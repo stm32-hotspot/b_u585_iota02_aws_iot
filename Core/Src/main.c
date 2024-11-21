@@ -23,6 +23,18 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+
+#include "hw_defs.h"
+#include "freertos_hooks.h"
+#include "logging.h"
+
+#include "sys_evt.h"
+#include "FreeRTOS.h"
+#include "task.h"
+//#include "hw_defs.h"
+#include <string.h>
+
+#include "mx_netconn.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,7 +59,6 @@ MDF_FilterConfigTypeDef AdfFilterConfig0;
 DCACHE_HandleTypeDef hdcache1;
 
 I2C_HandleTypeDef hi2c1;
-I2C_HandleTypeDef hi2c2;
 
 IWDG_HandleTypeDef hiwdg;
 
@@ -68,6 +79,8 @@ UART_HandleTypeDef huart1;
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
+static uint32_t ulCsrFlags = 0;
+EventGroupHandle_t xSystemEvents = NULL;
 
 /* USER CODE END PV */
 
@@ -75,10 +88,8 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 void SystemClock_Config(void);
 static void SystemPower_Config(void);
 void MX_FREERTOS_Init(void);
-static void MX_GPIO_Init(void);
 static void MX_ADF1_Init(void);
 static void MX_I2C1_Init(void);
-static void MX_I2C2_Init(void);
 static void MX_ICACHE_Init(void);
 static void MX_OCTOSPI1_Init(void);
 static void MX_OCTOSPI2_Init(void);
@@ -93,6 +104,8 @@ static void MX_RTC_Init(void);
 static void MX_IWDG_Init(void);
 static void MX_TIM5_Init(void);
 /* USER CODE BEGIN PFP */
+void vInitTask( void * pvArgs );
+static void vHeartbeatTask( void * pvParameters );
 
 /* USER CODE END PFP */
 
@@ -132,24 +145,30 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_ADF1_Init();
-  MX_I2C1_Init();
-  MX_I2C2_Init();
-  MX_ICACHE_Init();
-  MX_OCTOSPI1_Init();
-  MX_OCTOSPI2_Init();
-  MX_SPI2_Init();
-  MX_UART4_Init();
-  MX_USART1_UART_Init();
-  MX_UCPD1_Init();
-  MX_USB_OTG_FS_PCD_Init();
-  MX_RNG_Init();
-  MX_DCACHE1_Init();
-  MX_RTC_Init();
-  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
+  ulCsrFlags = RCC->CSR;
 
+  __HAL_RCC_CLEAR_RESET_FLAGS();
+
+  hw_init();
+
+  vRelocateVectorTable();
+
+  vLoggingInit();
+
+  LogInfo( "HW Init Complete." );
+
+  xSystemEvents = xEventGroupCreate();
+
+  xTaskCreate( vInitTask, "Init", 1024, NULL, 8, NULL );
+
+  /* Start scheduler */
+  vTaskStartScheduler();
+
+  /* Initialize threads */
+  LogError( "Kernel start returned." );
+
+#if 0
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -165,6 +184,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+#endif
   while (1)
   {
     /* USER CODE END WHILE */
@@ -379,54 +399,6 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
-
-}
-
-/**
-  * @brief I2C2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_I2C2_Init(void)
-{
-
-  /* USER CODE BEGIN I2C2_Init 0 */
-
-  /* USER CODE END I2C2_Init 0 */
-
-  /* USER CODE BEGIN I2C2_Init 1 */
-
-  /* USER CODE END I2C2_Init 1 */
-  hi2c2.Instance = I2C2;
-  hi2c2.Init.Timing = 0x30909DEC;
-  hi2c2.Init.OwnAddress1 = 0;
-  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c2.Init.OwnAddress2 = 0;
-  hi2c2.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Analogue filter
-  */
-  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c2, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Digital filter
-  */
-  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c2, 0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN I2C2_Init 2 */
-
-  /* USER CODE END I2C2_Init 2 */
 
 }
 
@@ -990,126 +962,70 @@ static void MX_USB_OTG_FS_PCD_Init(void)
 
 }
 
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GPIO_Init(void)
+/* USER CODE BEGIN 4 */
+void vInitTask( void * pvArgs )
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+    BaseType_t xResult;
+    int xMountStatus;
 
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOG_CLK_ENABLE();
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOI_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOE_CLK_ENABLE();
-  __HAL_RCC_GPIOF_CLK_ENABLE();
+    ( void ) pvArgs;
+#if 0
+    xResult = xTaskCreate( Task_CLI, "cli", 2048, NULL, 10, NULL );
+    configASSERT( xResult == pdTRUE );
+#endif
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(UCPD_PWR_GPIO_Port, UCPD_PWR_Pin, GPIO_PIN_RESET);
+    ( void ) xEventGroupSetBits( xSystemEvents, EVT_MASK_FS_READY );
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOH, LED_RED_Pin|LED_GREEN_Pin|Mems_VL53_xshut_Pin, GPIO_PIN_RESET);
+    xResult = xTaskCreate( vHeartbeatTask, "Heartbeat", 128, NULL, tskIDLE_PRIORITY, NULL );
+    configASSERT( xResult == pdTRUE );
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(WRLS_WKUP_B_GPIO_Port, WRLS_WKUP_B_Pin, GPIO_PIN_RESET);
+    xResult = xTaskCreate( &net_main, "MxNet", 1024, NULL, 23, NULL );
+    configASSERT( xResult == pdTRUE );
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, Mems_STSAFE_RESET_Pin|WRLS_WKUP_W_Pin, GPIO_PIN_RESET);
+#if 0
+    #if DEMO_QUALIFICATION_TEST
+        xResult = xTaskCreate( run_qualification_main, "QualTest", 4096, NULL, 10, NULL );
+        configASSERT( xResult == pdTRUE );
+    #else
+        xResult = xTaskCreate( vMQTTAgentTask, "MQTTAgent", 2048, NULL, 10, NULL );
+        configASSERT( xResult == pdTRUE );
 
-  /*Configure GPIO pins : WRLS_FLOW_Pin Mems_VLX_GPIO_Pin Mems_INT_LPS22HH_Pin */
-  GPIO_InitStruct.Pin = WRLS_FLOW_Pin|Mems_VLX_GPIO_Pin|Mems_INT_LPS22HH_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+        xResult = xTaskCreate( vOTAUpdateTask, "OTAUpdate", 4096, NULL, tskIDLE_PRIORITY + 1, NULL );
+        configASSERT( xResult == pdTRUE );
 
-  /*Configure GPIO pin : PH3_BOOT0_Pin */
-  GPIO_InitStruct.Pin = PH3_BOOT0_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(PH3_BOOT0_GPIO_Port, &GPIO_InitStruct);
+        xResult = xTaskCreate( vEnvironmentSensorPublishTask, "EnvSense", 1024, NULL, 6, NULL );
+        configASSERT( xResult == pdTRUE );
 
-  /*Configure GPIO pin : UCPD_PWR_Pin */
-  GPIO_InitStruct.Pin = UCPD_PWR_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(UCPD_PWR_GPIO_Port, &GPIO_InitStruct);
+        xResult = xTaskCreate( vMotionSensorsPublish, "MotionS", 2048, NULL, 5, NULL );
+        configASSERT( xResult == pdTRUE );
 
-  /*Configure GPIO pin : USER_Button_Pin */
-  GPIO_InitStruct.Pin = USER_Button_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(USER_Button_GPIO_Port, &GPIO_InitStruct);
+        xResult = xTaskCreate( vShadowDeviceTask, "ShadowDevice", 1024, NULL, 5, NULL );
+        configASSERT( xResult == pdTRUE );
 
-  /*Configure GPIO pins : LED_RED_Pin LED_GREEN_Pin Mems_VL53_xshut_Pin */
-  GPIO_InitStruct.Pin = LED_RED_Pin|LED_GREEN_Pin|Mems_VL53_xshut_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
+        xResult = xTaskCreate( vDefenderAgentTask, "AWSDefender", 2048, NULL, 5, NULL );
+        configASSERT( xResult == pdTRUE );
+    #endif /* DEMO_QUALIFICATION_TEST */
+#endif
 
-  /*Configure GPIO pin : MIC_CCK1_Pin */
-  GPIO_InitStruct.Pin = MIC_CCK1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF6_MDF1;
-  HAL_GPIO_Init(MIC_CCK1_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : WRLS_WKUP_B_Pin */
-  GPIO_InitStruct.Pin = WRLS_WKUP_B_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(WRLS_WKUP_B_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : WRLS_NOTIFY_Pin Mems_INT_IIS2MDC_Pin USB_IANA_Pin */
-  GPIO_InitStruct.Pin = WRLS_NOTIFY_Pin|Mems_INT_IIS2MDC_Pin|USB_IANA_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : USB_UCPD_FLT_Pin Mems_ISM330DLC_INT1_Pin */
-  GPIO_InitStruct.Pin = USB_UCPD_FLT_Pin|Mems_ISM330DLC_INT1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : USB_VBUS_SENSE_Pin */
-  GPIO_InitStruct.Pin = USB_VBUS_SENSE_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(USB_VBUS_SENSE_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : Mems_STSAFE_RESET_Pin WRLS_WKUP_W_Pin */
-  GPIO_InitStruct.Pin = Mems_STSAFE_RESET_Pin|WRLS_WKUP_W_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : MIC_SDIN0_Pin */
-  GPIO_InitStruct.Pin = MIC_SDIN0_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF6_MDF1;
-  HAL_GPIO_Init(MIC_SDIN0_GPIO_Port, &GPIO_InitStruct);
-
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+    while( 1 )
+    {
+        vTaskSuspend( NULL );
+    }
 }
 
-/* USER CODE BEGIN 4 */
+static void vHeartbeatTask( void * pvParameters )
+{
+    ( void ) pvParameters;
 
+    HAL_GPIO_WritePin( LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET );
+    HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET );
+
+    while( 1 )
+    {
+        vTaskDelay( pdMS_TO_TICKS( 1000 ) );
+        HAL_GPIO_TogglePin( LED_GREEN_GPIO_Port, LED_GREEN_Pin );
+    }
+}
 /* USER CODE END 4 */
 
 /**
@@ -1142,8 +1058,9 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
-  while (1)
+  while( 1 )
   {
+      __NOP();
   }
   /* USER CODE END Error_Handler_Debug */
 }

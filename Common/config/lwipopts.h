@@ -50,7 +50,7 @@
 #define LWIP_TCP_KEEPALIVE                    1  /* Keep the TCP link active. Important for MQTT/TLS */
 #define LWIP_RANDOMIZE_INITIAL_LOCAL_PORTS    1  /* Prevent the same port to be used after reset.
                                                   * //                                                   Otherwise, the remote host may be confused if the port was not explicitly closed before the reset. */
-
+#define LWIP_NOASSERT //@SJ
 /*#define TCP_LISTEN_BACKLOG            1 */
 
 #define LWIP_TIMEVAL_PRIVATE    0

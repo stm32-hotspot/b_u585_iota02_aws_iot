@@ -22,6 +22,7 @@
 #include "task.h"
 #include "timers.h"
 #include "freertos_hooks.h"
+#include <string.h>
 
 #if  configGENERATE_RUN_TIME_STATS
 extern TIM_HandleTypeDef htim2;
@@ -83,29 +84,6 @@ void vPetWatchdog( void )
 #endif
 }
 
-void HAL_Delay( uint32_t ulDelayMs )
-{
-    if( xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED )
-    {
-        vTaskDelay( pdMS_TO_TICKS( ulDelayMs ) );
-    }
-    else
-    {
-        uint32_t ulStartTick = HAL_GetTick();
-        uint32_t ulTicksWaited = ulDelayMs;
-
-        /* Add a freq to guarantee minimum wait */
-        if( ulTicksWaited < HAL_MAX_DELAY )
-        {
-            ulTicksWaited += ( uint32_t ) ( HAL_GetTickFreq() );
-        }
-
-        while( ( HAL_GetTick() - ulStartTick ) < ulTicksWaited )
-        {
-            __NOP();
-        }
-    }
-}
 
 #if (configCHECK_FOR_STACK_OVERFLOW > 0)
 void vApplicationStackOverflowHook( TaskHandle_t xTask, char * pcTaskName )
@@ -185,3 +163,39 @@ configRUN_TIME_COUNTER_TYPE getIRQTimeCounterValue(void)
   return IRQ_Timer;
 }
 #endif
+
+
+typedef void ( * VectorTable_t )( void );
+
+#define NUM_USER_IRQ               ( FMAC_IRQn + 1 )      /* MCU specific */
+#define VECTOR_TABLE_SIZE          ( NVIC_USER_IRQ_OFFSET + NUM_USER_IRQ )
+#define VECTOR_TABLE_ALIGN_CM33    0x400U
+
+static VectorTable_t pulVectorTableSRAM[ VECTOR_TABLE_SIZE ] __attribute__( ( aligned( VECTOR_TABLE_ALIGN_CM33 ) ) );
+
+extern DCACHE_HandleTypeDef hdcache1;
+#define pxHndlDCache &hdcache1
+/* Relocate vector table to ram for runtime interrupt registration */
+void vRelocateVectorTable( void )
+{
+    /* Disable interrupts */
+    __disable_irq();
+
+    HAL_ICACHE_Disable();
+    HAL_DCACHE_Disable( pxHndlDCache );
+
+    /* Copy vector table to ram */
+    ( void ) memcpy( pulVectorTableSRAM, ( uint32_t * ) SCB->VTOR, sizeof( uint32_t ) * VECTOR_TABLE_SIZE );
+
+    SCB->VTOR = ( uint32_t ) pulVectorTableSRAM;
+
+    __DSB();
+    __ISB();
+
+    HAL_DCACHE_Invalidate( pxHndlDCache );
+    HAL_ICACHE_Invalidate();
+    HAL_ICACHE_Enable();
+    HAL_DCACHE_Enable( pxHndlDCache );
+
+    __enable_irq();
+}

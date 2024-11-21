@@ -3,6 +3,8 @@
 
 #include "stm32u5xx_hal.h"
 
+void hw_init( void );
+
 #define LED_RED_Pin                GPIO_PIN_6
 #define LED_RED_GPIO_Port          GPIOH
 
@@ -30,7 +32,7 @@ extern UART_HandleTypeDef * pxHndlUart1;
 extern DCACHE_HandleTypeDef * pxHndlDCache;
 extern DMA_HandleTypeDef * pxHndlGpdmaCh4;
 extern DMA_HandleTypeDef * pxHndlGpdmaCh5;
-extern IWDG_HandleTypeDef * pxHwndIwdg; //@SJ We'll deal with IWDG later
+extern IWDG_HandleTypeDef * pxHwndIwdg;
 
 static inline uint32_t timer_get_count( TIM_HandleTypeDef * pxHndl )
 {
@@ -44,7 +46,7 @@ static inline uint32_t timer_get_count( TIM_HandleTypeDef * pxHndl )
     }
 }
 
-void hw_init( void );
+
 
 typedef void ( * GPIOInterruptCallback_t ) ( void * pvContext );
 
@@ -53,6 +55,15 @@ void GPIO_EXTI_Register_Callback( uint16_t usGpioPinMask,
                                   void * pvContext );
 
 void vDoSystemReset( void );
+
+static inline void vPetWatchdog( void )
+{
+    /* Check / pet the watchdog */
+    if( pxHwndIwdg != NULL )
+    {
+        HAL_IWDG_Refresh( pxHwndIwdg );
+    }
+}
 
 
 #endif /* __HW_DEFS */

@@ -77,7 +77,7 @@
    ---------------------------------
 #define LWIP_ETHERNET      managed by RTE
 */
-#define LWIP_ARP                        1
+#define LWIP_ARP                        0
 #define ARP_TABLE_SIZE                  10
 #define ETHARP_SUPPORT_VLAN             0
 #define ETH_PAD_SIZE                    2

@@ -55,7 +55,7 @@ extern uint32_t SystemCoreClock;
 #ifndef CMSIS_device_header
 #define CMSIS_device_header "stm32u5xx.h"
 #endif /* CMSIS_device_header */
-
+#include "main.h"
 /*-------------------- STM32U5 specific defines -------------------*/
 #define configENABLE_TRUSTZONE                   0
 #define configRUN_FREERTOS_SECURE_ONLY           0
@@ -86,7 +86,6 @@ extern uint32_t SystemCoreClock;
 #define configUSE_MINI_LIST_ITEM                 1
 #define configUSE_SB_COMPLETED_CALLBACK          0
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS  1
-
 /* USER CODE BEGIN MESSAGE_BUFFER_LENGTH_TYPE */
 /* Defaults to size_t for backward compatibility, but can be changed
    if lengths will always be less than the number of bytes in a size_t. */
@@ -130,8 +129,6 @@ to exclude the API function. */
 #define INCLUDE_xTaskGetCurrentTaskHandle    1
 #define INCLUDE_eTaskGetState                1
 #define INCLUDE_xTaskAbortDelay              1
-
-
 /* Cortex-M specific definitions. */
 #ifdef __NVIC_PRIO_BITS
  /* __BVIC_PRIO_BITS will be specified when CMSIS is being used. */
@@ -168,5 +165,17 @@ header file. */
 /* USER CODE BEGIN Defines */
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */
 /* USER CODE END Defines */
+
+extern RNG_HandleTypeDef hrng;
+extern HAL_StatusTypeDef HAL_RNG_GenerateRandomNumber(RNG_HandleTypeDef *hrng, uint32_t *random32bit);
+
+static inline uint32_t uxRand()
+{
+  // Return a secure random value that is uniformly-distributed.
+  uint32_t uRNGValue = 0;
+  (void) HAL_RNG_GenerateRandomNumber(&hrng, &uRNGValue);
+
+  return uRNGValue;
+}
 
 #endif /* FREERTOS_CONFIG_H */
