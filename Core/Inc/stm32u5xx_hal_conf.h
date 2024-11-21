@@ -39,7 +39,7 @@ extern "C" {
 /*#define HAL_CRC_MODULE_ENABLED */
 /*#define HAL_CRYP_MODULE_ENABLED */
 /*#define HAL_DAC_MODULE_ENABLED */
-/*#define HAL_DCACHE_MODULE_ENABLED */
+#define HAL_DCACHE_MODULE_ENABLED
 /*#define HAL_DCMI_MODULE_ENABLED */
 /*#define HAL_DMA2D_MODULE_ENABLED */
 /*#define HAL_DSI_MODULE_ENABLED */
@@ -54,7 +54,7 @@ extern "C" {
 #define HAL_I2C_MODULE_ENABLED
 #define HAL_ICACHE_MODULE_ENABLED
 /*#define HAL_IRDA_MODULE_ENABLED */
-/*#define HAL_IWDG_MODULE_ENABLED */
+#define HAL_IWDG_MODULE_ENABLED
 /*#define HAL_JPEG_MODULE_ENABLED */
 /*#define HAL_LPTIM_MODULE_ENABLED */
 /*#define HAL_LTDC_MODULE_ENABLED */
@@ -70,7 +70,7 @@ extern "C" {
 /*#define HAL_PSSI_MODULE_ENABLED */
 /*#define HAL_RAMCFG_MODULE_ENABLED */
 #define HAL_RNG_MODULE_ENABLED
-/*#define HAL_RTC_MODULE_ENABLED */
+#define HAL_RTC_MODULE_ENABLED
 /*#define HAL_SAI_MODULE_ENABLED */
 /*#define HAL_SD_MODULE_ENABLED */
 /*#define HAL_SMARTCARD_MODULE_ENABLED */
@@ -229,7 +229,7 @@ vary depending on the variations in voltage and temperature.*/
 #define  USE_HAL_SDRAM_REGISTER_CALLBACKS      0U /* SDRAM register callback disabled     */
 #define  USE_HAL_SMARTCARD_REGISTER_CALLBACKS  0U /* SMARTCARD register callback disabled */
 #define  USE_HAL_SMBUS_REGISTER_CALLBACKS      0U /* SMBUS register callback disabled     */
-#define  USE_HAL_SPI_REGISTER_CALLBACKS        0U /* SPI register callback disabled       */
+#define  USE_HAL_SPI_REGISTER_CALLBACKS        1U /* SPI register callback enabled       */
 #define  USE_HAL_SRAM_REGISTER_CALLBACKS       0U /* SRAM register callback disabled      */
 #define  USE_HAL_TIM_REGISTER_CALLBACKS        0U /* TIM register callback disabled       */
 #define  USE_HAL_TSC_REGISTER_CALLBACKS        0U /* TSC register callback disabled       */
