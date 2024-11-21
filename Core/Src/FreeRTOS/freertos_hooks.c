@@ -181,8 +181,8 @@ void vRelocateVectorTable( void )
     /* Disable interrupts */
     __disable_irq();
 
-    HAL_ICACHE_Disable();
-    HAL_DCACHE_Disable( pxHndlDCache );
+//    HAL_ICACHE_Disable();
+//    HAL_DCACHE_Disable( pxHndlDCache );
 
     /* Copy vector table to ram */
     ( void ) memcpy( pulVectorTableSRAM, ( uint32_t * ) SCB->VTOR, sizeof( uint32_t ) * VECTOR_TABLE_SIZE );
@@ -192,10 +192,10 @@ void vRelocateVectorTable( void )
     __DSB();
     __ISB();
 
-    HAL_DCACHE_Invalidate( pxHndlDCache );
-    HAL_ICACHE_Invalidate();
-    HAL_ICACHE_Enable();
-    HAL_DCACHE_Enable( pxHndlDCache );
+//    HAL_DCACHE_Invalidate( pxHndlDCache );
+//    HAL_ICACHE_Invalidate();
+//    HAL_ICACHE_Enable();
+//    HAL_DCACHE_Enable( pxHndlDCache );
 
     __enable_irq();
 }

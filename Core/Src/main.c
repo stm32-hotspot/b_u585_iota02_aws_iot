@@ -160,7 +160,10 @@ int main(void)
 
   xSystemEvents = xEventGroupCreate();
 
-  xTaskCreate( vInitTask, "Init", 1024, NULL, 8, NULL );
+  if (xTaskCreate( vInitTask, "Init", 1024, NULL, 8, NULL ) != pdPASS)
+  {
+	  __BKPT(0);
+  }
 
   /* Start scheduler */
   vTaskStartScheduler();

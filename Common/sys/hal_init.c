@@ -80,7 +80,7 @@ void hw_init( void )
     SystemClock_Config();
 
     #ifndef TFM_PSA_API
-        hw_cache_init();
+//        hw_cache_init();
     #endif
 
     /* Initialize uart for logging before cli is up and running */
@@ -104,7 +104,9 @@ void hw_init( void )
 
     hw_tim5_init();
 
+#if !defined NO_IWDG
     hw_watchdog_init();
+#endif
 }
 
 static void SystemClock_Config( void )

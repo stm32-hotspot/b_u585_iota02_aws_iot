@@ -55,7 +55,7 @@ extern uint32_t SystemCoreClock;
 #ifndef CMSIS_device_header
 #define CMSIS_device_header "stm32u5xx.h"
 #endif /* CMSIS_device_header */
-
+#include "main.h"
 /*-------------------- STM32U5 specific defines -------------------*/
 #define configENABLE_TRUSTZONE                   0
 #define configRUN_FREERTOS_SECURE_ONLY           0
@@ -70,8 +70,8 @@ extern uint32_t SystemCoreClock;
 #define configCPU_CLOCK_HZ                       ( SystemCoreClock )
 #define configTICK_RATE_HZ                       ((TickType_t)1000)
 #define configMAX_PRIORITIES                     ( 56 )
-#define configMINIMAL_STACK_SIZE                 ((uint16_t)128)
-#define configTOTAL_HEAP_SIZE                    ((size_t)8192)
+#define configMINIMAL_STACK_SIZE                   ( ( uint16_t ) 1024 )
+#define configTOTAL_HEAP_SIZE                      ( ( size_t ) 300 * 1024 )
 #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP 0
 #define configMAX_TASK_NAME_LEN                  ( 16 )
 #define configUSE_TRACE_FACILITY                 1
@@ -165,5 +165,17 @@ header file. */
 /* USER CODE BEGIN Defines */
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */
 /* USER CODE END Defines */
+
+extern RNG_HandleTypeDef hrng;
+extern HAL_StatusTypeDef HAL_RNG_GenerateRandomNumber(RNG_HandleTypeDef *hrng, uint32_t *random32bit);
+
+static inline uint32_t uxRand()
+{
+  // Return a secure random value that is uniformly-distributed.
+  uint32_t uRNGValue = 0;
+  (void) HAL_RNG_GenerateRandomNumber(&hrng, &uRNGValue);
+
+  return uRNGValue;
+}
 
 #endif /* FREERTOS_CONFIG_H */
