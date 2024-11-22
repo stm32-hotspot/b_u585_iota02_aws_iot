@@ -25,9 +25,10 @@
  *
  */
 
-#include "logging_levels.h"
-#define LOG_LEVEL    LOG_ERROR
+//#include "logging_levels.h"
+
 #include "logging.h"
+#define LOG_LEVEL    LOG_DEBUG
 
 #include "main.h" //@SJ
 /* Standard includes */
@@ -342,8 +343,8 @@ static void vInitializeWifiModule( MxNetConnectCtx_t * pxCtx )
         }
         else
         {
-            LogInfo( "Firmware Version:   %s", pxCtx->pcFirmwareRevision );
-            LogInfo( "HW Address:         %02X:%02X:%02X:%02X:%02X:%02X",
+            LogInfo( "Firmware Version:   %s\r\n", pxCtx->pcFirmwareRevision );
+            LogInfo( "HW Address:         %02X:%02X:%02X:%02X:%02X:%02X\r\n",
                      pxCtx->xMacAddress.addr[ 0 ], pxCtx->xMacAddress.addr[ 1 ],
                      pxCtx->xMacAddress.addr[ 2 ], pxCtx->xMacAddress.addr[ 3 ],
                      pxCtx->xMacAddress.addr[ 4 ], pxCtx->xMacAddress.addr[ 5 ] );
@@ -405,8 +406,6 @@ static void vInitializeContexts( MxNetConnectCtx_t * pxCtx )
     xControlPlaneCtx.xControlPlaneSendQueue = xControlPlaneSendQueue;
     xControlPlaneCtx.pulTxPacketsWaiting = &( xDataPlaneCtx.ulTxPacketsWaiting );
 }
-
-
 
 /*
  * Networking thread main function.

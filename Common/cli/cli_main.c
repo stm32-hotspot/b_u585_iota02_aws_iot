@@ -28,7 +28,7 @@
 #include "cli_prv.h"
 #include "stream_buffer.h"
 
-#include "tls_transport_config.h"
+//#include "tls_transport_config.h"
 
 #include <string.h>
 
@@ -337,16 +337,16 @@ static uint32_t prvGetNumberOfArgs( const char * pcCommandString )
 void Task_CLI( void * pvParameters )
 {
     ( void ) pvParameters;
-    FreeRTOS_CLIRegisterCommand( &xCommandDef_conf );
-    FreeRTOS_CLIRegisterCommand( &xCommandDef_pki );
-    FreeRTOS_CLIRegisterCommand( &xCommandDef_ps );
-    FreeRTOS_CLIRegisterCommand( &xCommandDef_kill );
-    FreeRTOS_CLIRegisterCommand( &xCommandDef_killAll );
-    FreeRTOS_CLIRegisterCommand( &xCommandDef_heapStat );
-    FreeRTOS_CLIRegisterCommand( &xCommandDef_reset );
-    FreeRTOS_CLIRegisterCommand( &xCommandDef_uptime );
-    FreeRTOS_CLIRegisterCommand( &xCommandDef_rngtest );
-    FreeRTOS_CLIRegisterCommand( &xCommandDef_assert );
+//    FreeRTOS_CLIRegisterCommand( &xCommandDef_conf );
+//    FreeRTOS_CLIRegisterCommand( &xCommandDef_pki );
+//    FreeRTOS_CLIRegisterCommand( &xCommandDef_ps );
+//    FreeRTOS_CLIRegisterCommand( &xCommandDef_kill );
+//    FreeRTOS_CLIRegisterCommand( &xCommandDef_killAll );
+//    FreeRTOS_CLIRegisterCommand( &xCommandDef_heapStat );
+//    FreeRTOS_CLIRegisterCommand( &xCommandDef_reset );
+//    FreeRTOS_CLIRegisterCommand( &xCommandDef_uptime );
+//    FreeRTOS_CLIRegisterCommand( &xCommandDef_rngtest );
+//    FreeRTOS_CLIRegisterCommand( &xCommandDef_assert );
 
     char * pcCommandBuffer = NULL;
 

@@ -972,10 +972,8 @@ void vInitTask( void * pvArgs )
     int xMountStatus;
 
     ( void ) pvArgs;
-#if 0
     xResult = xTaskCreate( Task_CLI, "cli", 2048, NULL, 10, NULL );
     configASSERT( xResult == pdTRUE );
-#endif
 
     ( void ) xEventGroupSetBits( xSystemEvents, EVT_MASK_FS_READY );
 
