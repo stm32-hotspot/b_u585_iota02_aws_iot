@@ -45,7 +45,7 @@
 									<listOptionValue builtIn="false" value="STM32U585xx"/>
 									<listOptionValue builtIn="false" value="MBEDTLS_CONFIG_FILE=&quot;config_mbedtls.h&quot;"/>
 									<listOptionValue builtIn="false" value="NO_STSAFE"/>
-									<listOptionValue builtIn="false" value="_NO_IWDG"/>
+									<listOptionValue builtIn="false" value="NO_IWDG"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.1974808480" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
