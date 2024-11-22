@@ -68,8 +68,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define CS_WIFI_SSID "JSEC"
-#define CS_WIFI_CREDENTIAL "STM32F103RBT6"
+#define CS_WIFI_SSID "st_iot_demo"
+#define CS_WIFI_CREDENTIAL "stm32u585"
 #define WRLS_FLOW_Pin GPIO_PIN_15
 #define WRLS_FLOW_GPIO_Port GPIOG
 #define WRLS_UART4_RX_Pin GPIO_PIN_11

@@ -1,26 +1,24 @@
-1- copy the content of the following folder
-```
- ~/STM32Cube/Repository/Packs/ARM/mbedTLS/3.1.1/library/ 
- ```
- to the following folder
-```
-./aware_demo\Middlewares\Third_Party\ARM_Security\library
-```
 
-2- in STM21CubeIDE project Exlude from build 
+## Wi-Fi Credentails configuration
+* If you regenerate the project with STM32CubeMX, then you need to run *UpdateMbedTLS.ps1* script before building the project with STM32CubeIDE
 
-*Middlewares->Third_Party->lwIP_Network_lwIP->ports->cmsis-driver->netif*
+![UpdateMbedTLS.png](UpdateMbedTLS.png)
 
-3- Project options Preprocessor add
-
+* You can change the Wi-Fi SSID and password in *main.h* or from STM32CubeMX. 
 ```
-MBEDTLS_CONFIG_FILE="config_mbedtls.h"
-NO_STSAFE
+#define CS_WIFI_SSID "st_iot_demo"
+#define CS_WIFI_CREDENTIAL "stm32u585"
 ```
+You need to run the *UpdateMbedTLS.ps1* script if you change the credential with STM32CubeMX
 
-4- Project options include path add
+### Command Line Interface (CLI)
 
-```
-${workspace_loc:/${ProjName}/Middlewares/Third_Party/ARM_Security/library}
-${workspace_loc:/${ProjName}/Core/Src/mbedTLS}
-```
+The CLI interface located in the Common/cli directory is used to provision the device. It also provides other Unix-like utilities. See [Common/cli](Common/cli/ReadMe.md) for details.
+
+- To Use the CLI, Use TeraTerm 115200, 8 bits, No parity, 1 Stop,
+- Type **ps** to get statistics on the running tasks
+- Type **heapstat** to get the heap statistics
+- Type **reset** to reset the device
+- Type **help** to get help menu
+
+![Example Image](example.png)
