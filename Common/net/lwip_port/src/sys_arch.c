@@ -554,6 +554,7 @@ void sys_sem_free( sys_sem_t * pxSemaphore )
 void sys_init( void )
 {
 /*    srand( rand() ); */
+	uxRand();
 }
 
 u32_t sys_now( void )
@@ -695,6 +696,17 @@ void sys_arch_unprotect( sys_prot_t xValue )
     }
 }
 
+extern RNG_HandleTypeDef hrng;
+extern HAL_StatusTypeDef HAL_RNG_GenerateRandomNumber(RNG_HandleTypeDef *hrng, uint32_t *random32bit);
+
+uint32_t uxRand(void)
+{
+  // Return a secure random value that is uniformly-distributed.
+  uint32_t uRNGValue = 0;
+  (void) HAL_RNG_GenerateRandomNumber(&hrng, &uRNGValue);
+
+  return uRNGValue;
+}
 /*-------------------------------------------------------------------------*
 * End of File:  sys_arch.c
 *-------------------------------------------------------------------------*/

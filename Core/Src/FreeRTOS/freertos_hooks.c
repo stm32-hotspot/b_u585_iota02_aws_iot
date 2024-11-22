@@ -74,6 +74,7 @@ void vApplicationMallocFailedHook(void)
 }
 #endif
 
+#if 0
 void vPetWatchdog( void )
 {
 #if defined(HAL_IWDG_MODULE_ENABLED)
@@ -83,7 +84,7 @@ void vPetWatchdog( void )
 #endif
 #endif
 }
-
+#endif
 
 #if (configCHECK_FOR_STACK_OVERFLOW > 0)
 void vApplicationStackOverflowHook( TaskHandle_t xTask, char * pcTaskName )

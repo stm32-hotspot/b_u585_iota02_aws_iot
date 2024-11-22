@@ -61,7 +61,9 @@ static inline void vPetWatchdog( void )
     /* Check / pet the watchdog */
     if( pxHwndIwdg != NULL )
     {
+#if !defined(NO_IWDG)
         HAL_IWDG_Refresh( pxHwndIwdg );
+#endif
     }
 }
 
