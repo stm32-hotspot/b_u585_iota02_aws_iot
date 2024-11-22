@@ -24,8 +24,6 @@
 /* Defines ------------------------------------------------------------------*/
 /* ARM.mbedTLS.3.1.1 */
 #define RTE_Security_mbedTLS /* Security mbed TLS */
-/* STMicroelectronics.X-CUBE-MEMS1.11.0.0 */
-#define HTS221_HUMTEMP_I2C
 /* lwIP.lwIP.2.2.0 */
 <!-- the following content goes into file 'RTE_Components.h' -->
 #define RTE_Network_Core /* Network Core */

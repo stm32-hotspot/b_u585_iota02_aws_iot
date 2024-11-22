@@ -29,8 +29,12 @@
 #include "stm32u5xx_hal.h"
 #include "hw_defs.h"
 #include "task.h"
-#include "b_u585i_iot02a_bus.h"
-#include "b_u585i_iot02a_errno.h"
+
+#if 0
+//#include "b_u585i_iot02a_bus.h"
+//#include "b_u585i_iot02a_errno.h"
+#endif
+
 #include "logging.h"
 /* Global peripheral handles */
 RTC_HandleTypeDef * pxHndlRtc = NULL;
@@ -96,12 +100,12 @@ void hw_init( void )
     #ifndef TFM_PSA_API
         hw_rng_init();
     #endif
-
+#if 0
     if( BSP_I2C2_Init() != BSP_ERROR_NONE )
     {
         LogError( "Failed to initialize BSP I2C interface." );
     }
-
+#endif
     hw_tim5_init();
 
 #if !defined NO_IWDG
