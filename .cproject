@@ -106,15 +106,18 @@
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.1221976189" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.46586632.2142737593" name="cli_rngtest.c" rcbsApplicability="disable" resourcePath="Common/cli/cli_rngtest.c" toolsToInvoke="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1793206418.1111270214">
+						<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1793206418.1111270214" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1793206418"/>
+					</fileInfo>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common/boards"/>
+						<entry excluding="cli_conf.c|cli_pki.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common/cli"/>
+						<entry excluding="mbedtls_transport.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common/net"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common/sys"/>
+						<entry excluding="Src/sysmem.c|Src/stm32u5xx_hal_timebase_tim.c|Src/stm32u5xx_hal_msp.c|Src/stm32u5xx_it.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry excluding="BSP/Components/veml6030|BSP/Components/aps6408|BSP/Components/mx25lm51245g" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libraries/CommonIO/include"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common/boards"/>
-						<entry excluding="Src/sysmem.c|Src/stm32u5xx_hal_timebase_tim.c|Src/stm32u5xx_hal_msp.c|Src/stm32u5xx_it.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry excluding="Third_Party/lwIP_Network_lwIP/lwip/apps/netbiosns|Third_Party/lwIP_Network_lwIP/lwip/apps/smtp|Third_Party/lwIP_Network_lwIP/lwip/apps/snmp|Third_Party/lwIP_Network_lwIP/lwip/apps/sntp|Third_Party/lwIP_Network_lwIP/lwip/apps/tftp|Third_Party/lwIP_Network_lwIP/lwip/apps/mqtt|Third_Party/lwIP_Network_lwIP/lwip/apps/mdns|Third_Party/lwIP_Network_lwIP/lwip/apps/http|Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls|Third_Party/lwIP_Network_lwIP/ports/cmsis-rtos|Third_Party/lwIP_Network_lwIP/ports/cmsis-driver/netif" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
-						<entry excluding="cli_conf.c|cli_rngtest.c|cli_utils.c|cli_pki.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common/cli"/>
-						<entry excluding="mbedtls_transport.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common/net"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
