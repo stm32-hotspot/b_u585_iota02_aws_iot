@@ -1,9 +1,13 @@
 
-## Wi-Fi Credentails configuration
+# aware_demo
+
+
+## UpdateMbedTLS.ps1 Script
 * If you regenerate the project with STM32CubeMX, then you need to run *UpdateMbedTLS.ps1* script before building the project with STM32CubeIDE
 
 ![UpdateMbedTLS.png](UpdateMbedTLS.png)
 
+## Wi-Fi Credentails configuration
 * You can change the Wi-Fi SSID and password in *main.h* or from STM32CubeMX. 
 ```
 #define CS_WIFI_SSID "st_iot_demo"
