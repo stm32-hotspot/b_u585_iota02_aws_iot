@@ -3,9 +3,7 @@
 
 ## CMSIS Packs
 
-If you need to regenerate the project with STM32CubeMX, then you need to dowload and install the following CMSIS packs and install them manually.
-
-You can install the packs using STM32CubeMX
+If you need to regenerate the project with STM32CubeMX, then you need to dowload and install the following CMSIS packs.
 
 [lwIP 2.2.0](https://www.keil.com/pack/lwIP.lwIP.2.2.0.pack)
 
