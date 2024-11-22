@@ -1,6 +1,15 @@
 
 # aware_demo
 
+## CMSIS Packs
+
+If you need to regenerate the project with STM32CubeMX, then you need to dowload and install the following CMSIS packs and install them manually.
+
+You can install the packs using STM32CubeMX
+
+[lwIP 2.2.0](https://www.keil.com/pack/lwIP.lwIP.2.2.0.pack)
+
+[mbedTLS 3.1.1](https://www.keil.com/pack/ARM.mbedTLS.3.1.1.pack)
 
 ## UpdateMbedTLS.ps1 Script
 * If you regenerate the project with STM32CubeMX, then you need to run *UpdateMbedTLS.ps1* script before building the project with STM32CubeIDE

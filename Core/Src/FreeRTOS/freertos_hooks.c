@@ -62,7 +62,7 @@ void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
 void vApplicationIdleHook( void )
 {
   vPetWatchdog();
-  __WFI();
+//  __WFI();
 }
 #endif
 
