@@ -24,8 +24,6 @@
 
 #include "logging_levels.h"
 #define LOG_LEVEL    LOG_ERROR
-#include "logging.h"
-
 
 #include "mx_ipc.h"
 
@@ -278,6 +276,30 @@ IPCError_t mx_RequestVersion( char * pcVersionBuffer,
         xReturnValue = xSendIPCRequest( &xTxPkt, 0,
                                         ( IPCPacketData_t * ) pcVersionBuffer,
                                         ulVersionLength,
+                                        xTimeout );
+    }
+    else
+    {
+        xReturnValue = IPC_PARAMETER_ERROR;
+    }
+
+    return xReturnValue;
+}
+
+
+IPCError_t mx_Scan( char * pcScan, uint32_t ulScannLength, TickType_t xTimeout )
+{
+    IPCError_t xReturnValue = IPC_SUCCESS;
+
+    IPCPacket_t xTxPkt;
+
+    xTxPkt.xHeader.usIPCApiId = IPC_WIFI_SCAN;
+
+    if( ( pcScan != NULL ) && (ulScannLength > 0 ) )
+    {
+        xReturnValue = xSendIPCRequest( &xTxPkt, 0,
+                                        ( IPCPacketData_t * ) pcScan,
+                                        ulScannLength,
                                         xTimeout );
     }
     else

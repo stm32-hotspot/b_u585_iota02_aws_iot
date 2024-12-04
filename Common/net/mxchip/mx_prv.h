@@ -305,8 +305,7 @@ typedef struct
  */
 
 
-BaseType_t prvxLinkInput( NetInterface_t * pxNetif,
-                          PacketBuffer_t * pxPbufIn );
+BaseType_t prvxLinkInput( NetInterface_t * pxNetif, PacketBuffer_t * pxPbufIn );
 void prvControlPlaneRouter( void * pvParameters );
 uint32_t prvGetNextRequestID( void );
 void vDataplaneThread( void * pvParameters );

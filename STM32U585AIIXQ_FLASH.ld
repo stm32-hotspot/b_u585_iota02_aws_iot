@@ -5,7 +5,7 @@
 **
 **  Author      : STM32CubeIDE
 **
-**  Abstract    : Linker script for STM32U585xI Device from STM32U5 series
+**  Abstract    : Linker script for STM32U575xI Device from STM32U5 series
 **                      2048Kbytes FLASH
 **                      784Kbytes RAM
 **
@@ -22,7 +22,7 @@
 *****************************************************************************
 ** @attention
 **
-** Copyright (c) 2024 STMicroelectronics.
+** Copyright (c) 2023 STMicroelectronics.
 ** All rights reserved.
 **
 ** This software is licensed under terms that can be found in the LICENSE file
@@ -41,12 +41,46 @@ _estack = ORIGIN(RAM) + LENGTH(RAM);	/* end of "RAM" Ram type memory */
 _Min_Heap_Size = 0x200;	/* required amount of heap  */
 _Min_Stack_Size = 0x400;	/* required amount of stack */
 
+/*BOOTLOADER_SIZE     = 0x00010000;*//* 64K */
+BOOTLOADER_SIZE     = 0x00000000;
+FLASH_B1_ADDR       = 0x08000000 + BOOTLOADER_SIZE;
+FLASH_B2_ADDR       = 0x08100000;
+
+DEVICE_PVK_ADDR        = 0x000F2000 + FLASH_B1_ADDR;
+DEVICE_PVK_SIZE_ADDR   = 0x000F3FF0 + FLASH_B1_ADDR;
+DEVICE_PBK_ADDR        = 0x000F4000 + FLASH_B1_ADDR;
+DEVICE_PBK_SIZE_ADDR   = 0x000F5FF0 + FLASH_B1_ADDR;
+DEVICE_CERT_ADDR       = 0x000F6000 + FLASH_B1_ADDR;
+DEVICE_CERT_SIZE_ADDR  = 0x000F7FF0 + FLASH_B1_ADDR;
+ROOT_CA_ADDR           = 0x000F8000 + FLASH_B1_ADDR;
+ROOT_CA_SIZE_ADDR      = 0x000F9FF0 + FLASH_B1_ADDR;
+METADATA_ADDRESS       = 0x000FE000 + FLASH_B1_ADDR;
+
 /* Memories definition */
 MEMORY
 {
-  RAM	(xrw)	: ORIGIN = 0x20000000,	LENGTH = 768K
-  SRAM4	(xrw)	: ORIGIN = 0x28000000,	LENGTH = 16K
-  FLASH	(rx)	: ORIGIN = 0x08000000,	LENGTH = 2048K
+  RAM (xrw)      : ORIGIN = 0x20000000,          LENGTH = 768K
+  SRAM4 (xrw)    : ORIGIN = 0x28000000,          LENGTH = 16K
+
+  FLASH (rx)     : ORIGIN = FLASH_B1_ADDR,       LENGTH = 960K /* Taking in accuont the secure bootloader  */
+  
+  /*OTA            : ORIGIN = FLASH_B2_ADDR,       LENGTH = 992K */ /* Section to receive OTA images            */
+  OTA            : ORIGIN = FLASH_B2_ADDR,       LENGTH = 960K /* Section to receive OTA images            */
+  /*********************************************************************************************************/
+  DEVICE_PVK        : ORIGIN = DEVICE_PVK_ADDR         LENGTH = 4K   /* Section that holds the device private key*/
+  DEVICE_PVK_SIZE   : ORIGIN = DEVICE_PVK_SIZE_ADDR    LENGTH = 16   /* 16 bytes resrved as  */
+  
+  DEVICE_CERT       : ORIGIN = DEVICE_CERT_ADDR         LENGTH = 4K   /* Section that holds the device certificate*/
+  DEVICE_CERT_SIZE  : ORIGIN = DEVICE_CERT_SIZE_ADDR    LENGTH = 16   /* 16 bytes resrved as  */
+  
+  DEVICE_PBK        : ORIGIN = DEVICE_PBK_ADDR          LENGTH = 4K   /* Section that holds the device private key*/
+  DEVICE_PBK_SIZE   : ORIGIN = DEVICE_PBK_SIZE_ADDR     LENGTH = 16   /* 16 bytes resrved as  */
+  /*********************************************************************************************************/
+  
+  ROOT_CA        : ORIGIN = ROOT_CA_ADDR         LENGTH = 4K   /* Section that holds the AWS RootCA        */
+  ROOT_CA_SIZE   : ORIGIN = ROOT_CA_SIZE_ADDR    LENGTH = 16   /* 16 bytes resrved as  */
+   
+  METADATA       : ORIGIN = METADATA_ADDRESS     LENGTH = 8K  /* Metadata section, SSID, Passphrase, ...   */
 }
 
 /* Sections */
@@ -79,26 +113,104 @@ SECTIONS
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
   } >FLASH
+  
+  /*********************************************************************************************************/
+  /* Device private key */
+  .device_pvk :
+  {
+    _device_pvk_start = .;/* create a global symbol at data start */
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+  } >DEVICE_PVK
+  
+  /* Device private key size */
+  .device_pvk_size :
+  {
+    _device_pvk_size_start = .; /* create a global symbol at data start */
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+  } >DEVICE_PVK_SIZE    
+  
+    /*********************************************************************************************************/
+    /* Device public key */
+  .device_pbk :
+  {
+    _device_pbk_start = .;/* create a global symbol at data start */
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+  } >DEVICE_PBK
+  
+  /* Device public key size */
+  .device_pbk_size :
+  {
+    _device_pbk_size_start = .; /* create a global symbol at data start */
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+  } >DEVICE_PBK_SIZE   
 
-  .ARM.extab (READONLY) : /* The READONLY keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  /*********************************************************************************************************/  
+  /* Device Cert */
+  .device_cert :
+  {
+    _device_cert_start = .;/* create a global symbol at data start */
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+  } >DEVICE_CERT
+  
+  /* Device Cert size */
+  .device_cert_size :
+  {
+    device_cert_size_start = .; /* create a global symbol at data start */
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+  } >DEVICE_CERT_SIZE
+   
+  /*********************************************************************************************************/
+  /* AmazonRootCA3 */
+  .root_ca :
+  {
+    _root_ca_start = .;/* create a global symbol at data start */
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+  } >ROOT_CA
+  
+  /* AmazonRootCA3 size */
+  .root_ca_size :
+  {
+    _root_ca_size_start = .; /* create a global symbol at data start */
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+  } >ROOT_CA_SIZE  
+    
+  /*********************************************************************************************************/
+  /* Metadata */
+  .metadata :
+  {
+    _metadata_start = .;/* create a global symbol at data start */
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+  } >METADATA  
+
+  .ARM.extab :
   {
     *(.ARM.extab* .gnu.linkonce.armextab.*)
   } >FLASH
-  .ARM (READONLY) : /* The READONLY keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+
+  .ARM :
   {
     __exidx_start = .;
     *(.ARM.exidx*)
     __exidx_end = .;
   } >FLASH
 
-  .preinit_array (READONLY) : /* The READONLY keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  .preinit_array :
   {
     PROVIDE_HIDDEN (__preinit_array_start = .);
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
   } >FLASH
 
-  .init_array (READONLY) : /* The READONLY keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  .init_array :
   {
     PROVIDE_HIDDEN (__init_array_start = .);
     KEEP (*(SORT(.init_array.*)))
@@ -106,7 +218,7 @@ SECTIONS
     PROVIDE_HIDDEN (__init_array_end = .);
   } >FLASH
 
-  .fini_array (READONLY) : /* The READONLY keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  .fini_array :
   {
     PROVIDE_HIDDEN (__fini_array_start = .);
     KEEP (*(SORT(.fini_array.*)))

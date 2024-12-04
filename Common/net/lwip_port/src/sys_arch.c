@@ -48,6 +48,7 @@
 #include "lwip/sys.h"
 #include "lwip/mem.h"
 #include "lwip/stats.h"
+#include "main.h"
 
 #if !INCLUDE_xTaskAbortDelay
     #error "lwIP FreeRTOS port requires INCLUDE_xTaskAbortDelay"

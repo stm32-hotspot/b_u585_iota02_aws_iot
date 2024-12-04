@@ -24,9 +24,8 @@
  */
 
 #include "logging_levels.h"
-#define LOG_LEVEL    LOG_WARN
-
-#include "logging.h"
+#define LOG_LEVEL    LOG_INFO
+//#include "logging.h"
 
 #include "hw_defs.h"
 #include "FreeRTOS.h"

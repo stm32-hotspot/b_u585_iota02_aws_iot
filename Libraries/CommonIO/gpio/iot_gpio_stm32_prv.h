@@ -26,8 +26,7 @@
 #define _IOT_GPIO_STM32_PRV_
 
 #include "iot_gpio.h"
-#include "stm32u585xx.h"
-#include "stm32u5xx_hal.h"
+#include "main.h"
 
 /* Number of GPIO pins per controller. Also defines number of interrupts */
 #define NUM_GPIO_PER_CONTROLLER 16

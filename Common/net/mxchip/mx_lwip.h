@@ -103,8 +103,7 @@ static inline void vStopDhcp( NetInterface_t * pxNetif )
     /* Start DHCP if necessary */
     struct dhcp * pxDHCP = netif_dhcp_data( pxNetif );
 
-    if( ( pxDHCP != NULL ) &&
-        ( pxDHCP->state != DHCP_STATE_OFF ) )
+    if( ( pxDHCP != NULL ) && ( pxDHCP->state != DHCP_STATE_OFF ) )
     {
         LogInfo( "Stopping DHCP." );
         err_t xLwipError = netifapi_dhcp_start( pxNetif );
@@ -166,10 +165,8 @@ static inline void vSetLinkDown( NetInterface_t * pxNetif )
     }
 }
 
-err_t prvxLinkOutput( NetInterface_t * pxNetif,
-                      PacketBuffer_t * pxPbuf );
-BaseType_t prvxLinkInput( NetInterface_t * pxNetif,
-                          PacketBuffer_t * pxPbufIn );
+err_t prvxLinkOutput     ( NetInterface_t * pxNetif, PacketBuffer_t * pxPbuf );
+//BaseType_t prvxLinkInput ( NetInterface_t * pxNetif, PacketBuffer_t * pxPbufIn );
 err_t prvInitNetInterface( NetInterface_t * pxNetif );
 
 #endif /* _MXFREE_LWIP_ */

@@ -22,10 +22,8 @@
  * http://aws.amazon.com/freertos
  */
 #include "logging_levels.h"
-
 #define LOG_LEVEL    LOG_ERROR
-
-#include "logging.h"
+//#include "logging.h"
 
 #include "mx_lwip.h"
 
@@ -190,8 +188,7 @@ err_t prvxLinkOutput( NetInterface_t * pxNetif,
     return xError;
 }
 
-BaseType_t prvxLinkInput( NetInterface_t * pxNetif,
-                          PacketBuffer_t * pxPbufIn )
+BaseType_t prvxLinkInput( NetInterface_t * pxNetif, PacketBuffer_t * pxPbufIn )
 {
     BaseType_t xReturn;
 
