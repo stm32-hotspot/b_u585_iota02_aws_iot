@@ -33,6 +33,8 @@
 #include <string.h>
 
 #include "mx_netconn.h"
+
+#include "coapTask.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -184,6 +186,9 @@ void StartDefaultTask(void *argument)
   configASSERT(xResult == pdTRUE);
 
   xResult = xTaskCreate(&net_main, "MxNet", 1024, NULL, 23, NULL);
+  configASSERT(xResult == pdTRUE);
+
+  xResult = xTaskCreate(&vCoApTask, "CoAP", 4096, NULL, 22, NULL);
   configASSERT(xResult == pdTRUE);
 
 #if 0

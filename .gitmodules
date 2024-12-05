@@ -1,0 +1,3 @@
+[submodule "Libraries/microcoap"]
+	path = Libraries/microcoap
+	url = https://github.com/1248/microcoap.git
