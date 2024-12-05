@@ -32,9 +32,10 @@
 #include "kvstore.h"
 #include <string.h>
 
-#include "mx_netconn.h"
+#include "lfs.h"
+#include "lfs_port.h"
 
-#include "coapTask.h"
+#include "mx_netconn.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,6 +56,8 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 EventGroupHandle_t xSystemEvents = NULL;
+static lfs_t * pxLfsCtx = NULL;
+
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -68,7 +71,8 @@ const osThreadAttr_t defaultTask_attributes = {
 /* USER CODE BEGIN FunctionPrototypes */
 void vInitTask(void *pvArgs);
 static void vHeartbeatTask(void *pvParameters);
-
+static int fs_init( void );
+lfs_t * pxGetDefaultFsCtx( void );
 /* USER CODE END FunctionPrototypes */
 
 /* USER CODE BEGIN 5 */
@@ -176,9 +180,32 @@ void StartDefaultTask(void *argument)
   (void) argument;
   xResult = xTaskCreate(Task_CLI, "cli", 2048, NULL, 10, NULL);
   configASSERT(xResult == pdTRUE);
+#if 1
+  xMountStatus = fs_init();
 
+  if( xMountStatus == LFS_ERR_OK )
+  {
+      /*
+       * FIXME: Need to debug  the cause of internal flash status register error here.
+       * Clearing the flash status register as a workaround.
+       */
+      FLASH_WaitForLastOperation( 1000 );
+
+      LogInfo( "File System mounted." );
+#if 0
+      otaPal_EarlyInit();
+#endif
+      ( void ) xEventGroupSetBits( xSystemEvents, EVT_MASK_FS_READY );
+
+      KVStore_init();
+  }
+  else
+  {
+      LogError( "Failed to mount filesystem." );
+  }
+#else
   KVStore_init();
-
+#endif
   (void) xEventGroupSetBits(xSystemEvents, EVT_MASK_FS_READY);
 
   xResult = xTaskCreate(vHeartbeatTask, "Heartbeat", 128, NULL,
@@ -189,10 +216,6 @@ void StartDefaultTask(void *argument)
   configASSERT(xResult == pdTRUE);
 
 #if 0
-  xResult = xTaskCreate(&vCoApTask, "CoAP", 4096, NULL, 22, NULL);
-  configASSERT(xResult == pdTRUE);
-
-
     #if DEMO_QUALIFICATION_TEST
         xResult = xTaskCreate( run_qualification_main, "QualTest", 4096, NULL, 10, NULL );
         configASSERT( xResult == pdTRUE );
@@ -241,5 +264,79 @@ static void vHeartbeatTask(void *pvParameters)
     HAL_GPIO_TogglePin( LED_GREEN_GPIO_Port, LED_GREEN_Pin);
   }
 }
+
+lfs_t * pxGetDefaultFsCtx( void )
+{
+    while( pxLfsCtx == NULL )
+    {
+        LogDebug( "Waiting for FS Initialization." );
+        /* Wait for FS to be initialized */
+        vTaskDelay( 1000 );
+        /*TODO block on an event group bit instead */
+    }
+
+    return pxLfsCtx;
+}
+
+static int fs_init( void )
+{
+    static lfs_t xLfsCtx = { 0 };
+
+    struct lfs_info xDirInfo = { 0 };
+
+    /* Block time of up to 1 s for filesystem to initialize */
+    const struct lfs_config * pxCfg = pxInitializeOSPIFlashFs( pdMS_TO_TICKS( 30 * 1000 ) );
+
+    /* mount the filesystem */
+    int err = lfs_mount( &xLfsCtx, pxCfg );
+
+    /* format if we can't mount the filesystem
+     * this should only happen on the first boot
+     */
+    if( err != LFS_ERR_OK )
+    {
+        LogError( "Failed to mount partition. Formatting..." );
+        err = lfs_format( &xLfsCtx, pxCfg );
+
+        if( err == 0 )
+        {
+            err = lfs_mount( &xLfsCtx, pxCfg );
+        }
+
+        if( err != LFS_ERR_OK )
+        {
+            LogError( "Failed to format littlefs device." );
+        }
+    }
+
+    if( lfs_stat( &xLfsCtx, "/cfg", &xDirInfo ) == LFS_ERR_NOENT )
+    {
+        err = lfs_mkdir( &xLfsCtx, "/cfg" );
+
+        if( err != LFS_ERR_OK )
+        {
+            LogError( "Failed to create /cfg directory." );
+        }
+    }
+
+    if( lfs_stat( &xLfsCtx, "/ota", &xDirInfo ) == LFS_ERR_NOENT )
+    {
+        err = lfs_mkdir( &xLfsCtx, "/ota" );
+
+        if( err != LFS_ERR_OK )
+        {
+            LogError( "Failed to create /ota directory." );
+        }
+    }
+
+    if( err == 0 )
+    {
+        /* Export the FS context */
+        pxLfsCtx = &xLfsCtx;
+    }
+
+    return err;
+}
+
 /* USER CODE END Application */
 
