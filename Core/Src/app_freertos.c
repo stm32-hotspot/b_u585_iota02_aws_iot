@@ -188,10 +188,11 @@ void StartDefaultTask(void *argument)
   xResult = xTaskCreate(&net_main, "MxNet", 1024, NULL, 23, NULL);
   configASSERT(xResult == pdTRUE);
 
+#if 0
   xResult = xTaskCreate(&vCoApTask, "CoAP", 4096, NULL, 22, NULL);
   configASSERT(xResult == pdTRUE);
 
-#if 0
+
     #if DEMO_QUALIFICATION_TEST
         xResult = xTaskCreate( run_qualification_main, "QualTest", 4096, NULL, 10, NULL );
         configASSERT( xResult == pdTRUE );
