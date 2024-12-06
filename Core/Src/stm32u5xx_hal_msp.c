@@ -173,6 +173,125 @@ void HAL_DCACHE_MspDeInit(DCACHE_HandleTypeDef* hdcache)
 }
 
 /**
+* @brief OSPI MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hospi: OSPI handle pointer
+* @retval None
+*/
+void HAL_OSPI_MspInit(OSPI_HandleTypeDef* hospi)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+  if(hospi->Instance==OCTOSPI2)
+  {
+  /* USER CODE BEGIN OCTOSPI2_MspInit 0 */
+
+  /* USER CODE END OCTOSPI2_MspInit 0 */
+
+  /** Initializes the peripherals clock
+  */
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_OSPI;
+    PeriphClkInit.OspiClockSelection = RCC_OSPICLKSOURCE_SYSCLK;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    /* Peripheral clock enable */
+    __HAL_RCC_OSPIM_CLK_ENABLE();
+    __HAL_RCC_OSPI2_CLK_ENABLE();
+
+    __HAL_RCC_GPIOI_CLK_ENABLE();
+    __HAL_RCC_GPIOH_CLK_ENABLE();
+    __HAL_RCC_GPIOF_CLK_ENABLE();
+    /**OCTOSPI2 GPIO Configuration
+    PI5     ------> OCTOSPIM_P2_NCS
+    PH12     ------> OCTOSPIM_P2_IO7
+    PH10     ------> OCTOSPIM_P2_IO5
+    PH11     ------> OCTOSPIM_P2_IO6
+    PF0     ------> OCTOSPIM_P2_IO0
+    PH9     ------> OCTOSPIM_P2_IO4
+    PF1     ------> OCTOSPIM_P2_IO1
+    PF2     ------> OCTOSPIM_P2_IO2
+    PF3     ------> OCTOSPIM_P2_IO3
+    PF4     ------> OCTOSPIM_P2_CLK
+    PF12     ------> OCTOSPIM_P2_DQS
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF5_OCTOSPI2;
+    HAL_GPIO_Init(GPIOI, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_9;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF5_OCTOSPI2;
+    HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
+                          |GPIO_PIN_4|GPIO_PIN_12;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF5_OCTOSPI2;
+    HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN OCTOSPI2_MspInit 1 */
+
+  /* USER CODE END OCTOSPI2_MspInit 1 */
+
+  }
+
+}
+
+/**
+* @brief OSPI MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hospi: OSPI handle pointer
+* @retval None
+*/
+void HAL_OSPI_MspDeInit(OSPI_HandleTypeDef* hospi)
+{
+  if(hospi->Instance==OCTOSPI2)
+  {
+  /* USER CODE BEGIN OCTOSPI2_MspDeInit 0 */
+
+  /* USER CODE END OCTOSPI2_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_OSPIM_CLK_DISABLE();
+    __HAL_RCC_OSPI2_CLK_DISABLE();
+
+    /**OCTOSPI2 GPIO Configuration
+    PI5     ------> OCTOSPIM_P2_NCS
+    PH12     ------> OCTOSPIM_P2_IO7
+    PH10     ------> OCTOSPIM_P2_IO5
+    PH11     ------> OCTOSPIM_P2_IO6
+    PF0     ------> OCTOSPIM_P2_IO0
+    PH9     ------> OCTOSPIM_P2_IO4
+    PF1     ------> OCTOSPIM_P2_IO1
+    PF2     ------> OCTOSPIM_P2_IO2
+    PF3     ------> OCTOSPIM_P2_IO3
+    PF4     ------> OCTOSPIM_P2_CLK
+    PF12     ------> OCTOSPIM_P2_DQS
+    */
+    HAL_GPIO_DeInit(GPIOI, GPIO_PIN_5);
+
+    HAL_GPIO_DeInit(GPIOH, GPIO_PIN_12|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_9);
+
+    HAL_GPIO_DeInit(GPIOF, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
+                          |GPIO_PIN_4|GPIO_PIN_12);
+
+  /* USER CODE BEGIN OCTOSPI2_MspDeInit 1 */
+
+  /* USER CODE END OCTOSPI2_MspDeInit 1 */
+  }
+
+}
+
+/**
 * @brief RNG MSP Initialization
 * This function configures the hardware resources used in this example
 * @param hrng: RNG handle pointer

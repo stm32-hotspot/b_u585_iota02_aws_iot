@@ -33,8 +33,8 @@
 /* Define KV_STORE_NVIMPL_ENABLE to 1 to enable storage of all key / value pairs in non-volatile storage */
 #define KV_STORE_NVIMPL_ENABLE      1
 // @SJ TODO:
-//#define KV_STORE_NVIMPL_LITTLEFS    1
-#define KV_STORE_NVIMPL_INTERNAL    1
+#define KV_STORE_NVIMPL_LITTLEFS    1
+//#define KV_STORE_NVIMPL_INTERNAL    1
 
 #define KV_STORE_NVIMPL_ARM_PSA     0
 

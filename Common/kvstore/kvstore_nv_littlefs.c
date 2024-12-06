@@ -32,7 +32,7 @@
 
 #ifdef KV_STORE_NVIMPL_LITTLEFS
     #include "lfs.h"
-    #include "fs/lfs_port.h"
+    #include "lfs_port.h"
 
     #define KVSTORE_PREFIX        "/cfg/"
     #define KVSTORE_MAX_FNANME    ( sizeof( KVSTORE_PREFIX ) + KVSTORE_KEY_MAX_LEN )

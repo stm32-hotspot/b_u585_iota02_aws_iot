@@ -36,6 +36,10 @@
 #include "lfs_port.h"
 
 #include "mx_netconn.h"
+
+#include "lwip/sockets.h"
+
+#include "echo.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,7 +49,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define ECHO_PORT 7
+//#define REMOTE_IP_ADDRESS "192.168.1.25"
+#define REMOTE_IP_ADDRESS "192.168.137.173"
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -73,6 +79,9 @@ void vInitTask(void *pvArgs);
 static void vHeartbeatTask(void *pvParameters);
 static int fs_init( void );
 lfs_t * pxGetDefaultFsCtx( void );
+void vReceiverTask(void *pvParameters);
+void lwip_socket_send(const char *message, const char *dest_ip, uint16_t dest_port);
+void vMainTask(void *pvParameters);
 /* USER CODE END FunctionPrototypes */
 
 /* USER CODE BEGIN 5 */
@@ -180,7 +189,8 @@ void StartDefaultTask(void *argument)
   (void) argument;
   xResult = xTaskCreate(Task_CLI, "cli", 2048, NULL, 10, NULL);
   configASSERT(xResult == pdTRUE);
-#if 1
+
+#if KV_STORE_NVIMPL_LITTLEFS
   xMountStatus = fs_init();
 
   if( xMountStatus == LFS_ERR_OK )
@@ -206,6 +216,7 @@ void StartDefaultTask(void *argument)
 #else
   KVStore_init();
 #endif
+
   (void) xEventGroupSetBits(xSystemEvents, EVT_MASK_FS_READY);
 
   xResult = xTaskCreate(vHeartbeatTask, "Heartbeat", 128, NULL,
@@ -213,6 +224,9 @@ void StartDefaultTask(void *argument)
   configASSERT(xResult == pdTRUE);
 
   xResult = xTaskCreate(&net_main, "MxNet", 1024, NULL, 23, NULL);
+  configASSERT(xResult == pdTRUE);
+
+  xResult = xTaskCreate(vEchoServerTask, "EchoServer", 1024, NULL, 22, NULL);
   configASSERT(xResult == pdTRUE);
 
 #if 0

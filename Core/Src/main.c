@@ -46,6 +46,8 @@ CRC_HandleTypeDef hcrc;
 
 DCACHE_HandleTypeDef hdcache1;
 
+OSPI_HandleTypeDef hospi2;
+
 RNG_HandleTypeDef hrng;
 
 RTC_HandleTypeDef hrtc;
@@ -127,6 +129,7 @@ int main(void)
   MX_TIM5_Init();
   MX_RTC_Init();
   MX_CRC_Init();
+  MX_OCTOSPI2_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -354,6 +357,66 @@ static void MX_ICACHE_Init(void)
   /* USER CODE BEGIN ICACHE_Init 2 */
 
   /* USER CODE END ICACHE_Init 2 */
+
+}
+
+/**
+  * @brief OCTOSPI2 Initialization Function
+  * @param None
+  * @retval None
+  */
+void MX_OCTOSPI2_Init(void)
+{
+
+  /* USER CODE BEGIN OCTOSPI2_Init 0 */
+
+  /* USER CODE END OCTOSPI2_Init 0 */
+
+  OSPIM_CfgTypeDef sOspiManagerCfg = {0};
+  HAL_OSPI_DLYB_CfgTypeDef HAL_OSPI_DLYB_Cfg_Struct = {0};
+
+  /* USER CODE BEGIN OCTOSPI2_Init 1 */
+
+  /* USER CODE END OCTOSPI2_Init 1 */
+  /* OCTOSPI2 parameter configuration*/
+  hospi2.Instance = OCTOSPI2;
+  hospi2.Init.FifoThreshold = 1;
+  hospi2.Init.DualQuad = HAL_OSPI_DUALQUAD_DISABLE;
+  hospi2.Init.MemoryType = HAL_OSPI_MEMTYPE_MICRON;
+  hospi2.Init.DeviceSize = 32;
+  hospi2.Init.ChipSelectHighTime = 1;
+  hospi2.Init.FreeRunningClock = HAL_OSPI_FREERUNCLK_DISABLE;
+  hospi2.Init.ClockMode = HAL_OSPI_CLOCK_MODE_0;
+  hospi2.Init.WrapSize = HAL_OSPI_WRAP_NOT_SUPPORTED;
+  hospi2.Init.ClockPrescaler = 1;
+  hospi2.Init.SampleShifting = HAL_OSPI_SAMPLE_SHIFTING_NONE;
+  hospi2.Init.DelayHoldQuarterCycle = HAL_OSPI_DHQC_DISABLE;
+  hospi2.Init.ChipSelectBoundary = 0;
+  hospi2.Init.DelayBlockBypass = HAL_OSPI_DELAY_BLOCK_BYPASSED;
+  hospi2.Init.MaxTran = 0;
+  hospi2.Init.Refresh = 0;
+  if (HAL_OSPI_Init(&hospi2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sOspiManagerCfg.ClkPort = 2;
+  sOspiManagerCfg.DQSPort = 2;
+  sOspiManagerCfg.NCSPort = 2;
+  sOspiManagerCfg.IOLowPort = HAL_OSPIM_IOPORT_2_LOW;
+  sOspiManagerCfg.IOHighPort = HAL_OSPIM_IOPORT_2_HIGH;
+  if (HAL_OSPIM_Config(&hospi2, &sOspiManagerCfg, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  HAL_OSPI_DLYB_Cfg_Struct.Units = 0;
+  HAL_OSPI_DLYB_Cfg_Struct.PhaseSel = 0;
+  if (HAL_OSPI_DLYB_SetConfig(&hospi2, &HAL_OSPI_DLYB_Cfg_Struct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN OCTOSPI2_Init 2 */
+
+  /* USER CODE END OCTOSPI2_Init 2 */
 
 }
 
@@ -622,12 +685,13 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOG_CLK_ENABLE();
+  __HAL_RCC_GPIOI_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOH, LED_RED_Pin|LED_GREEN_Pin, GPIO_PIN_RESET);
