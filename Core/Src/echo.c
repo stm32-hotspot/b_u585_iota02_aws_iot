@@ -14,11 +14,12 @@
 
 #include "lwip/sockets.h"
 
-//#define REMOTE_IP_ADDRESS "192.168.1.25"
-//#define REMOTE_IP_ADDRESS "192.168.137.173"
+
 
 #define ECHO_PORT 7
 #define REMOTE_IP_ADDRESS "192.168.1.31"
+//#define REMOTE_IP_ADDRESS "192.168.1.25"
+//#define REMOTE_IP_ADDRESS "192.168.137.173"
 
 static void lwip_socket_send(const char *message, const char *dest_ip, uint16_t dest_port);
 
@@ -36,7 +37,7 @@ void vEchoReceiverTask(void *pvParameters)
     	buffer[bytes_read]= '\0';
     	LogInfo("Data received %s\n", buffer);
 
-    	lwip_send(sock, buffer, bytes_read, 0);
+//    	lwip_send(sock, buffer, bytes_read, 0);
     }
 
     lwip_close(sock);
@@ -45,7 +46,7 @@ void vEchoReceiverTask(void *pvParameters)
 
 static void lwip_socket_send(const char *message, const char *dest_ip, uint16_t dest_port)
 {
-    int sock = lwip_socket(AF_INET, SOCK_DGRAM, 0);
+    int sock = lwip_socket(AF_INET, SOCK_STREAM, 0);
 
     if (sock < 0)
     {
@@ -58,15 +59,17 @@ static void lwip_socket_send(const char *message, const char *dest_ip, uint16_t 
     dest_addr.sin_port = lwip_htons(dest_port);
     dest_addr.sin_addr.s_addr = inet_addr(dest_ip);
 
-    ssize_t sent_bytes = lwip_sendto(sock, message, strlen(message), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+    if (lwip_connect(sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr)) < 0)
+    {
+      LogError("Error: Unable to connect to server\n");
+      lwip_close(sock); return;
+    }
+
+    ssize_t sent_bytes = lwip_send(sock, message, strlen(message), 0);
 
     if (sent_bytes < 0)
     {
       LogError("Error: Unable to send message");
-    }
-    else if (sent_bytes == 0)
-    {
-      LogError("Error: 0 bytes sent");
     }
     else
     {
@@ -139,6 +142,8 @@ void vEchoServerTask(void *pvParameters)
 
     LogInfo("Echo server is listening on port %d\n", ECHO_PORT);
 
+    xTaskCreate(vEchoSenderTask, "SenderTask", 2 * configMINIMAL_STACK_SIZE, &new_sock, tskIDLE_PRIORITY + 1, NULL);
+
     while (1)
     {
         // Accept incoming connection
@@ -154,7 +159,6 @@ void vEchoServerTask(void *pvParameters)
 
         // Create tasks for sending and receiving
         xTaskCreate(vEchoReceiverTask, "ReceiverTask", configMINIMAL_STACK_SIZE, &new_sock, tskIDLE_PRIORITY + 1, NULL);
-        xTaskCreate(vEchoSenderTask, "SenderTask", configMINIMAL_STACK_SIZE, &new_sock, tskIDLE_PRIORITY + 1, NULL);
     }
 
     lwip_close(sock);

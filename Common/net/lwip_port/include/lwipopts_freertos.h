@@ -244,9 +244,9 @@
  * ------------------------------------
  */
 
-/*#define LWIP_DEBUG      LWIP_DBG_ON */
+//#define LWIP_DEBUG      LWIP_DBG_ON
 /*#define UDP_DEBUG LWIP_DBG_ON */
-/*#define SOCKETS_DEBUG LWIP_DBG_ON */
+//#define SOCKETS_DEBUG LWIP_DBG_ON
 /*#define TCP_DEBUG   LWIP_DBG_ON */
 /*#define NETIF_DEBUG    LWIP_DBG_ON */
 /*#define ETHARP_DEBUG LWIP_DBG_ON */

@@ -32,6 +32,8 @@
 #include "key_value_store.h"
 #include "flash_interface.h"
 
+#ifdef KV_STORE_NVIMPL_INTERNAL
+
 #if defined(NO_STSAFE)
 #include "flash_interface.h"
 #else
@@ -542,3 +544,5 @@ static bool metadata_set_default(void)
 
   return metadata_update();
 }
+
+#endif
