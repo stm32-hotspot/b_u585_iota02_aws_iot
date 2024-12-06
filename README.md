@@ -1,6 +1,20 @@
 
 # aware_demo
 
+### Cloning the Repository
+To clone using HTTPS:
+```
+git clone https://github.com/SlimJallouli/aware_demo.git --recurse-submodules
+```
+Using SSH:
+```
+git clone git@github.com:SlimJallouli/aware_demo.git --recurse-submodules
+```
+If you have downloaded the repo without using the `--recurse-submodules` argument, you should run:
+```
+git submodule update --init --recursive
+```
+
 ## CMSIS Packs
 
 If you need to regenerate the project with STM32CubeMX, then you need to dowload and install the following CMSIS packs.
@@ -9,18 +23,17 @@ If you need to regenerate the project with STM32CubeMX, then you need to dowload
 
 [mbedTLS 3.1.1](https://www.keil.com/pack/ARM.mbedTLS.3.1.1.pack)
 
-## UpdateMbedTLS.ps1 Script
-* If you regenerate the project with STM32CubeMX, then you need to run *UpdateMbedTLS.ps1* script before building the project with STM32CubeIDE
-
-![UpdateMbedTLS.png](UpdateMbedTLS.png)
 
 ## Wi-Fi Credentails configuration
-* You can change the Wi-Fi SSID and password in *main.h* or from STM32CubeMX. 
+The Wi-Fi credentials can be changed using the CLI
+
 ```
-#define CS_WIFI_SSID "st_iot_demo"
-#define CS_WIFI_CREDENTIAL "stm32u585"
+conf set wifi_ssid MySSID
+conf set wifi_credential MyPSWD
+conf commit
+reset
 ```
-You need to run the *UpdateMbedTLS.ps1* script if you change the credential with STM32CubeMX
+![Example Image](wi-fi_Config.png)
 
 ### Command Line Interface (CLI)
 
@@ -31,5 +44,6 @@ The CLI interface located in the Common/cli directory is used to provision the d
 - Type **heapstat** to get the heap statistics
 - Type **reset** to reset the device
 - Type **help** to get help menu
+- Type **conf get** to get the current configuration
 
 ![Example Image](example.png)
