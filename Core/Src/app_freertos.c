@@ -68,8 +68,11 @@ static lfs_t *pxLfsCtx = NULL;
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes =
-{ .name = "defaultTask", .priority = (osPriority_t) osPriorityNormal, .stack_size = 1024 * 4 };
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 1024 * 4
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -82,6 +85,8 @@ void lwip_socket_send(const char *message, const char *dest_ip, uint16_t dest_po
 void vMainTask(void *pvParameters);
 
 extern void vSubscribePublishTestTask(void*);
+void vShadowDeviceTask( void * pvParameters );
+
 /* USER CODE END FunctionPrototypes */
 
 /* USER CODE BEGIN 5 */
@@ -127,12 +132,11 @@ __weak unsigned long getRunTimeCounterValue(void)
 /* USER CODE END 1 */
 
 /**
- * @brief  FreeRTOS initialization
- * @param  None
- * @retval None
- */
-void MX_FREERTOS_Init(void)
-{
+  * @brief  FreeRTOS initialization
+  * @param  None
+  * @retval None
+  */
+void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
   hw_init();
 
@@ -250,10 +254,10 @@ void StartDefaultTask(void *argument)
 
         xResult = xTaskCreate( vMotionSensorsPublish, "MotionS", 2048, NULL, 5, NULL );
         configASSERT( xResult == pdTRUE );
-
+#endif
         xResult = xTaskCreate( vShadowDeviceTask, "ShadowDevice", 1024, NULL, 5, NULL );
         configASSERT( xResult == pdTRUE );
-
+#if 0
         xResult = xTaskCreate( vDefenderAgentTask, "AWSDefender", 2048, NULL, 5, NULL );
         configASSERT( xResult == pdTRUE );
 #endif

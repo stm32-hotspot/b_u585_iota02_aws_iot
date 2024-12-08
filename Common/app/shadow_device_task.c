@@ -48,7 +48,7 @@
 #include "logging_levels.h"
 /* define LOG_LEVEL here if you want to modify the logging level from the default */
 
-#define LOG_LEVEL    LOG_INFO
+#define LOG_LEVEL    LOG_DEBUG
 
 #include "logging.h"
 
@@ -761,6 +761,8 @@ void vShadowDeviceTask( void * pvParameters )
         /* Subscribe to Shadow topics. */
         xStatus = prvSubscribeToShadowUpdateTopics( &xShadowCtx );
     }
+
+    xShadowCtx.ulCurrentPowerOnState = !xShadowCtx.ulReportedPowerOnState;
 
     if( xStatus == true )
     {

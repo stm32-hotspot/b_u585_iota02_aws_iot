@@ -22,7 +22,13 @@
 
 #ifndef SHADOW_CONFIG_H
 #define SHADOW_CONFIG_H
+#include "logging_levels.h"
+/* define LOG_LEVEL here if you want to modify the logging level from the default */
+#if !defined(LOG_LEVEL)
+#define LOG_LEVEL    LOG_DEBUG
+#endif
 
+#include "logging.h"
 
 
 #endif /* ifndef SHADOW_CONFIG_H */
