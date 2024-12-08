@@ -108,11 +108,11 @@ int main(void)
 
   /* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
-
   /* Configure the System Power */
   SystemPower_Config();
+
+  /* Configure the system clock */
+  SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
 
@@ -137,7 +137,7 @@ int main(void)
   /* Init scheduler */
   osKernelInitialize();
 
-  /* Call init function for freertos objects (in cmsis_os2.c) */
+  /* Call init function for freertos objects (in app_freertos.c) */
   MX_FREERTOS_Init();
 
   /* Start scheduler */
@@ -380,19 +380,19 @@ void MX_OCTOSPI2_Init(void)
   /* USER CODE END OCTOSPI2_Init 1 */
   /* OCTOSPI2 parameter configuration*/
   hospi2.Instance = OCTOSPI2;
-  hospi2.Init.FifoThreshold = 1;
+  hospi2.Init.FifoThreshold = 4;
   hospi2.Init.DualQuad = HAL_OSPI_DUALQUAD_DISABLE;
-  hospi2.Init.MemoryType = HAL_OSPI_MEMTYPE_MICRON;
-  hospi2.Init.DeviceSize = 32;
-  hospi2.Init.ChipSelectHighTime = 1;
-  hospi2.Init.FreeRunningClock = HAL_OSPI_FREERUNCLK_DISABLE;
+  hospi2.Init.MemoryType = HAL_OSPI_MEMTYPE_MACRONIX;
+  hospi2.Init.DeviceSize = 26;
+  hospi2.Init.ChipSelectHighTime = 2;
+  hospi2.Init.FreeRunningClock = HAL_OSPI_FREERUNCLK_ENABLE;
   hospi2.Init.ClockMode = HAL_OSPI_CLOCK_MODE_0;
   hospi2.Init.WrapSize = HAL_OSPI_WRAP_NOT_SUPPORTED;
-  hospi2.Init.ClockPrescaler = 1;
+  hospi2.Init.ClockPrescaler = 4;
   hospi2.Init.SampleShifting = HAL_OSPI_SAMPLE_SHIFTING_NONE;
-  hospi2.Init.DelayHoldQuarterCycle = HAL_OSPI_DHQC_DISABLE;
+  hospi2.Init.DelayHoldQuarterCycle = HAL_OSPI_DHQC_ENABLE;
   hospi2.Init.ChipSelectBoundary = 0;
-  hospi2.Init.DelayBlockBypass = HAL_OSPI_DELAY_BLOCK_BYPASSED;
+  hospi2.Init.DelayBlockBypass = HAL_OSPI_DELAY_BLOCK_USED;
   hospi2.Init.MaxTran = 0;
   hospi2.Init.Refresh = 0;
   if (HAL_OSPI_Init(&hospi2) != HAL_OK)

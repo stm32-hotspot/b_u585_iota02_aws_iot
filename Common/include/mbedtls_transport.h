@@ -24,7 +24,6 @@
  * @file mbedtls_transport.h
  * @brief TLS transport interface header.
  */
-#define _MBEDTLS_TRANSPORT_H //@SJ
 #ifndef _MBEDTLS_TRANSPORT_H
 #define _MBEDTLS_TRANSPORT_H
 

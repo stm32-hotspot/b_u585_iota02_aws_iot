@@ -2,6 +2,6 @@
 [submodule "Libraries/littlefs"]
 	path = Libraries/littlefs
 	url = https://github.com/littlefs-project/littlefs.git
-[submodule "Middleware/FreeRTOS/corePKCS11"]
-	path = Middleware/FreeRTOS/corePKCS11
+[submodule "Libraries/corePKCS11"]
+	path = Libraries/corePKCS11
 	url = https://github.com/FreeRTOS/corePKCS11.git

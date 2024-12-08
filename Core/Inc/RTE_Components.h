@@ -25,7 +25,7 @@
 /* ARM.mbedTLS.3.1.1 */
 #define RTE_Security_mbedTLS /* Security mbed TLS */
 /* lwIP.lwIP.2.2.0 */
-<!-- the following content goes into file 'RTE_Components.h' -->
+//<!-- the following content goes into file 'RTE_Components.h' -->
 #define RTE_Network_Core /* Network Core */
 #define RTE_Network_IPv4 /* Network IPv4 Stack */
 #define RTE_Network_RTOS /* Network RTOS */

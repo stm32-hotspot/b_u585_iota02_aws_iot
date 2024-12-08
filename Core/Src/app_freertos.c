@@ -40,6 +40,7 @@
 #include "lwip/sockets.h"
 
 #include "echo.h"
+#include "mqtt_agent_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,26 +63,25 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 EventGroupHandle_t xSystemEvents = NULL;
-static lfs_t * pxLfsCtx = NULL;
+static lfs_t *pxLfsCtx = NULL;
 
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 1024 * 4
-};
+const osThreadAttr_t defaultTask_attributes =
+{ .name = "defaultTask", .priority = (osPriority_t) osPriorityNormal, .stack_size = 1024 * 4 };
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 void vInitTask(void *pvArgs);
 static void vHeartbeatTask(void *pvParameters);
-static int fs_init( void );
-lfs_t * pxGetDefaultFsCtx( void );
+static int fs_init(void);
+lfs_t* pxGetDefaultFsCtx(void);
 void vReceiverTask(void *pvParameters);
 void lwip_socket_send(const char *message, const char *dest_ip, uint16_t dest_port);
 void vMainTask(void *pvParameters);
+
+extern void vSubscribePublishTestTask(void*);
 /* USER CODE END FunctionPrototypes */
 
 /* USER CODE BEGIN 5 */
@@ -93,7 +93,7 @@ void vApplicationMallocFailedHook(void)
 /* USER CODE END 5 */
 
 /* USER CODE BEGIN 2 */
-void vApplicationIdleHook( void )
+void vApplicationIdleHook(void)
 {
   vPetWatchdog();
 }
@@ -104,8 +104,8 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
 {
   taskENTER_CRITICAL();
 
-  LogSys( "Stack overflow in %s", pcTaskName );
-  ( void ) xTask;
+  LogSys("Stack overflow in %s", pcTaskName);
+  (void) xTask;
 
   vDoSystemReset();
 
@@ -122,16 +122,17 @@ __weak void configureTimerForRunTimeStats(void)
 
 __weak unsigned long getRunTimeCounterValue(void)
 {
-return 0;
+  return 0;
 }
 /* USER CODE END 1 */
 
 /**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
-  */
-void MX_FREERTOS_Init(void) {
+ * @brief  FreeRTOS initialization
+ * @param  None
+ * @retval None
+ */
+void MX_FREERTOS_Init(void)
+{
   /* USER CODE BEGIN Init */
   hw_init();
 
@@ -193,25 +194,25 @@ void StartDefaultTask(void *argument)
 #if KV_STORE_NVIMPL_LITTLEFS
   xMountStatus = fs_init();
 
-  if( xMountStatus == LFS_ERR_OK )
+  if (xMountStatus == LFS_ERR_OK)
   {
-      /*
-       * FIXME: Need to debug  the cause of internal flash status register error here.
-       * Clearing the flash status register as a workaround.
-       */
-      FLASH_WaitForLastOperation( 1000 );
+    /*
+     * FIXME: Need to debug  the cause of internal flash status register error here.
+     * Clearing the flash status register as a workaround.
+     */
+    FLASH_WaitForLastOperation(1000);
 
-      LogInfo( "File System mounted." );
+    LogInfo( "File System mounted." );
 #if 0
       otaPal_EarlyInit();
 #endif
-      ( void ) xEventGroupSetBits( xSystemEvents, EVT_MASK_FS_READY );
+    (void) xEventGroupSetBits(xSystemEvents, EVT_MASK_FS_READY);
 
-      KVStore_init();
+    KVStore_init();
   }
   else
   {
-      LogError( "Failed to mount filesystem." );
+    LogError("Failed to mount filesystem.");
   }
 #else
   KVStore_init();
@@ -226,17 +227,21 @@ void StartDefaultTask(void *argument)
   xResult = xTaskCreate(&net_main, "MxNet", 1024, NULL, 23, NULL);
   configASSERT(xResult == pdTRUE);
 
+#if 0
   xResult = xTaskCreate(vEchoServerTask, "EchoServer", 1024, NULL, 22, NULL);
   configASSERT(xResult == pdTRUE);
+#endif
 
-#if 0
-    #if DEMO_QUALIFICATION_TEST
+#if DEMO_QUALIFICATION_TEST
         xResult = xTaskCreate( run_qualification_main, "QualTest", 4096, NULL, 10, NULL );
         configASSERT( xResult == pdTRUE );
     #else
-        xResult = xTaskCreate( vMQTTAgentTask, "MQTTAgent", 2048, NULL, 10, NULL );
-        configASSERT( xResult == pdTRUE );
+  xResult = xTaskCreate(vMQTTAgentTask, "MQTTAgent", 2048, NULL, 10, NULL);
+  configASSERT(xResult == pdTRUE);
 
+  xResult = xTaskCreate(vSubscribePublishTestTask, "PubSub", 6144, NULL, 10, NULL);
+  configASSERT(xResult == pdTRUE);
+#if 0
         xResult = xTaskCreate( vOTAUpdateTask, "OTAUpdate", 4096, NULL, tskIDLE_PRIORITY + 1, NULL );
         configASSERT( xResult == pdTRUE );
 
@@ -251,8 +256,8 @@ void StartDefaultTask(void *argument)
 
         xResult = xTaskCreate( vDefenderAgentTask, "AWSDefender", 2048, NULL, 5, NULL );
         configASSERT( xResult == pdTRUE );
-    #endif /* DEMO_QUALIFICATION_TEST */
 #endif
+#endif /* DEMO_QUALIFICATION_TEST */
 
   /* Infinite loop */
   for (;;)
@@ -279,77 +284,79 @@ static void vHeartbeatTask(void *pvParameters)
   }
 }
 
-lfs_t * pxGetDefaultFsCtx( void )
+lfs_t* pxGetDefaultFsCtx(void)
 {
-    while( pxLfsCtx == NULL )
-    {
-        LogDebug( "Waiting for FS Initialization." );
-        /* Wait for FS to be initialized */
-        vTaskDelay( 1000 );
-        /*TODO block on an event group bit instead */
-    }
+  while (pxLfsCtx == NULL)
+  {
+    LogDebug( "Waiting for FS Initialization." );
+    /* Wait for FS to be initialized */
+    vTaskDelay(1000);
+    /*TODO block on an event group bit instead */
+  }
 
-    return pxLfsCtx;
+  return pxLfsCtx;
 }
 
-static int fs_init( void )
+static int fs_init(void)
 {
-    static lfs_t xLfsCtx = { 0 };
+  static lfs_t xLfsCtx =
+  { 0 };
 
-    struct lfs_info xDirInfo = { 0 };
+  struct lfs_info xDirInfo =
+  { 0 };
 
-    /* Block time of up to 1 s for filesystem to initialize */
-    const struct lfs_config * pxCfg = pxInitializeOSPIFlashFs( pdMS_TO_TICKS( 30 * 1000 ) );
+  /* Block time of up to 1 s for filesystem to initialize */
+  const struct lfs_config *pxCfg = pxInitializeOSPIFlashFs(pdMS_TO_TICKS(30 * 1000));
 
-    /* mount the filesystem */
-    int err = lfs_mount( &xLfsCtx, pxCfg );
+  /* mount the filesystem */
+  int err = lfs_mount(&xLfsCtx, pxCfg);
 
-    /* format if we can't mount the filesystem
-     * this should only happen on the first boot
-     */
-    if( err != LFS_ERR_OK )
+  /* format if we can't mount the filesystem
+   * this should only happen on the first boot
+   */
+  if (err != LFS_ERR_OK)
+  {
+    LogError("Failed to mount partition. Formatting...");
+    err = lfs_format(&xLfsCtx, pxCfg);
+
+    if (err == 0)
     {
-        LogError( "Failed to mount partition. Formatting..." );
-        err = lfs_format( &xLfsCtx, pxCfg );
-
-        if( err == 0 )
-        {
-            err = lfs_mount( &xLfsCtx, pxCfg );
-        }
-
-        if( err != LFS_ERR_OK )
-        {
-            LogError( "Failed to format littlefs device." );
-        }
+      err = lfs_mount(&xLfsCtx, pxCfg);
     }
 
-    if( lfs_stat( &xLfsCtx, "/cfg", &xDirInfo ) == LFS_ERR_NOENT )
+    if (err != LFS_ERR_OK)
     {
-        err = lfs_mkdir( &xLfsCtx, "/cfg" );
-
-        if( err != LFS_ERR_OK )
-        {
-            LogError( "Failed to create /cfg directory." );
-        }
+      LogError("Failed to format littlefs device.");
     }
+  }
 
-    if( lfs_stat( &xLfsCtx, "/ota", &xDirInfo ) == LFS_ERR_NOENT )
+  if (lfs_stat(&xLfsCtx, "/cfg", &xDirInfo) == LFS_ERR_NOENT)
+  {
+    err = lfs_mkdir(&xLfsCtx, "/cfg");
+
+    if (err != LFS_ERR_OK)
     {
-        err = lfs_mkdir( &xLfsCtx, "/ota" );
-
-        if( err != LFS_ERR_OK )
-        {
-            LogError( "Failed to create /ota directory." );
-        }
+      LogError("Failed to create /cfg directory.");
     }
+  }
 
-    if( err == 0 )
+  if (lfs_stat(&xLfsCtx, "/ota", &xDirInfo) == LFS_ERR_NOENT)
+  {
+    err = lfs_mkdir(&xLfsCtx, "/ota");
+
+    if (err != LFS_ERR_OK)
     {
-        /* Export the FS context */
-        pxLfsCtx = &xLfsCtx;
+      LogError("Failed to create /ota directory.");
     }
+  }
 
-    return err;
+  if (err == 0)
+  {
+    /* Export the FS context */
+    pxLfsCtx = &xLfsCtx;
+  }
+
+  return err;
 }
 
 /* USER CODE END Application */
