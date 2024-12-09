@@ -1409,6 +1409,7 @@
 
         ( void ) lFRng;
         ( void ) pvPRng;
+        ( void ) pxP11PrvKey;
 
         if( ( pxPubKey == NULL ) || ( pxPrvKey == NULL ) )
         {

@@ -196,7 +196,6 @@ void StartDefaultTask(void *argument)
   xResult = xTaskCreate(Task_CLI, "cli", 2048, NULL, 10, NULL);
   configASSERT(xResult == pdTRUE);
 
-#if KV_STORE_NVIMPL_LITTLEFS
   xMountStatus = fs_init();
 
   if (xMountStatus == LFS_ERR_OK)
@@ -208,9 +207,9 @@ void StartDefaultTask(void *argument)
     FLASH_WaitForLastOperation(1000);
 
     LogInfo( "File System mounted." );
-#if 0
-      otaPal_EarlyInit();
-#endif
+
+    otaPal_EarlyInit();
+
     (void) xEventGroupSetBits(xSystemEvents, EVT_MASK_FS_READY);
 
     KVStore_init();
@@ -219,9 +218,6 @@ void StartDefaultTask(void *argument)
   {
     LogError("Failed to mount filesystem.");
   }
-#else
-  KVStore_init();
-#endif
 
   (void) xEventGroupSetBits(xSystemEvents, EVT_MASK_FS_READY);
 

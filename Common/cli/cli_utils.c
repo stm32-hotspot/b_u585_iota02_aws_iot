@@ -217,7 +217,7 @@ static void prvPSCommand( ConsoleIO_t * const pxCIO,
     }
     else
     {
-        unsigned long ulTotalRuntime = 0;
+      configRUN_TIME_COUNTER_TYPE ulTotalRuntime = 0;
         uxNumTasks = uxTaskGetSystemState( pxTaskStatusArray,
                                            uxNumTasks,
                                            &ulTotalRuntime );
@@ -320,7 +320,7 @@ static TaskHandle_t xGetTaskHandleFromID( UBaseType_t uxTaskID )
 
     if( pxTaskStatusArray != NULL )
     {
-        unsigned long ulTotalRuntime = 0;
+      configRUN_TIME_COUNTER_TYPE ulTotalRuntime = 0;
         uxNumTasks = uxTaskGetSystemState( pxTaskStatusArray,
                                            uxNumTasks,
                                            &ulTotalRuntime );

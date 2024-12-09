@@ -751,7 +751,7 @@ PkiStatus_t xPkiGenerateECKeypair( const char * pcPrvKeyLabel,
 
                 #ifdef MBEDTLS_TRANSPORT_PKCS11
                     case OBJ_FORM_PKCS11_LABEL:
-                        xStatus = xPkcs11GenerateKeyPairEC( xPrvKey.pcPkcs11Label, xPubKey.pcPkcs11Label, ppucPubKeyDer, puxPubKeyDerLen );
+                        xStatus = xPkcs11GenerateKeyPairEC( (char *)xPrvKey.pcPkcs11Label, (char *)xPubKey.pcPkcs11Label, ppucPubKeyDer, puxPubKeyDerLen );
                         break;
                 #endif
                 #ifdef MBEDTLS_TRANSPORT_PSA
