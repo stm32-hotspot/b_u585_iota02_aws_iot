@@ -87,7 +87,7 @@ void vMainTask(void *pvParameters);
 extern void vSubscribePublishTestTask(void*);
 extern void vDefenderAgentTask( void * pvParameters );
 extern void vShadowDeviceTask( void * pvParameters );
-
+extern void vOTAUpdateTask( void * pvParam );
 /* USER CODE END FunctionPrototypes */
 
 /* USER CODE BEGIN 5 */
@@ -246,10 +246,10 @@ void StartDefaultTask(void *argument)
 
   xResult = xTaskCreate(vSubscribePublishTestTask, "PubSub", 6144, NULL, 10, NULL);
   configASSERT(xResult == pdTRUE);
-#if 0
+
         xResult = xTaskCreate( vOTAUpdateTask, "OTAUpdate", 4096, NULL, tskIDLE_PRIORITY + 1, NULL );
         configASSERT( xResult == pdTRUE );
-
+#if 0
         xResult = xTaskCreate( vEnvironmentSensorPublishTask, "EnvSense", 1024, NULL, 6, NULL );
         configASSERT( xResult == pdTRUE );
 
