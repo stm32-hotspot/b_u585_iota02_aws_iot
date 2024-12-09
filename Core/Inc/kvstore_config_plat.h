@@ -27,14 +27,14 @@
 #define _KVSTORE_CONFIG_PLAT_H
 
 /* Define KV_STORE_CACHE_ENABLE to 1 to enable an in-memory cache of all Key / Value pairs */
-// @SJ TODO:
+
 #define KV_STORE_CACHE_ENABLE       1
 
 /* Define KV_STORE_NVIMPL_ENABLE to 1 to enable storage of all key / value pairs in non-volatile storage */
 #define KV_STORE_NVIMPL_ENABLE      1
-// @SJ TODO:
+
 #define KV_STORE_NVIMPL_LITTLEFS    1
-//#define KV_STORE_NVIMPL_INTERNAL    1
+
 
 #define KV_STORE_NVIMPL_ARM_PSA     0
 
