@@ -6,7 +6,7 @@
  */
 #include "main.h"
 
-#include "key_value_store.h"
+#include "kvstore_prv.h"
 
 #ifdef KV_STORE_NVIMPL_INTERNAL
 const char __attribute__((section(".root_ca"))) AmazonRootCA3[] = {};

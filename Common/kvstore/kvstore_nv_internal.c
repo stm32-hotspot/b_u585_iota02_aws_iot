@@ -73,6 +73,16 @@ size_t xprvGetValueLengthFromImpl(KVStoreKey_t xKey)
     xLength = valueLength;
     break;
 
+  case CS_TIME_HWM_S_1970:
+    pfKvs_getKeyValue(CONF_KEY_TIME_HWM_S_1970, value, &valueLength);
+    xLength = valueLength;
+    break;
+
+  case CS_NUM_KEYS:
+    pfKvs_getKeyValue(CONF_KEY_TIME_NUM_KEYS, value, &valueLength);
+    xLength = valueLength;
+    break;
+
   default:
     break;
   }

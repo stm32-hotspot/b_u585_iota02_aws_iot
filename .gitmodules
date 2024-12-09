@@ -5,3 +5,6 @@
 [submodule "Libraries/corePKCS11"]
 	path = Libraries/corePKCS11
 	url = https://github.com/FreeRTOS/corePKCS11.git
+[submodule "Libraries/tinycbor"]
+	path = Libraries/tinycbor
+	url = https://github.com/intel/tinycbor.git

@@ -85,7 +85,8 @@ void lwip_socket_send(const char *message, const char *dest_ip, uint16_t dest_po
 void vMainTask(void *pvParameters);
 
 extern void vSubscribePublishTestTask(void*);
-void vShadowDeviceTask( void * pvParameters );
+extern void vDefenderAgentTask( void * pvParameters );
+extern void vShadowDeviceTask( void * pvParameters );
 
 /* USER CODE END FunctionPrototypes */
 
@@ -257,10 +258,10 @@ void StartDefaultTask(void *argument)
 #endif
         xResult = xTaskCreate( vShadowDeviceTask, "ShadowDevice", 1024, NULL, 5, NULL );
         configASSERT( xResult == pdTRUE );
-#if 0
+
         xResult = xTaskCreate( vDefenderAgentTask, "AWSDefender", 2048, NULL, 5, NULL );
         configASSERT( xResult == pdTRUE );
-#endif
+
 #endif /* DEMO_QUALIFICATION_TEST */
 
   /* Infinite loop */
@@ -310,7 +311,9 @@ static int fs_init(void)
   { 0 };
 
   /* Block time of up to 1 s for filesystem to initialize */
-  const struct lfs_config *pxCfg = pxInitializeOSPIFlashFs(pdMS_TO_TICKS(30 * 1000));
+//  const struct lfs_config *pxCfg = pxInitializeOSPIFlashFs(pdMS_TO_TICKS(30 * 1000));
+
+  const struct lfs_config *pxCfg = pxInitializeInternalFlashFs(pdMS_TO_TICKS(30 * 1000));
 
   /* mount the filesystem */
   int err = lfs_mount(&xLfsCtx, pxCfg);

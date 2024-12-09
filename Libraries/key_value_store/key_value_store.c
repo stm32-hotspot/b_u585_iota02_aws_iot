@@ -29,6 +29,7 @@
 #include "task.h"
 #include "semphr.h"
 
+#include "kvstore_prv.h"
 #include "key_value_store.h"
 #include "flash_interface.h"
 
@@ -88,7 +89,7 @@ static char *crc      = &metadata_buffer[ADDRESS_CRC            ];
 #endif
 
 //TODO: Set the default apn
-#define DEFAULT_THING_NAME       "STM32U5"
+#define DEFAULT_THING_NAME       "stm32u5-6eaa0920373033M6"
 #define DEFAULT_WIFI_SSID        WIFI_SSID
 #define DEFAULT_WIFI_PASSWORD    WIFI_CREDENTIAL
 #define DEFAULT_AWS_IOT_ENDPOINT "a1qwhobjtvew8t-ats.iot.us-west-1.amazonaws.com"

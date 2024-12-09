@@ -87,7 +87,7 @@ static int lfs_port_prog( const struct lfs_config * c,
 
     struct LfsPortCtx * pxCtx = ( struct LfsPortCtx * ) c->context;
 
-    configASSERT( xQueueGetMutexHolder( pxCtx->xMutex ) == xTaskGetCurrentTaskHandle() );
+//    configASSERT( xQueueGetMutexHolder( pxCtx->xMutex ) == xTaskGetCurrentTaskHandle() );
 
     HAL_FLASH_Unlock();
     __HAL_FLASH_CLEAR_FLAG( FLASH_FLAG_ALL_ERRORS );
@@ -117,7 +117,7 @@ static int lfs_port_erase( const struct lfs_config * c,
     FLASH_EraseInitTypeDef xErase_Config = { 0 };
     struct LfsPortCtx * pxCtx = ( struct LfsPortCtx * ) c->context;
 
-    configASSERT( xQueueGetMutexHolder( pxCtx->xMutex ) == xTaskGetCurrentTaskHandle() );
+//    configASSERT( xQueueGetMutexHolder( pxCtx->xMutex ) == xTaskGetCurrentTaskHandle() );
 
     xErase_Config.TypeErase = FLASH_TYPEERASE_PAGES;
     xErase_Config.Banks = FLASH_BANK_2;
