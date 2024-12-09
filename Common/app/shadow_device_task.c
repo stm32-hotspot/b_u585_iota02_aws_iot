@@ -762,7 +762,8 @@ void vShadowDeviceTask( void * pvParameters )
         xStatus = prvSubscribeToShadowUpdateTopics( &xShadowCtx );
     }
 
-    xShadowCtx.ulCurrentPowerOnState = !xShadowCtx.ulReportedPowerOnState;
+    /* Just to send a shadow message the first time we connect */
+    xShadowCtx.ulReportedPowerOnState = !xShadowCtx.ulCurrentPowerOnState;
 
     if( xStatus == true )
     {
