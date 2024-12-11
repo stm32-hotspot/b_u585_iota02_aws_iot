@@ -51,6 +51,10 @@
 /* Subscription manager header include. */
 #include "subscription_manager.h"
 
+#include "kvstore.h"
+
+# define MAXT_TOPIC_LENGTH 64
+static char topic     [MAXT_TOPIC_LENGTH];
 
 /**
  * @brief A test application which loops through subscribing to a topic and publishing message
@@ -80,7 +84,8 @@
 /**
  * @brief Format of topic used to publish outgoing messages.
  */
-#define configPUBLISH_TOPIC_FORMAT                   "mqtt_test/outgoing"
+//#define configPUBLISH_TOPIC_FORMAT                   "mqtt_test/outgoing"
+#define configPUBLISH_TOPIC_FORMAT                   topic
 
 /**
  * @brief Size of the static buffer to hold the topic name.
@@ -92,12 +97,13 @@
  * @brief Format of topic used to subscribe to incoming messages.
  *
  */
-#define configSUBSCRIBE_TOPIC_FORMAT           "mqtt_test/incoming"
+//#define configSUBSCRIBE_TOPIC_FORMAT           "mqtt_test/incoming"
+#define configSUBSCRIBE_TOPIC_FORMAT   configPUBLISH_TOPIC_FORMAT
 
 /**
  * @brief Size of the static buffer to hold the topic name.
  */
-#define configSUBSCRIBE_TOPIC_BUFFER_LENGTH    ( sizeof( configSUBSCRIBE_TOPIC_FORMAT ) - 1 )
+#define configSUBSCRIBE_TOPIC_BUFFER_LENGTH    ( sizeof( configSUBSCRIBE_TOPIC_FORMAT ) - 1 15
 
 /*-----------------------------------------------------------*/
 
@@ -347,6 +353,8 @@ void vSubscribePublishTestTask( void * pvParameters )
     MQTTStatus_t xMQTTStatus;
     MQTTQoS_t xQoS;
     TickType_t xTicksToDelay;
+    char * pThingName = NULL;
+    size_t uxTempSize = 0;
 
     ( void ) pvParameters;
 
@@ -358,6 +366,10 @@ void vSubscribePublishTestTask( void * pvParameters )
     vSleepUntilMQTTAgentConnected();
 
     LogInfo( ( "MQTT Agent is connected. Starting the publish subscribe task. " ) );
+
+    pThingName = KVStore_getStringHeap( CS_CORE_THING_NAME, &uxTempSize );
+
+    snprintf(topic, MAXT_TOPIC_LENGTH, "mqtt_test/%s", pThingName);
 
     if( xStatus == pdPASS )
     {
@@ -385,7 +397,7 @@ void vSubscribePublishTestTask( void * pvParameters )
              * the task name and an incrementing number. */
             xPayloadLength = snprintf( cPayloadBuf,
                                        configPAYLOAD_BUFFER_LENGTH,
-                                       "Test message %lu",
+                                       "{\"message\": \"Test message %lu\"}",
                                        ( ulPublishCount + 1 ) );
 
             /* Assert if the buffer length is large enough to hold the message. */
