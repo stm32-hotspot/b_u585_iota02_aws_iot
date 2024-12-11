@@ -32,10 +32,10 @@ echo "Contents copied from $LwIP_source to $LwIP_destination"
 # echo "File $FreeRTOSConfig_source copied to $FreeRTOSConfig_destination"
 
 # Delete the files
-rm -f "Middlewares/Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls_mbedtls.c"
-rm -f "Middlewares/Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls_mbedtls_mem.c"
-rm -f "Middlewares/Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls_mbedtls_mem.h"
-rm -f "Middlewares/Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls_mbedtls_structs.h"
+# rm -f "Middlewares/Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls_mbedtls.c"
+# rm -f "Middlewares/Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls_mbedtls_mem.c"
+# rm -f "Middlewares/Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls_mbedtls_mem.h"
+# rm -f "Middlewares/Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls_mbedtls_structs.h"
 
 
 

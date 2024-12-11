@@ -22,16 +22,6 @@
 
 #include "lwipopts_freertos.h"
 
-/*#define LWIP_DEBUG        1 */
-/* #define DHCP_DEBUG     LWIP_DBG_ON */
-/* #define ETHARP_DEBUG     LWIP_DBG_ON */
-/* #define SOCKETS_DEBUG     LWIP_DBG_ON */
-/* #define TCP_DEBUG         LWIP_DBG_ON */
-/* #define UDP_DEBUG         LWIP_DBG_ON */
-/* #define IP_DEBUG          LWIP_DBG_ON */
-/* #define MEM_DEBUG         LWIP_DBG_ON */
-/*#define PBUF_DEBUG          LWIP_DBG_ON */
-
 /*#define LWIP_IPV6                       1 */
 /*#define LWIP_IPV6_DHCP6                 1 */
 #define LWIP_DHCP                             1

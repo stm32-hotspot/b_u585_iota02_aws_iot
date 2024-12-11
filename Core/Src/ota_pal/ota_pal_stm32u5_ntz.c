@@ -36,8 +36,7 @@
 
 #include "ota.h"
 #include "ota_pal.h"
-#include "stm32u5xx.h"
-#include "stm32u5xx_hal_flash.h"
+#include "main.h"
 #include "lfs.h"
 #include "lfs_port.h"
 
@@ -381,7 +380,6 @@ static BaseType_t prvDeletePalNvContext( void )
     return xResult;
 }
 
-
 static OtaPalContext_t * prvGetImageContext( void )
 {
     OtaPalContext_t * pxCtx = NULL;
@@ -401,7 +399,6 @@ static OtaPalContext_t * prvGetImageContext( void )
     return pxCtx;
 }
 
-
 static HAL_StatusTypeDef prvFlashSetDualBankMode( void )
 {
     HAL_StatusTypeDef status = HAL_ERROR;
@@ -419,7 +416,7 @@ static HAL_StatusTypeDef prvFlashSetDualBankMode( void )
         {
             /* Get the Dual bank configuration status */
             HAL_FLASHEx_OBGetConfig( &xObContext );
-
+#if !defined(STM32H5)
             if( ( xObContext.USERConfig & OB_DUALBANK_DUAL ) != OB_DUALBANK_DUAL )
             {
                 xObContext.OptionType = OPTIONBYTE_USER;
@@ -427,7 +424,7 @@ static HAL_StatusTypeDef prvFlashSetDualBankMode( void )
                 xObContext.USERConfig = OB_DUALBANK_DUAL;
                 status = HAL_FLASHEx_OBProgram( &xObContext );
             }
-
+#endif
             ( void ) HAL_FLASH_OB_Lock();
         }
 
@@ -575,7 +572,6 @@ static uint32_t prvGetInactiveBank( void )
     return ulInactiveBank;
 }
 
-
 static HAL_StatusTypeDef prvWriteToFlash( uint32_t destination,
                                           uint8_t * pSource,
                                           uint32_t ulLength )
@@ -662,12 +658,17 @@ static BaseType_t prvEraseBank( uint32_t bankNumber )
     {
         uint32_t pageError = 0U;
         FLASH_EraseInitTypeDef pEraseInit;
-
+#if defined(STM32H5)
+        pEraseInit.TypeErase = FLASH_TYPEERASE_MASSERASE;
+        pEraseInit.Banks = bankNumber;
+        pEraseInit.Sector = 0;
+        pEraseInit.NbSectors = FLASH_SECTOR_NB;
+#else
         pEraseInit.Banks = bankNumber;
         pEraseInit.NbPages = FLASH_PAGE_NB;
         pEraseInit.Page = 0U;
         pEraseInit.TypeErase = FLASH_TYPEERASE_MASSERASE;
-
+#endif
         if( HAL_FLASHEx_Erase( &pEraseInit, &pageError ) != HAL_OK )
         {
             LogError( "Failed to erase the flash bank, errorCode = %u, pageError = %u.", HAL_FLASH_GetError(), pageError );
@@ -959,7 +960,6 @@ OtaPalStatus_t otaPal_CloseFile( OtaFileContext_t * const pxFileContext )
     return uxOtaStatus;
 }
 
-
 OtaPalStatus_t otaPal_Abort( OtaFileContext_t * const pxFileContext )
 {
     OtaPalStatus_t palStatus = otaPal_SetPlatformImageState( pxFileContext, OtaImageStateAborted );
@@ -1214,7 +1214,6 @@ OtaPalStatus_t otaPal_SetPlatformImageState( OtaFileContext_t * const pxFileCont
     return uxOtaStatus;
 }
 
-
 OtaPalImageState_t otaPal_GetPlatformImageState( OtaFileContext_t * const pxFileContext )
 {
     OtaPalImageState_t xOtaState = OtaPalImageStateUnknown;
@@ -1258,7 +1257,6 @@ OtaPalImageState_t otaPal_GetPlatformImageState( OtaFileContext_t * const pxFile
 
     return xOtaState;
 }
-
 
 OtaPalStatus_t otaPal_ResetDevice( OtaFileContext_t * const pxFileContext )
 {

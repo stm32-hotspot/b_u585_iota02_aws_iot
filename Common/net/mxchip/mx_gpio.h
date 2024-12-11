@@ -3,8 +3,7 @@
 #ifndef _COMMON_IO_BOAD_U5_
 #define _COMMON_IO_BOAD_U5_
 
-#include "stm32u585xx.h"
-#include "stm32u5xx_hal.h"
+#include "main.h"
 
 #include "iot_gpio_stm32_prv.h"
 
@@ -14,8 +13,6 @@ typedef enum GpioPin
     GPIO_MX_RESET,
     GPIO_MX_NSS,
     GPIO_MX_NOTIFY,
-//    GPIO_LED_RED,
-//    GPIO_LED_GREEN,
     GPIO_MAX
 } GpioPin_t;
 

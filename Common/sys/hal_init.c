@@ -40,10 +40,12 @@ void hw_init(void)
 {
   uint32_t ulCsrFlags = 0;
 
+#if !defined(STM32H5)
   ulCsrFlags = RCC->CSR;
 
   /* To make the compiler happy */
   ulCsrFlags = ulCsrFlags;
+#endif
 
   __HAL_RCC_CLEAR_RESET_FLAGS();
 }

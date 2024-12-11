@@ -118,12 +118,17 @@ static int lfs_port_erase( const struct lfs_config * c,
     struct LfsPortCtx * pxCtx = ( struct LfsPortCtx * ) c->context;
 
 //    configASSERT( xQueueGetMutexHolder( pxCtx->xMutex ) == xTaskGetCurrentTaskHandle() );
-
+#if defined(STM32H5)
+    xErase_Config.TypeErase = FLASH_TYPEERASE_SECTORS;
+    xErase_Config.Banks = FLASH_BANK_2;
+    xErase_Config.Sector = block;
+    xErase_Config.NbSectors = 1;
+#else
     xErase_Config.TypeErase = FLASH_TYPEERASE_PAGES;
     xErase_Config.Banks = FLASH_BANK_2;
     xErase_Config.Page = block;
     xErase_Config.NbPages = 1;
-
+#endif
     HAL_FLASH_Unlock();
     __HAL_FLASH_CLEAR_FLAG( FLASH_FLAG_ALL_ERRORS );
     HAL_StatusTypeDef xHAL_Status = HAL_FLASHEx_Erase( &xErase_Config, &ulPageError );
@@ -156,9 +161,15 @@ static void vPopulateConfig( struct lfs_config * pxCfg,
 
     pxCfg->read_size = 1;
     pxCfg->prog_size = 16;
+#if defined(STM32H5)
+    pxCfg->block_size = FLASH_SECTOR_SIZE;
+
+    pxCfg->block_count = FLASH_BANK_SIZE/FLASH_SECTOR_SIZE;
+#else
     pxCfg->block_size = FLASH_PAGE_SIZE;
 
     pxCfg->block_count = FLASH_PAGE_NB;
+#endif
     pxCfg->block_cycles = 500;
 
     pxCfg->cache_size = LFS_CONFIG_CACHE_SIZE;

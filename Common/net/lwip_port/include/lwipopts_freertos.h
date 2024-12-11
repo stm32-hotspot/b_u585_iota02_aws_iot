@@ -237,6 +237,8 @@
  */
 #define LWIP_NETCONN_FULLDUPLEX    1
 
+/* To use single transmit pbuf ,this may be more efficient for MXCHIP */
+#define LWIP_NETIF_TX_SINGLE_PBUF 1
 
 /*
  * ------------------------------------
@@ -244,15 +246,16 @@
  * ------------------------------------
  */
 
-//#define LWIP_DEBUG      LWIP_DBG_ON
-/*#define UDP_DEBUG LWIP_DBG_ON */
-//#define SOCKETS_DEBUG LWIP_DBG_ON
-/*#define TCP_DEBUG   LWIP_DBG_ON */
-/*#define NETIF_DEBUG    LWIP_DBG_ON */
-/*#define ETHARP_DEBUG LWIP_DBG_ON */
-/*#define DHCP_DEBUG LWIP_DBG_ON */
-/*#define IP_DEBUG LWIP_DBG_ON */
-
+/*#define LWIP_DEBUG    LWIP_DBG_ON */
+/*#define UDP_DEBUG     LWIP_DBG_ON */
+/*#define SOCKETS_DEBUG LWIP_DBG_ON */
+/*#define TCP_DEBUG     LWIP_DBG_ON */
+/*#define NETIF_DEBUG   LWIP_DBG_ON */
+/*#define ETHARP_DEBUG  LWIP_DBG_ON */
+/*#define DHCP_DEBUG    LWIP_DBG_ON */
+/*#define IP_DEBUG      LWIP_DBG_ON */
+/*#define MEM_DEBUG     LWIP_DBG_ON */
+/*#define PBUF_DEBUG    LWIP_DBG_ON */
 
 /*
  * Use the errno.h mechanism from FreeRTOS.

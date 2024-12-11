@@ -32,7 +32,7 @@
 #include "semphr.h"
 #include "event_groups.h"
 #include "stdbool.h"
-#include "stm32u5xx_hal.h"
+#include "main.h"
 #include "message_buffer.h"
 #include "atomic.h"
 

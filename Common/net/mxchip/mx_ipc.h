@@ -65,6 +65,8 @@ IPCError_t mx_RequestVersion( char * pcVersionBuffer,
 
 IPCError_t mx_FactoryReset( TickType_t xTimeout );
 
+IPCError_t mx_Scan( char * pcScan, uint32_t ulScannLength, TickType_t xTimeout );
+
 IPCError_t mx_GetMacAddress( struct eth_addr * pxMacAddress,
                              TickType_t xTimeout );
 
