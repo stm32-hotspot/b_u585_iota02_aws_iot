@@ -87,7 +87,7 @@ static int lfs_port_prog( const struct lfs_config * c,
 
     struct LfsPortCtx * pxCtx = ( struct LfsPortCtx * ) c->context;
 
-//    configASSERT( xQueueGetMutexHolder( pxCtx->xMutex ) == xTaskGetCurrentTaskHandle() );
+    configASSERT( xQueueGetMutexHolder( pxCtx->xMutex ) == xTaskGetCurrentTaskHandle() );
 
     HAL_FLASH_Unlock();
     __HAL_FLASH_CLEAR_FLAG( FLASH_FLAG_ALL_ERRORS );
@@ -117,7 +117,8 @@ static int lfs_port_erase( const struct lfs_config * c,
     FLASH_EraseInitTypeDef xErase_Config = { 0 };
     struct LfsPortCtx * pxCtx = ( struct LfsPortCtx * ) c->context;
 
-//    configASSERT( xQueueGetMutexHolder( pxCtx->xMutex ) == xTaskGetCurrentTaskHandle() );
+    configASSERT( xQueueGetMutexHolder( pxCtx->xMutex ) == xTaskGetCurrentTaskHandle() );
+
 #if defined(STM32H5)
     xErase_Config.TypeErase = FLASH_TYPEERASE_SECTORS;
     xErase_Config.Banks = FLASH_BANK_2;
@@ -129,6 +130,7 @@ static int lfs_port_erase( const struct lfs_config * c,
     xErase_Config.Page = block;
     xErase_Config.NbPages = 1;
 #endif
+
     HAL_FLASH_Unlock();
     __HAL_FLASH_CLEAR_FLAG( FLASH_FLAG_ALL_ERRORS );
     HAL_StatusTypeDef xHAL_Status = HAL_FLASHEx_Erase( &xErase_Config, &ulPageError );
@@ -156,7 +158,7 @@ static void vPopulateConfig( struct lfs_config * pxCfg,
 
     #ifdef LFS_THREADSAFE
         pxCfg->lock = &lfs_port_lock;
-        pxCfg->lock = &lfs_port_unlock;
+        pxCfg->unlock = &lfs_port_unlock;
     #endif
 
     pxCfg->read_size = 1;
@@ -231,6 +233,7 @@ static void vPopulateConfig( struct lfs_config * pxCfg,
         configASSERT( pxCtx->xMutex != NULL );
 
         vPopulateConfig( pxCfg, pxCtx );
+
         return pxCfg;
     }
 #endif /* LFS_NO_MALLOC */

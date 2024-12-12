@@ -46,6 +46,7 @@
 									<listOptionValue builtIn="false" value="NO_STSAFE"/>
 									<listOptionValue builtIn="false" value="NO_IWDG"/>
 									<listOptionValue builtIn="false" value="SHADOW_CONFIG_DEFAULTS_H_"/>
+									<listOptionValue builtIn="false" value="LFS_CONFIG=lfs_config.h"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.1974808480" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
