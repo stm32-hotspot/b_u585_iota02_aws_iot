@@ -29,9 +29,9 @@
 
 #include "logging_levels.h"
 #define LOG_LEVEL    LOG_DEBUG
-//#include "logging.h"
+#include "logging.h"
 
-#include "main.h" //@SJ
+#include "main.h"
 /* Standard includes */
 #include <stdint.h>
 #include <limits.h>
@@ -50,7 +50,10 @@
 #include "lwip/tcpip.h"
 #include "lwip/netifapi.h"
 #include "lwip/prot/dhcp.h"
+
+#if 0
 #include "lwip/apps/lwiperf.h"
+#endif
 
 #include "sys_evt.h"
 
@@ -271,9 +274,6 @@ static void vLwipReadyCallback( void * pvCtx )
 
 static char pcSSID[ MX_SSID_BUF_LEN ] = { 0 };
 static char pcPSK[ MX_PSK_BUF_LEN ] = { 0 };
-
-// @SJ
-//#define KVStore_getString(src, dst, len) memcpy(dst, src, len)
 
 static BaseType_t xConnectToAP( MxNetConnectCtx_t * pxCtx )
 {
@@ -601,10 +601,10 @@ void net_main( void * pvParameters )
                 vLogAddress( "IP Address:", pxNetif->ip_addr );
                 vLogAddress( "Gateway:", pxNetif->gw );
                 vLogAddress( "Netmask:", pxNetif->netmask );
-
+#if 0
                 lwiperf_start_tcp_server_default( NULL, NULL );
                 LogSys( "Started Iperf server" );
-
+#endif
                 ( void ) xEventGroupSetBits( xSystemEvents, EVT_MASK_NET_CONNECTED );
             }
 
