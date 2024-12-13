@@ -42,7 +42,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
-
+#include "semphr.h"
 #include "kvstore.h"
 
 #include "sys_evt.h"
@@ -59,8 +59,20 @@
 #include "subscription_manager.h"
 
 /* Sensor includes */
-#include "b_u585i_iot02a_motion_sensors.h"
+#include "ism330dhcx.h"
+#include "iis2mdc.h"
 
+#if USE_SENSORS
+#include "custom_bus.h"
+static ISM330DHCX_Object_t ISM330DHCX_Obj;
+static IIS2MDC_Object_t    IIS2MDC_Obj;
+#endif
+
+extern SemaphoreHandle_t SENSORS_I2C_MutexHandle;
+
+static ISM330DHCX_Axes_t xAcceleroAxes;
+static ISM330DHCX_Axes_t xGyroAxes;
+static IIS2MDC_Axes_t    xMagnetoAxes;
 /**
  * @brief Size of statically allocated buffers for holding topic names and
  * payloads.
@@ -72,7 +84,6 @@
 #define MQTT_PUBLISH_NOTIFICATION_WAIT_MS    ( 1000 )
 #define MQTT_NOTIFY_IDX                      ( 1 )
 #define MQTT_PUBLISH_QOS                     ( MQTTQoS0 )
-
 
 /*-----------------------------------------------------------*/
 
@@ -194,23 +205,82 @@ static BaseType_t prvPublishAndWaitForAck( MQTTAgentHandle_t xAgentHandle,
 }
 
 /*-----------------------------------------------------------*/
-static BaseType_t xInitSensors( void )
+static BaseType_t xInitSensors(void)
 {
-    int32_t lBspError = BSP_ERROR_NONE;
+#if USE_SENSORS
+  xSemaphoreTake(SENSORS_I2C_MutexHandle, portMAX_DELAY);
+  uint8_t ISM330DHCX_Id;
+  uint8_t Status;
+  ISM330DHCX_IO_t ISM330DHCX_io_ctx = { 0 };
 
-    /* Gyro + Accelerometer*/
-    lBspError = BSP_MOTION_SENSOR_Init( 0, MOTION_GYRO | MOTION_ACCELERO );
-    lBspError |= BSP_MOTION_SENSOR_Enable( 0, MOTION_GYRO );
-    lBspError |= BSP_MOTION_SENSOR_Enable( 0, MOTION_ACCELERO );
-    lBspError |= BSP_MOTION_SENSOR_SetOutputDataRate( 0, MOTION_GYRO, 1.0f );
-    lBspError |= BSP_MOTION_SENSOR_SetOutputDataRate( 0, MOTION_ACCELERO, 1.0f );
+  uint8_t IIS2MDC_Id;
+  IIS2MDC_IO_t IIS2MDC_io_ctx = { 0 };
 
-    /* Magnetometer */
-    lBspError |= BSP_MOTION_SENSOR_Init( 1, MOTION_MAGNETO );
-    lBspError |= BSP_MOTION_SENSOR_Enable( 1, MOTION_MAGNETO );
-    lBspError |= BSP_MOTION_SENSOR_SetOutputDataRate( 1, MOTION_MAGNETO, 1.0f );
+  /* Configure the accelerometer driver */
+  ISM330DHCX_io_ctx.BusType = ISM330DHCX_I2C_BUS; /* I2C */
+  ISM330DHCX_io_ctx.Address = ISM330DHCX_I2C_ADD_H;
+  ISM330DHCX_io_ctx.Init = BSP_I2C2_Init;
+  ISM330DHCX_io_ctx.DeInit = BSP_I2C2_DeInit;
+  ISM330DHCX_io_ctx.ReadReg = BSP_I2C2_ReadReg;
+  ISM330DHCX_io_ctx.WriteReg = BSP_I2C2_WriteReg;
 
-    return( lBspError == BSP_ERROR_NONE ? pdTRUE : pdFALSE );
+  ISM330DHCX_RegisterBusIO(&ISM330DHCX_Obj, &ISM330DHCX_io_ctx);
+  ISM330DHCX_Init(&ISM330DHCX_Obj);
+  ISM330DHCX_ReadID(&ISM330DHCX_Obj, &ISM330DHCX_Id);
+
+  if (ISM330DHCX_Id != ISM330DHCX_ID)
+  {
+    return ISM330DHCX_ERROR;
+  }
+
+  ISM330DHCX_ACC_Enable (&ISM330DHCX_Obj);
+  ISM330DHCX_GYRO_Enable(&ISM330DHCX_Obj);
+
+  do
+  {
+    vTaskDelay(5);
+    ISM330DHCX_ACC_Get_DRDY_Status(&ISM330DHCX_Obj, &Status);
+  }
+  while (Status != 1);
+
+  do
+  {
+    vTaskDelay(5);
+    ISM330DHCX_GYRO_Get_DRDY_Status(&ISM330DHCX_Obj, &Status);
+  }
+  while (Status != 1);
+
+
+  /* Configure the MAG driver */
+  IIS2MDC_io_ctx.BusType = IIS2MDC_I2C_BUS; /* I2C */
+  IIS2MDC_io_ctx.Address = IIS2MDC_I2C_ADD;
+  IIS2MDC_io_ctx.Init = BSP_I2C2_Init;
+  IIS2MDC_io_ctx.DeInit = BSP_I2C2_DeInit;
+  IIS2MDC_io_ctx.ReadReg = BSP_I2C2_ReadReg;
+  IIS2MDC_io_ctx.WriteReg = BSP_I2C2_WriteReg;
+
+  IIS2MDC_RegisterBusIO(&IIS2MDC_Obj, &IIS2MDC_io_ctx);
+  IIS2MDC_Init(&IIS2MDC_Obj);
+  IIS2MDC_ReadID(&IIS2MDC_Obj, &IIS2MDC_Id);
+
+  if (IIS2MDC_Id != IIS2MDC_ID)
+  {
+    return ISM330DHCX_ERROR;
+  }
+
+  IIS2MDC_MAG_Enable (&IIS2MDC_Obj);
+
+  do
+  {
+    vTaskDelay(5);
+    IIS2MDC_MAG_Get_DRDY_Status(&IIS2MDC_Obj, &Status);
+  }
+  while (Status != 1);
+
+  xSemaphoreGive(SENSORS_I2C_MutexHandle);
+#endif
+
+  return pdTRUE;
 }
 
 /*-----------------------------------------------------------*/
@@ -259,11 +329,14 @@ void vMotionSensorsPublish( void * pvParameters )
     {
         /* Interpret sensor data */
         int32_t lBspError = BSP_ERROR_NONE;
-        BSP_MOTION_SENSOR_Axes_t xAcceleroAxes, xGyroAxes, xMagnetoAxes;
 
-        lBspError = BSP_MOTION_SENSOR_GetAxes( 0, MOTION_GYRO, &xGyroAxes );
-        lBspError |= BSP_MOTION_SENSOR_GetAxes( 0, MOTION_ACCELERO, &xAcceleroAxes );
-        lBspError |= BSP_MOTION_SENSOR_GetAxes( 1, MOTION_MAGNETO, &xMagnetoAxes );
+#if USE_SENSORS
+        xSemaphoreTake(SENSORS_I2C_MutexHandle, portMAX_DELAY);
+        ISM330DHCX_ACC_GetAxes (&ISM330DHCX_Obj, &xAcceleroAxes);
+        ISM330DHCX_GYRO_GetAxes(&ISM330DHCX_Obj, &xGyroAxes    );
+        IIS2MDC_MAG_GetAxes    (&IIS2MDC_Obj   , &xMagnetoAxes );
+        xSemaphoreGive(SENSORS_I2C_MutexHandle);
+#endif
 
         if( lBspError == BSP_ERROR_NONE )
         {

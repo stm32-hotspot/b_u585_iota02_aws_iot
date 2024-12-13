@@ -24,23 +24,23 @@
  *
  */
 
-
 #include "logging_levels.h"
 /* define LOG_LEVEL here if you want to modify the logging level from the default */
 
-#define LOG_LEVEL    LOG_ERROR
+#define LOG_LEVEL    LOG_INFO
 
 #include "logging.h"
 
 /* Standard includes. */
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 /* Kernel includes. */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
-
+#include "semphr.h"
 #include "kvstore.h"
 
 /* MQTT library includes. */
@@ -52,8 +52,14 @@
 #include "subscription_manager.h"
 
 /* Sensor includes */
-#include "b_u585i_iot02a_env_sensors.h"
+#include "hts221.h"
+#include "lps22hh.h"
 
+#if USE_SENSORS
+#include "custom_bus.h"
+static HTS221_Object_t HTS221_Obj;
+static LPS22HH_Object_t LPS22HH_Obj;
+#endif
 
 #define MQTT_PUBLISH_MAX_LEN                 ( 512 )
 #define MQTT_PUBLISH_TIME_BETWEEN_MS         ( 1000 )
@@ -65,6 +71,8 @@
 #define MQTT_NOTIFY_IDX                      ( 1 )
 #define MQTT_PUBLISH_QOS                     ( MQTTQoS0 )
 
+extern SemaphoreHandle_t SENSORS_I2C_MutexHandle;
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -73,263 +81,293 @@
  */
 struct MQTTAgentCommandContext
 {
-    MQTTStatus_t xReturnStatus;
-    TaskHandle_t xTaskToNotify;
+  MQTTStatus_t xReturnStatus;
+  TaskHandle_t xTaskToNotify;
 };
 
 typedef struct
 {
-    float_t fTemperature0;
-    float_t fTemperature1;
-    float_t fHumidity;
-    float_t fBarometricPressure;
+  float_t fTemperature0;
+  float_t fTemperature1;
+  float_t fHumidity;
+  float_t fBarometricPressure;
 } EnvironmentalSensorData_t;
 
 /*-----------------------------------------------------------*/
 
-static void prvPublishCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
-                                       MQTTAgentReturnInfo_t * pxReturnInfo )
+static void prvPublishCommandCallback(MQTTAgentCommandContext_t *pxCommandContext, MQTTAgentReturnInfo_t *pxReturnInfo)
 {
-    configASSERT( pxCommandContext != NULL );
-    configASSERT( pxReturnInfo != NULL );
+  configASSERT(pxCommandContext != NULL);
+  configASSERT(pxReturnInfo != NULL);
 
-    pxCommandContext->xReturnStatus = pxReturnInfo->returnCode;
+  pxCommandContext->xReturnStatus = pxReturnInfo->returnCode;
 
-    if( pxCommandContext->xTaskToNotify != NULL )
-    {
-        /* Send the context's ulNotificationValue as the notification value so
-         * the receiving task can check the value it set in the context matches
-         * the value it receives in the notification. */
-        ( void ) xTaskNotifyGiveIndexed( pxCommandContext->xTaskToNotify,
-                                         MQTT_NOTIFY_IDX );
-    }
+  if (pxCommandContext->xTaskToNotify != NULL)
+  {
+    /* Send the context's ulNotificationValue as the notification value so
+     * the receiving task can check the value it set in the context matches
+     * the value it receives in the notification. */
+    (void) xTaskNotifyGiveIndexed(pxCommandContext->xTaskToNotify, MQTT_NOTIFY_IDX);
+  }
 }
 
 /*-----------------------------------------------------------*/
 
-static BaseType_t prvPublishAndWaitForAck( MQTTAgentHandle_t xAgentHandle,
-                                           const char * pcTopic,
-                                           const void * pvPublishData,
-                                           size_t xPublishDataLen )
+static BaseType_t prvPublishAndWaitForAck(MQTTAgentHandle_t xAgentHandle, const char *pcTopic, const void *pvPublishData, size_t xPublishDataLen)
 {
-    BaseType_t xResult = pdFALSE;
-    MQTTStatus_t xStatus;
+  BaseType_t xResult = pdFALSE;
+  MQTTStatus_t xStatus;
 
-    configASSERT( pcTopic != NULL );
-    configASSERT( pvPublishData != NULL );
-    configASSERT( xPublishDataLen > 0 );
+  configASSERT(pcTopic != NULL);
+  configASSERT(pvPublishData != NULL);
+  configASSERT(xPublishDataLen > 0);
 
-    MQTTPublishInfo_t xPublishInfo =
+  MQTTPublishInfo_t xPublishInfo =
+  { .qos = MQTT_PUBLISH_QOS, .retain = 0, .dup = 0, .pTopicName = pcTopic, .topicNameLength = strlen(pcTopic), .pPayload = pvPublishData, .payloadLength = xPublishDataLen };
+
+  MQTTAgentCommandContext_t xCommandContext =
+  { .xTaskToNotify = xTaskGetCurrentTaskHandle(), .xReturnStatus = MQTTIllegalState, };
+
+  MQTTAgentCommandInfo_t xCommandParams =
+  { .blockTimeMs = MQTT_PUBLISH_BLOCK_TIME_MS, .cmdCompleteCallback = prvPublishCommandCallback, .pCmdCompleteCallbackContext = &xCommandContext, };
+
+  /* Clear the notification index */
+  xTaskNotifyStateClearIndexed(NULL, MQTT_NOTIFY_IDX);
+
+  xStatus = MQTTAgent_Publish(xAgentHandle, &xPublishInfo, &xCommandParams);
+
+  if (xStatus == MQTTSuccess)
+  {
+    xResult = ulTaskNotifyTakeIndexed(MQTT_NOTIFY_IDX, pdTRUE, pdMS_TO_TICKS( MQTT_PUBLISH_NOTIFICATION_WAIT_MS ));
+
+    if (xResult == 0)
     {
-        .qos             = MQTT_PUBLISH_QOS,
-        .retain          = 0,
-        .dup             = 0,
-        .pTopicName      = pcTopic,
-        .topicNameLength = strlen( pcTopic ),
-        .pPayload        = pvPublishData,
-        .payloadLength   = xPublishDataLen
-    };
-
-    MQTTAgentCommandContext_t xCommandContext =
-    {
-        .xTaskToNotify = xTaskGetCurrentTaskHandle(),
-        .xReturnStatus = MQTTIllegalState,
-    };
-
-    MQTTAgentCommandInfo_t xCommandParams =
-    {
-        .blockTimeMs                 = MQTT_PUBLISH_BLOCK_TIME_MS,
-        .cmdCompleteCallback         = prvPublishCommandCallback,
-        .pCmdCompleteCallbackContext = &xCommandContext,
-    };
-
-    /* Clear the notification index */
-    xTaskNotifyStateClearIndexed( NULL, MQTT_NOTIFY_IDX );
-
-
-    xStatus = MQTTAgent_Publish( xAgentHandle,
-                                 &xPublishInfo,
-                                 &xCommandParams );
-
-    if( xStatus == MQTTSuccess )
-    {
-        xResult = ulTaskNotifyTakeIndexed( MQTT_NOTIFY_IDX,
-                                           pdTRUE,
-                                           pdMS_TO_TICKS( MQTT_PUBLISH_NOTIFICATION_WAIT_MS ) );
-
-        if( xResult == 0 )
-        {
-            LogError( "Timed out while waiting for publish ACK or Sent event. xTimeout = %d",
-                      pdMS_TO_TICKS( MQTT_PUBLISH_NOTIFICATION_WAIT_MS ) );
-            xResult = pdFALSE;
-        }
-        else if( xCommandContext.xReturnStatus != MQTTSuccess )
-        {
-            LogError( "MQTT Agent returned error code: %d during publish operation.",
-                      xCommandContext.xReturnStatus );
-            xResult = pdFALSE;
-        }
+      LogError("Timed out while waiting for publish ACK or Sent event. xTimeout = %d", pdMS_TO_TICKS( MQTT_PUBLISH_NOTIFICATION_WAIT_MS ));
+      xResult = pdFALSE;
     }
-    else
+    else if (xCommandContext.xReturnStatus != MQTTSuccess)
     {
-        LogError( "MQTTAgent_Publish returned error code: %d.",
-                  xStatus );
+      LogError("MQTT Agent returned error code: %d during publish operation.", xCommandContext.xReturnStatus);
+      xResult = pdFALSE;
     }
+  }
+  else
+  {
+    LogError("MQTTAgent_Publish returned error code: %d.", xStatus);
+  }
 
-    return xResult;
+  return xResult;
 }
 
-static BaseType_t xIsMqttConnected( void )
+static BaseType_t xIsMqttConnected(void)
 {
-    /* Wait for MQTT to be connected */
-    EventBits_t uxEvents = xEventGroupWaitBits( xSystemEvents,
-                                                EVT_MASK_MQTT_CONNECTED,
-                                                pdFALSE,
-                                                pdTRUE,
-                                                0 );
+  /* Wait for MQTT to be connected */
+  EventBits_t uxEvents = xEventGroupWaitBits(xSystemEvents,
+  EVT_MASK_MQTT_CONNECTED,
+  pdFALSE,
+  pdTRUE, 0);
 
-    return( ( uxEvents & EVT_MASK_MQTT_CONNECTED ) == EVT_MASK_MQTT_CONNECTED );
+  return ((uxEvents & EVT_MASK_MQTT_CONNECTED) == EVT_MASK_MQTT_CONNECTED);
 }
 
 /*-----------------------------------------------------------*/
 
-static BaseType_t xInitSensors( void )
+static BaseType_t xInitSensors(void)
 {
-    int32_t lBspError = BSP_ERROR_NONE;
+#if USE_SENSORS
+  xSemaphoreTake(SENSORS_I2C_MutexHandle, portMAX_DELAY);
 
-    lBspError = BSP_ENV_SENSOR_Init( 0, ENV_TEMPERATURE );
+  uint8_t HTS221_Id;
+  uint8_t Status;
+  HTS221_IO_t HTS221_io_ctx =
+  { 0 };
 
-    lBspError |= BSP_ENV_SENSOR_Init( 0, ENV_HUMIDITY );
+  uint8_t LPS22HH_Id;
+  LPS22HH_IO_t LPS22HH_io_ctx =
+  { 0 };
 
-    lBspError |= BSP_ENV_SENSOR_Init( 1, ENV_TEMPERATURE );
+  /* Configure the driver */
+  HTS221_io_ctx.BusType = HTS221_I2C_BUS; /* I2C */
+  HTS221_io_ctx.Address = HTS221_I2C_ADDRESS;
+  HTS221_io_ctx.Init = BSP_I2C2_Init;
+  HTS221_io_ctx.DeInit = BSP_I2C2_DeInit;
+  HTS221_io_ctx.ReadReg = BSP_I2C2_ReadReg;
+  HTS221_io_ctx.WriteReg = BSP_I2C2_WriteReg;
 
-    lBspError |= BSP_ENV_SENSOR_Init( 1, ENV_PRESSURE );
+  HTS221_RegisterBusIO(&HTS221_Obj, &HTS221_io_ctx);
+  HTS221_Init(&HTS221_Obj);
+  HTS221_ReadID(&HTS221_Obj, &HTS221_Id);
 
-    lBspError |= BSP_ENV_SENSOR_Enable( 0, ENV_TEMPERATURE );
+  if (HTS221_Id != HTS221_ID)
+  {
+    return HTS221_ERROR;
+  }
 
-    lBspError |= BSP_ENV_SENSOR_Enable( 0, ENV_HUMIDITY );
+  HTS221_HUM_Enable(&HTS221_Obj);
 
-    lBspError |= BSP_ENV_SENSOR_Enable( 1, ENV_TEMPERATURE );
+  do
+  {
+    vTaskDelay(5);
+    HTS221_HUM_Get_DRDY_Status(&HTS221_Obj, &Status);
+  } while (Status != 1);
 
-    lBspError |= BSP_ENV_SENSOR_Enable( 1, ENV_PRESSURE );
+  do
+  {
+    vTaskDelay(5);
+    HTS221_TEMP_Get_DRDY_Status(&HTS221_Obj, &Status);
+  } while (Status != 1);
 
-    lBspError |= BSP_ENV_SENSOR_SetOutputDataRate( 0, ENV_TEMPERATURE, 1.0f );
+#define LPS22HH_I2C_ADDRESS 0xBB
+  /* Configure the driver */
+  LPS22HH_io_ctx.BusType = LPS22HH_I2C_BUS; /* I2C */
+  LPS22HH_io_ctx.Address = LPS22HH_I2C_ADDRESS;
+  LPS22HH_io_ctx.Init = BSP_I2C2_Init;
+  LPS22HH_io_ctx.DeInit = BSP_I2C2_DeInit;
+  LPS22HH_io_ctx.ReadReg = BSP_I2C2_ReadReg;
+  LPS22HH_io_ctx.WriteReg = BSP_I2C2_WriteReg;
 
-    lBspError |= BSP_ENV_SENSOR_SetOutputDataRate( 0, ENV_HUMIDITY, 1.0f );
+  LPS22HH_RegisterBusIO(&LPS22HH_Obj, &LPS22HH_io_ctx);
+  LPS22HH_Init(&LPS22HH_Obj);
+  LPS22HH_ReadID(&LPS22HH_Obj, &LPS22HH_Id);
 
-    lBspError |= BSP_ENV_SENSOR_SetOutputDataRate( 1, ENV_TEMPERATURE, 1.0f );
+  if (LPS22HH_Id != LPS22HH_ID)
+  {
+    return LPS22HH_ERROR;
+  }
 
-    lBspError |= BSP_ENV_SENSOR_SetOutputDataRate( 1, ENV_PRESSURE, 1.0f );
+  LPS22HH_TEMP_Enable(&LPS22HH_Obj);
+  LPS22HH_PRESS_Enable(&LPS22HH_Obj);
 
-    return( lBspError == BSP_ERROR_NONE ? pdTRUE : pdFALSE );
+  do
+  {
+    vTaskDelay(5);
+    LPS22HH_PRESS_Get_DRDY_Status(&LPS22HH_Obj, &Status);
+  } while (Status != 1);
+
+  do
+  {
+    vTaskDelay(5);
+    LPS22HH_TEMP_Get_DRDY_Status(&LPS22HH_Obj, &Status);
+  } while (Status != 1);
+
+  xSemaphoreGive(SENSORS_I2C_MutexHandle);
+#endif
+  return pdTRUE;
 }
 
-static BaseType_t xUpdateSensorData( EnvironmentalSensorData_t * pxData )
+static BaseType_t xUpdateSensorData(EnvironmentalSensorData_t *pxData)
 {
-    int32_t lBspError = BSP_ERROR_NONE;
+#if USE_SENSORS
+  xSemaphoreTake(SENSORS_I2C_MutexHandle, portMAX_DELAY);
+  HTS221_HUM_GetHumidity    (&HTS221_Obj, &pxData->fHumidity);
+  HTS221_TEMP_GetTemperature(&HTS221_Obj, &pxData->fTemperature0);
 
-    lBspError = BSP_ENV_SENSOR_GetValue( 0, ENV_TEMPERATURE, &pxData->fTemperature0 );
-    lBspError |= BSP_ENV_SENSOR_GetValue( 0, ENV_HUMIDITY, &pxData->fHumidity );
-    lBspError |= BSP_ENV_SENSOR_GetValue( 1, ENV_TEMPERATURE, &pxData->fTemperature1 );
-    lBspError |= BSP_ENV_SENSOR_GetValue( 1, ENV_PRESSURE, &pxData->fBarometricPressure );
+  LPS22HH_PRESS_GetPressure  (&LPS22HH_Obj, &pxData->fBarometricPressure);
+  LPS22HH_TEMP_GetTemperature(&LPS22HH_Obj, &pxData->fTemperature1);
 
-    return( lBspError == BSP_ERROR_NONE ? pdTRUE : pdFALSE );
+  xSemaphoreGive(SENSORS_I2C_MutexHandle);
+#else
+  pxData->fHumidity           += 5;
+  pxData->fTemperature0       += 7;
+  pxData->fBarometricPressure += 100;
+  pxData->fTemperature1       += 4;
+
+  pxData->fHumidity           = fmod(pxData->fHumidity          , 100.0f);
+  pxData->fTemperature0       = fmod(pxData->fTemperature0      , 50.0f);
+  pxData->fBarometricPressure = fmod(pxData->fBarometricPressure, 100.0f);
+  pxData->fTemperature1       = fmod(pxData->fTemperature1      , 50.0f);
+#endif
+
+  return pdTRUE;
 }
 
 /*-----------------------------------------------------------*/
 
-extern UBaseType_t uxRand( void );
+extern UBaseType_t uxRand(void);
 
-void vEnvironmentSensorPublishTask( void * pvParameters )
+void vEnvironmentSensorPublishTask(void *pvParameters)
 {
-    BaseType_t xResult = pdFALSE;
-    BaseType_t xExitFlag = pdFALSE;
-    char payloadBuf[ MQTT_PUBLISH_MAX_LEN ];
-    MQTTAgentHandle_t xAgentHandle = NULL;
-    char pcTopicString[ MQTT_PUBLICH_TOPIC_STR_LEN ] = { 0 };
-    size_t uxTopicLen = 0;
+  BaseType_t xResult = pdFALSE;
+  BaseType_t xExitFlag = pdFALSE;
+  char payloadBuf[MQTT_PUBLISH_MAX_LEN];
+  MQTTAgentHandle_t xAgentHandle = NULL;
+  char pcTopicString[MQTT_PUBLICH_TOPIC_STR_LEN] =
+  { 0 };
+  size_t uxTopicLen = 0;
 
-    ( void ) pvParameters;
+  (void) pvParameters;
 
-    xResult = xInitSensors();
+  xResult = xInitSensors();
 
-    if( xResult != pdTRUE )
+  if (xResult != pdTRUE)
+  {
+    LogError("Error while initializing environmental sensors.");
+    vTaskDelete( NULL);
+  }
+
+  uxTopicLen = KVStore_getString(CS_CORE_THING_NAME, pcTopicString, MQTT_PUBLICH_TOPIC_STR_LEN);
+
+  if (uxTopicLen > 0)
+  {
+    uxTopicLen = strlcat(pcTopicString, "/" MQTT_PUBLISH_TOPIC, MQTT_PUBLICH_TOPIC_STR_LEN);
+  }
+
+  if ((uxTopicLen == 0) || (uxTopicLen >= MQTT_PUBLICH_TOPIC_STR_LEN))
+  {
+    LogError("Failed to construct topic string.");
+    xExitFlag = pdTRUE;
+  }
+
+  vSleepUntilMQTTAgentReady();
+
+  xAgentHandle = xGetMqttAgentHandle();
+
+  while (xExitFlag == pdFALSE)
+  {
+    TickType_t xTicksToWait = pdMS_TO_TICKS(MQTT_PUBLISH_TIME_BETWEEN_MS);
+    TimeOut_t xTimeOut;
+
+    vTaskSetTimeOutState(&xTimeOut);
+
+    EnvironmentalSensorData_t xEnvData;
+    xResult = xUpdateSensorData(&xEnvData);
+
+    if (xResult != pdTRUE)
     {
-        LogError( "Error while initializing environmental sensors." );
-        vTaskDelete( NULL );
+      LogError("Error while reading sensor data.");
+    }
+    else if (xIsMqttConnected() == pdTRUE)
+    {
+      int bytesWritten = 0;
+
+      /* Write to */
+      bytesWritten = snprintf(payloadBuf,
+      MQTT_PUBLISH_MAX_LEN, "{ \"temp_0_c\": %f, \"rh_pct\": %f, \"temp_1_c\": %f, \"baro_mbar\": %f }", xEnvData.fTemperature0, xEnvData.fHumidity, xEnvData.fTemperature1, xEnvData.fBarometricPressure);
+
+      if (bytesWritten < MQTT_PUBLISH_MAX_LEN)
+      {
+        xResult = prvPublishAndWaitForAck(xAgentHandle, pcTopicString, payloadBuf, bytesWritten);
+      }
+      else if (bytesWritten > 0)
+      {
+        LogError("Not enough buffer space.");
+      }
+      else
+      {
+        LogError("Printf call failed.");
+      }
+
+      if (xResult == pdTRUE)
+      {
+        LogDebug( payloadBuf );
+      }
     }
 
-    uxTopicLen = KVStore_getString( CS_CORE_THING_NAME, pcTopicString, MQTT_PUBLICH_TOPIC_STR_LEN );
-
-    if( uxTopicLen > 0 )
+    /* Adjust remaining tick count */
+    if (xTaskCheckForTimeOut(&xTimeOut, &xTicksToWait) == pdFALSE)
     {
-        uxTopicLen = strlcat( pcTopicString, "/" MQTT_PUBLISH_TOPIC, MQTT_PUBLICH_TOPIC_STR_LEN );
+      /* Wait until its time to poll the sensors again */
+      vTaskDelay(xTicksToWait);
     }
-
-    if( ( uxTopicLen == 0 ) || ( uxTopicLen >= MQTT_PUBLICH_TOPIC_STR_LEN ) )
-    {
-        LogError( "Failed to construct topic string." );
-        xExitFlag = pdTRUE;
-    }
-
-    vSleepUntilMQTTAgentReady();
-
-    xAgentHandle = xGetMqttAgentHandle();
-
-    while( xExitFlag == pdFALSE )
-    {
-        TickType_t xTicksToWait = pdMS_TO_TICKS( MQTT_PUBLISH_TIME_BETWEEN_MS );
-        TimeOut_t xTimeOut;
-
-        vTaskSetTimeOutState( &xTimeOut );
-
-        EnvironmentalSensorData_t xEnvData;
-        xResult = xUpdateSensorData( &xEnvData );
-
-        if( xResult != pdTRUE )
-        {
-            LogError( "Error while reading sensor data." );
-        }
-        else if( xIsMqttConnected() == pdTRUE )
-        {
-            int bytesWritten = 0;
-
-            /* Write to */
-            bytesWritten = snprintf( payloadBuf,
-                                     MQTT_PUBLISH_MAX_LEN,
-                                     "{ \"temp_0_c\": %f, \"rh_pct\": %f, \"temp_1_c\": %f, \"baro_mbar\": %f }",
-                                     xEnvData.fTemperature0,
-                                     xEnvData.fHumidity,
-                                     xEnvData.fTemperature1,
-                                     xEnvData.fBarometricPressure );
-
-            if( bytesWritten < MQTT_PUBLISH_MAX_LEN )
-            {
-                xResult = prvPublishAndWaitForAck( xAgentHandle,
-                                                   pcTopicString,
-                                                   payloadBuf,
-                                                   bytesWritten );
-            }
-            else if( bytesWritten > 0 )
-            {
-                LogError( "Not enough buffer space." );
-            }
-            else
-            {
-                LogError( "Printf call failed." );
-            }
-
-            if( xResult == pdTRUE )
-            {
-                LogDebug( payloadBuf );
-            }
-        }
-
-        /* Adjust remaining tick count */
-        if( xTaskCheckForTimeOut( &xTimeOut, &xTicksToWait ) == pdFALSE )
-        {
-            /* Wait until its time to poll the sensors again */
-            vTaskDelay( xTicksToWait );
-        }
-    }
+  }
 }
