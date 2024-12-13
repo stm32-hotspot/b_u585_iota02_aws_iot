@@ -51,82 +51,12 @@ StreamBufferHandle_t xUartTxStream = NULL;
 static char pcInputBuffer[ CLI_INPUT_LINE_LEN_MAX ] = { 0 };
 static volatile uint32_t ulInBufferIdx = 0;
 
-static UART_HandleTypeDef xConsoleHandle =
-{
-    .Instance                    = USART1,
-    .Init.BaudRate               = CLI_UART_BAUD_RATE,
-    .Init.WordLength             = UART_WORDLENGTH_8B,
-    .Init.StopBits               = UART_STOPBITS_1,
-    .Init.Parity                 = UART_PARITY_NONE,
-    .Init.Mode                   = UART_MODE_TX_RX,
-    .Init.HwFlowCtl              = UART_HWCONTROL_NONE,
-    .Init.OverSampling           = UART_OVERSAMPLING_16,
-    .Init.OneBitSampling         = UART_ONE_BIT_SAMPLE_DISABLE,
-    .Init.ClockPrescaler         = UART_PRESCALER_DIV1,
-    .AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT,
-};
-
 static BaseType_t xExitFlag = pdFALSE;
 
 static TaskHandle_t xRxThreadHandle = NULL;
 static TaskHandle_t xTxThreadHandle = NULL;
 
-static void vUart1MspInitCallback( UART_HandleTypeDef * huart )
-{
-    HAL_StatusTypeDef xHalStatus = HAL_OK;
-    RCC_PeriphCLKInitTypeDef xClockInit = { 0 };
-    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
-
-    if( huart == &xConsoleHandle )
-    {
-        __HAL_RCC_USART1_CLK_DISABLE();
-
-        xClockInit.PeriphClockSelection = RCC_PERIPHCLK_USART1;
-        xClockInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
-
-        xHalStatus = HAL_RCCEx_PeriphCLKConfig( &xClockInit );
-
-        if( xHalStatus == HAL_OK )
-        {
-            __HAL_RCC_USART1_CLK_ENABLE();
-        }
-
-        /*
-         * Enable GPIOA clock
-         * Mux RX/TX GPIOs to USART1 Alternate Function: GPIO_AF7_USART1
-         * PA10 -> USART_RX
-         * PA9 -> USART1_TX
-         */
-
-        __HAL_RCC_GPIOA_CLK_ENABLE();
-
-        GPIO_InitStruct.Pin = GPIO_PIN_9 | GPIO_PIN_10;
-        GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-        GPIO_InitStruct.Pull = GPIO_NOPULL;
-        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-        GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
-        HAL_GPIO_Init( GPIOA, &GPIO_InitStruct );
-
-        HAL_NVIC_SetPriority( USART1_IRQn, 5, 1 );
-        HAL_NVIC_EnableIRQ( USART1_IRQn );
-    }
-}
-
-void USART1_IRQHandler( void )
-{
-    HAL_UART_IRQHandler( &xConsoleHandle );
-}
-
-static void vUart1MspDeInitCallback( UART_HandleTypeDef * huart )
-{
-    if( huart == &xConsoleHandle )
-    {
-        HAL_NVIC_DisableIRQ( USART1_IRQn );
-        /* De-initialize GPIOs */
-        HAL_GPIO_DeInit( GPIOA, GPIO_PIN_10 | GPIO_PIN_9 );
-        __HAL_RCC_USART1_CLK_DISABLE();
-    }
-}
+extern UART_HandleTypeDef xConsoleHandle;
 
 static void txCompleteCallback( UART_HandleTypeDef * pxUartHandle );
 static void vTxThread( void * pvParameters );
@@ -135,17 +65,9 @@ static void rxEventCallback( UART_HandleTypeDef * pxUartHandle,
                              uint16_t usBytesRead );
 static void rxErrorCallback( UART_HandleTypeDef * pxUartHandle );
 
-
 /* Should only be called before the scheduler has been initialized / after an assertion has occurred */
 UART_HandleTypeDef * vInitUartEarly( void )
 {
-    ( void ) HAL_UART_DeInit( &xConsoleHandle );
-
-    ( void ) HAL_UART_RegisterCallback( &xConsoleHandle, HAL_UART_MSPINIT_CB_ID, vUart1MspInitCallback );
-    ( void ) HAL_UART_RegisterCallback( &xConsoleHandle, HAL_UART_MSPDEINIT_CB_ID, vUart1MspDeInitCallback );
-    ( void ) HAL_UART_Init( &xConsoleHandle );
-
-
     return &xConsoleHandle;
 }
 
@@ -159,9 +81,6 @@ BaseType_t xInitConsoleUart( void )
 
     xUartRxStream = xStreamBufferCreate( CLI_UART_RX_STREAM_LEN, 1 );
     xUartTxStream = xStreamBufferCreate( CLI_UART_TX_STREAM_LEN, HW_FIFO_LEN ); /*TODO maybe increase this */
-
-    xHalRslt |= HAL_UART_RegisterCallback( &xConsoleHandle, HAL_UART_MSPINIT_CB_ID, vUart1MspInitCallback );
-    xHalRslt |= HAL_UART_RegisterCallback( &xConsoleHandle, HAL_UART_MSPDEINIT_CB_ID, vUart1MspDeInitCallback );
 
     if( xHalRslt == HAL_OK )
     {
@@ -204,7 +123,6 @@ BaseType_t xInitConsoleUart( void )
     return( xHalRslt == HAL_OK );
 }
 
-
 /* Receive buffer A/B */
 static uint8_t puxRxBufferA[ CLI_UART_RX_READ_SZ_10MS ] = { 0 };
 static uint8_t puxRxBufferB[ CLI_UART_RX_READ_SZ_10MS ] = { 0 };
@@ -230,7 +148,6 @@ static void rxErrorCallback( UART_HandleTypeDef * pxUartHandle )
 
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
-
 
 static void rxEventCallback( UART_HandleTypeDef * pxUartHandle,
                              uint16_t usBytesRead )
@@ -331,7 +248,6 @@ static void txCompleteCallback( UART_HandleTypeDef * pxUartHandle )
 
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
-
 
 /* Uart transmit thread */
 static void vTxThread( void * pvParameters )
@@ -483,7 +399,6 @@ static void uart_print( const char * const pcString )
         uart_write( pcString, xLength );
     }
 }
-
 
 static int32_t uart_readline( char ** const ppcInputBuffer )
 {
