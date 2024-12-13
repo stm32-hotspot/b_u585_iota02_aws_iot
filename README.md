@@ -81,12 +81,28 @@ If you need to regenerate the project with STM32CubeMX, then you need to dowload
 
 [coreMQTT_Agent 5.0.1](https://d1pm0k3vkcievw.cloudfront.net/AWS.coreMQTT_Agent.5.0.1.pack)
 
+The following packs are automatically downloaded by STM32CubeMX
 
+[X-CUBE-MEMS1](https://www.st.com/en/embedded-software/x-cube-mems1.html)
+
+[X-CUBE-SAFEA1](https://www.st.com/en/embedded-software/x-cube-safea1.html)
+
+[X-CUBE-FREERTOS](https://www.st.com/en/embedded-software/x-cube-freertos.html)
+
+
+## Git submodules
+
+[corePKCS11](https://github.com/FreeRTOS/corePKCS11)
+
+[littlefs](https://github.com/littlefs-project/littlefs)
+
+[tinycbor](https://github.com/intel/tinycbor)
 
 ## Provision Your Board
 [Provision automatically with provision.py](https://github.com/FreeRTOS/iot-reference-stm32u5/blob/main/Getting_Started_Guide.md#option-8a-provision-automatically-with-provisionpy)
 
 [Provision manually via CLI](https://github.com/FreeRTOS/iot-reference-stm32u5/blob/main/Getting_Started_Guide.md#option-8b-provision-manually-via-cli)
+
 
 
 ## Generate the project using STM32CubeMX
