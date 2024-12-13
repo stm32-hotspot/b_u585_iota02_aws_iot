@@ -24,7 +24,6 @@
  * @file ota_config.h
  * @brief OTA user configurable settings.
  */
-#define OTA_CONFIG_H_ //@SJ
 #ifndef OTA_CONFIG_H_
 #define OTA_CONFIG_H_
 

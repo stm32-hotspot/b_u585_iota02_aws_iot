@@ -238,7 +238,7 @@
 #define LWIP_NETCONN_FULLDUPLEX    1
 
 /* To use single transmit pbuf ,this may be more efficient for MXCHIP */
-#define LWIP_NETIF_TX_SINGLE_PBUF 1
+//#define LWIP_NETIF_TX_SINGLE_PBUF 1
 
 /*
  * ------------------------------------

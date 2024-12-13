@@ -29,6 +29,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32u5xx_hal.h"
 
+#include "safea1_conf.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -58,33 +59,32 @@ void MX_OCTOSPI2_Init(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define WIFI_SSID "st_iot_demo"
 #define RunTimeStats_Timer htim5
 #define MXCHIP_NOTIFY_EXTI_IRQn EXTI14_IRQn
+#define xConsoleHandle huart1
 #define MXCHIP_SPI hspi2
-#define WIFI_CREDENTIAL "stm32u585"
-#define MXCHIP_FLOW_EXTI_IRQn EXTI15_IRQn
-#define CORE_MQTT_PORT 8883
 #define MAX_AP 20
+#define MXCHIP_FLOW_EXTI_IRQn EXTI15_IRQn
+#define USE_SENSORS 1
 #define MXCHIP_FLOW_Pin GPIO_PIN_15
 #define MXCHIP_FLOW_GPIO_Port GPIOG
 #define MXCHIP_FLOW_EXTI_IRQn EXTI15_IRQn
 #define PH3_BOOT0_Pin GPIO_PIN_3
 #define PH3_BOOT0_GPIO_Port GPIOH
-#define WRLS_SPI2_MOSI_Pin GPIO_PIN_4
-#define WRLS_SPI2_MOSI_GPIO_Port GPIOD
+#define MXCHIP_SPI2_MOSI_Pin GPIO_PIN_4
+#define MXCHIP_SPI2_MOSI_GPIO_Port GPIOD
 #define PC14_OSC32_IN_Pin GPIO_PIN_14
 #define PC14_OSC32_IN_GPIO_Port GPIOC
-#define WRLS_SPI2_MISO_Pin GPIO_PIN_3
-#define WRLS_SPI2_MISO_GPIO_Port GPIOD
+#define MXCHIP_SPI2_MISO_Pin GPIO_PIN_3
+#define MXCHIP_SPI2_MISO_GPIO_Port GPIOD
 #define PC15_OSC32_OUT_Pin GPIO_PIN_15
 #define PC15_OSC32_OUT_GPIO_Port GPIOC
 #define USER_Button_Pin GPIO_PIN_13
 #define USER_Button_GPIO_Port GPIOC
 #define LED_RED_Pin GPIO_PIN_6
 #define LED_RED_GPIO_Port GPIOH
-#define WRLS_SPI2_SCK_Pin GPIO_PIN_1
-#define WRLS_SPI2_SCK_GPIO_Port GPIOD
+#define MXCHIP_SPI2_SCK_Pin GPIO_PIN_1
+#define MXCHIP_SPI2_SCK_GPIO_Port GPIOD
 #define LED_GREEN_Pin GPIO_PIN_7
 #define LED_GREEN_GPIO_Port GPIOH
 #define T_VCP_RX_Pin GPIO_PIN_10

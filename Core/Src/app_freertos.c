@@ -30,6 +30,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "kvstore.h"
+#include "semphr.h"
+
 #include <string.h>
 
 #include "lfs.h"
@@ -39,7 +41,7 @@
 
 #include "lwip/sockets.h"
 
-#include "echo.h"
+//#include "echo.h"
 #include "mqtt_agent_task.h"
 /* USER CODE END Includes */
 
@@ -63,6 +65,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 EventGroupHandle_t xSystemEvents = NULL;
+SemaphoreHandle_t SENSORS_I2C_MutexHandle = NULL;
 static lfs_t *pxLfsCtx = NULL;
 
 /* USER CODE END Variables */
@@ -80,14 +83,17 @@ void vInitTask(void *pvArgs);
 static void vHeartbeatTask(void *pvParameters);
 static int fs_init(void);
 lfs_t* pxGetDefaultFsCtx(void);
-void vReceiverTask(void *pvParameters);
-void lwip_socket_send(const char *message, const char *dest_ip, uint16_t dest_port);
-void vMainTask(void *pvParameters);
 
 extern void vSubscribePublishTestTask(void*);
-extern void vDefenderAgentTask( void * pvParameters );
-extern void vShadowDeviceTask( void * pvParameters );
-extern void vOTAUpdateTask( void * pvParam );
+extern void vDefenderAgentTask(void *pvParameters);
+extern void vShadowDeviceTask(void *pvParameters);
+extern void vOTAUpdateTask(void *pvParam);
+extern void otaPal_EarlyInit( void );
+extern void vEnvironmentSensorPublishTask(void *pvParameters);
+extern void vMotionSensorsPublish(void *pvParameters);
+extern void vEchoServerTask(void *pvParameters);
+
+
 /* USER CODE END FunctionPrototypes */
 
 /* USER CODE BEGIN 5 */
@@ -196,6 +202,8 @@ void StartDefaultTask(void *argument)
   xResult = xTaskCreate(Task_CLI, "cli", 2048, NULL, 10, NULL);
   configASSERT(xResult == pdTRUE);
 
+  SENSORS_I2C_MutexHandle = xSemaphoreCreateMutex();
+
   xMountStatus = fs_init();
 
   if (xMountStatus == LFS_ERR_OK)
@@ -206,7 +214,7 @@ void StartDefaultTask(void *argument)
      */
     FLASH_WaitForLastOperation(1000);
 
-    LogInfo( "File System mounted." );
+    LogInfo("File System mounted.");
 
     otaPal_EarlyInit();
 
@@ -234,29 +242,35 @@ void StartDefaultTask(void *argument)
 #endif
 
 #if DEMO_QUALIFICATION_TEST
-        xResult = xTaskCreate( run_qualification_main, "QualTest", 4096, NULL, 10, NULL );
-        configASSERT( xResult == pdTRUE );
+  xResult = xTaskCreate( run_qualification_main, "QualTest", 4096, NULL, 10, NULL );
+  configASSERT( xResult == pdTRUE );
     #else
   xResult = xTaskCreate(vMQTTAgentTask, "MQTTAgent", 2048, NULL, 10, NULL);
   configASSERT(xResult == pdTRUE);
 
+#if 0
   xResult = xTaskCreate(vSubscribePublishTestTask, "PubSub", 6144, NULL, 10, NULL);
   configASSERT(xResult == pdTRUE);
-
-        xResult = xTaskCreate( vOTAUpdateTask, "OTAUpdate", 4096, NULL, tskIDLE_PRIORITY + 1, NULL );
-        configASSERT( xResult == pdTRUE );
-#if 0
-        xResult = xTaskCreate( vEnvironmentSensorPublishTask, "EnvSense", 1024, NULL, 6, NULL );
-        configASSERT( xResult == pdTRUE );
-
-        xResult = xTaskCreate( vMotionSensorsPublish, "MotionS", 2048, NULL, 5, NULL );
-        configASSERT( xResult == pdTRUE );
 #endif
-        xResult = xTaskCreate( vShadowDeviceTask, "ShadowDevice", 1024, NULL, 5, NULL );
-        configASSERT( xResult == pdTRUE );
 
-        xResult = xTaskCreate( vDefenderAgentTask, "AWSDefender", 2048, NULL, 5, NULL );
-        configASSERT( xResult == pdTRUE );
+  xResult = xTaskCreate(vOTAUpdateTask, "OTAUpdate", 4096, NULL, tskIDLE_PRIORITY + 1, NULL);
+  configASSERT(xResult == pdTRUE);
+
+#if 1
+  xResult = xTaskCreate(vEnvironmentSensorPublishTask, "EnvSense", 1024, NULL, 6, NULL);
+  configASSERT(xResult == pdTRUE);
+#endif
+
+#if 1
+  xResult = xTaskCreate(vMotionSensorsPublish, "MotionS", 2048, NULL, 5, NULL);
+  configASSERT(xResult == pdTRUE);
+#endif
+
+  xResult = xTaskCreate(vShadowDeviceTask, "ShadowDevice", 1024, NULL, 5, NULL);
+  configASSERT(xResult == pdTRUE);
+
+  xResult = xTaskCreate(vDefenderAgentTask, "AWSDefender", 2048, NULL, 5, NULL);
+  configASSERT(xResult == pdTRUE);
 
 #endif /* DEMO_QUALIFICATION_TEST */
 
@@ -307,9 +321,11 @@ static int fs_init(void)
   { 0 };
 
   /* Block time of up to 1 s for filesystem to initialize */
-//  const struct lfs_config *pxCfg = pxInitializeOSPIFlashFs(pdMS_TO_TICKS(30 * 1000));
-
+#if 0
+  const struct lfs_config *pxCfg = pxInitializeOSPIFlashFs(pdMS_TO_TICKS(30 * 1000));
+#else
   const struct lfs_config *pxCfg = pxInitializeInternalFlashFs(pdMS_TO_TICKS(30 * 1000));
+#endif
 
   /* mount the filesystem */
   int err = lfs_mount(&xLfsCtx, pxCfg);
