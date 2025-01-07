@@ -697,6 +697,20 @@ void sys_arch_unprotect( sys_prot_t xValue )
     }
 }
 
+/*
+ * Prints an assertion messages and aborts execution.
+ */
+void sys_assert( const char *pcMessage )
+{
+    (void) pcMessage;
+    LogAssert( "LWIP Assertion failed: %s", pcMessage );
+    portDISABLE_INTERRUPTS();
+
+    for (;;)
+    {
+    }
+}
+
 extern RNG_HandleTypeDef hrng;
 extern HAL_StatusTypeDef HAL_RNG_GenerateRandomNumber(RNG_HandleTypeDef *hrng, uint32_t *random32bit);
 

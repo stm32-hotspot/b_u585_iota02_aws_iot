@@ -21,11 +21,11 @@ echo "Home : " $HOME
 
 # Copy the contents from mbedTLS_source to mbedTLS_destination
 cp -r "$mbedTLS_source" "$mbedTLS_destination"
-echo "Contents copied from $mbedTLS_source to $mbedTLS_destination"
+echo "Content copied from $mbedTLS_source to $mbedTLS_destination"
 
 # Copy the contents from LwIP_source to LwIP_destination
 cp -r "$LwIP_source" "$LwIP_destination"
-echo "Contents copied from $LwIP_source to $LwIP_destination"
+echo "Content copied from $LwIP_source to $LwIP_destination"
 
 # Force copy the FreeRTOSConfig.h file to the destination
 # cp -f "$FreeRTOSConfig_source" "$FreeRTOSConfig_destination"
@@ -35,7 +35,8 @@ echo "Contents copied from $LwIP_source to $LwIP_destination"
 # rm -f "Middlewares/Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls_mbedtls.c"
 # rm -f "Middlewares/Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls_mbedtls_mem.c"
 # rm -f "Middlewares/Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls_mbedtls_mem.h"
-# rm -f "Middlewares/Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls_mbedtls_structs.h"
 
-
+FILE_PATH="./Middlewares/Third_Party/lwIP_Network_lwIP/ports/freertos/sys_arch.c"
+echo "Deleting $FILE_PATH"
+rm -f $FILE_PATH
 

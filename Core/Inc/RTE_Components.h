@@ -33,11 +33,11 @@
 #define SAFEA1
 #define STSAFEA110
 /* lwIP.lwIP.2.2.0 */
-<!-- the following content goes into file 'RTE_Components.h' -->
+//<!-- the following content goes into file 'RTE_Components.h' -->
 #define RTE_Network_Core /* Network Core */
 #define RTE_Network_IPv4 /* Network IPv4 Stack */
 #define RTE_Network_RTOS /* Network RTOS */
-#define RTE_Network_CMSIS_RTOS2 /* Network CMSIS-RTOS2 */
+#define RTE_Network_FreeRTOS /* Network FreeRTOS */
 #define RTE_Network_Interface_Ethernet /* Network Interface Ethernet */
 #define RTE_Network_Driver_Ethernet /* Network Driver Ethernet */
 #define RTE_Network_API /* Network API */

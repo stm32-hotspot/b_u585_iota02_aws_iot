@@ -29,54 +29,33 @@
  * Author: Adam Dunkels <adam@sics.se>
  *
  */
-#ifndef LWIP_ARCH_CC_H
-#define LWIP_ARCH_CC_H
+#ifndef __ARCH_SYS_ARCH_H__
+#define __ARCH_SYS_ARCH_H__
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "semphr.h"
 
-#if defined (__CC_ARM ) || \
-   (defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
-#include <errno.h>
-#undef  EDOM
-#undef  ERANGE
-#undef  EILSEQ
-#undef  ESIGNUM
-#undef  EINVAL
-#undef  ENOMEM
-#define LWIP_PROVIDE_ERRNO
-#else
-#define LWIP_PROVIDE_ERRNO
-#endif
+#define SYS_MBOX_NULL					( ( QueueHandle_t ) NULL )
+#define SYS_SEM_NULL					( ( SemaphoreHandle_t ) NULL )
+#define SYS_DEFAULT_THREAD_STACK_DEPTH	configMINIMAL_STACK_SIZE
 
-/* Define platform endianness (might already be defined) */
-#ifndef BYTE_ORDER
-#define BYTE_ORDER LITTLE_ENDIAN
-#endif /* BYTE_ORDER */
+typedef SemaphoreHandle_t sys_sem_t;
+typedef SemaphoreHandle_t sys_mutex_t;
+typedef TaskHandle_t sys_thread_t;
 
-/* Define (sn)printf formatters for these lwIP types */
-#define X8_F  "02x"
-#define U16_F "hu"
-#define S16_F "hd"
-#define X16_F "hx"
-#define U32_F "lu"
-#define S32_F "ld"
-#define X32_F "lx"
-#define SZT_F "lu"
+struct sys_mbox {
+    QueueHandle_t xMbox;
+    TaskHandle_t xTask;
+};
+typedef struct sys_mbox sys_mbox_t;
 
-/* Compiler hints for packing structures */
-#if defined(__ICCARM__)
-#define PACK_STRUCT_STRUCT __packed
-#else
-#define PACK_STRUCT_STRUCT __attribute__((packed))
-#endif
+#define sys_mbox_valid( x ) ( ( ( ( x ) == NULL ) || ( ( x )->xMbox == NULL ) ) ? pdFALSE : pdTRUE )
+#define sys_mbox_set_invalid( x ) do { if ( ( x ) != NULL ) { ( x )->xMbox = NULL; ( x )->xTask = NULL; } } while ( 0 )
+#define sys_sem_valid( x ) ( ( ( *x ) == NULL) ? pdFALSE : pdTRUE )
+#define sys_sem_set_invalid( x ) ( ( *x ) = NULL )
 
-/* Platform specific diagnostic output */
-#define LWIP_PLATFORM_DIAG(x) do {printf x;} while(0)
 
-#define LWIP_PLATFORM_ASSERT(x) do {printf("Assertion \"%s\" failed at line %d in %s\n", \
-                                     x, __LINE__, __FILE__); fflush(NULL); abort();} while(0)
+#endif /* __ARCH_SYS_ARCH_H__ */
 
-#define LWIP_RAND() ((u32_t)rand())
-
-#endif /* LWIP_ARCH_CC_H */
