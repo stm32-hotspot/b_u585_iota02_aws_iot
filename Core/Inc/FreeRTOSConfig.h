@@ -57,10 +57,8 @@ extern unsigned long getRunTimeCounterValue(void);
 /* USER CODE END 0 */
 #endif
 #ifndef CMSIS_device_header
-#define CMSIS_device_header "main.h"
+#define CMSIS_device_header "stm32u5xx.h"
 #endif /* CMSIS_device_header */
-
-#include CMSIS_device_header
 
 /*-------------------- STM32U5 specific defines -------------------*/
 #define configENABLE_TRUSTZONE                   0

@@ -39,15 +39,12 @@
     #include "main.h"
     #include <string.h>
 
-    extern RNG_HandleTypeDef * pxHndlRng;
+    extern RNG_HandleTypeDef hrng;
+#define pxHndlRng (&hrng)
+
     static SemaphoreHandle_t xRngMutex = NULL;
 
     static volatile TaskHandle_t xRngTaskToNotify = NULL;
-
-    static void vRngIrqHandler( void )
-    {
-        HAL_RNG_IRQHandler( pxHndlRng );
-    }
 
     static void vRngInit( void )
     {
@@ -57,9 +54,6 @@
             ( xRngMutex == NULL ) )
         {
             xRngMutex = xSemaphoreCreateMutex();
-            NVIC_SetVector( RNG_IRQn, ( uint32_t ) &vRngIrqHandler );
-            NVIC_SetPriority( RNG_IRQn, configLIBRARY_LOWEST_INTERRUPT_PRIORITY );
-            NVIC_EnableIRQ( RNG_IRQn );
         }
 
         taskEXIT_CRITICAL();
