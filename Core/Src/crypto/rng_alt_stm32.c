@@ -36,7 +36,7 @@
 /*
  * include the correct headerfile depending on the STM32 family */
 
-    #include "stm32u5xx_hal.h"
+    #include "main.h"
     #include <string.h>
 
     extern RNG_HandleTypeDef * pxHndlRng;

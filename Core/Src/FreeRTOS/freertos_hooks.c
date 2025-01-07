@@ -92,6 +92,9 @@ void vDoSystemReset(void)
 }
 
 #if  configGENERATE_RUN_TIME_STATS
+extern TIM_HandleTypeDef RunTimeStats_Timer;
+#define pRunTimeStats_Timer (&RunTimeStats_Timer)
+
 void configureTimerForRunTimeStats(void)
 {
   HAL_TIM_Base_Stop(pRunTimeStats_Timer);
@@ -130,3 +133,10 @@ configRUN_TIME_COUNTER_TYPE getIRQTimeCounterValue(void)
 }
 #endif
 
+void vPetWatchdog(void)
+{
+#if defined(HAL_IWDG_MODULE_ENABLED)
+  extern IWDG_HandleTypeDef hiwdg;
+  HAL_IWDG_Refresh( &hiwdg );
+#endif
+}

@@ -36,8 +36,6 @@
 #include "cli.h"
 #include "cli_prv.h"
 
-#include "core_cm33.h"
-
 static void prvPSCommand( ConsoleIO_t * const pxConsoleIO,
                           uint32_t ulArgc,
                           char * ppcArgv[] );

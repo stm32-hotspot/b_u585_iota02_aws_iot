@@ -327,18 +327,19 @@ void vMotionSensorsPublish( void * pvParameters )
 
     while( xExitFlag == pdFALSE )
     {
-        /* Interpret sensor data */
+#if USE_SENSORS
+      /* Interpret sensor data */
         int32_t lBspError = BSP_ERROR_NONE;
 
-#if USE_SENSORS
+
         xSemaphoreTake(SENSORS_I2C_MutexHandle, portMAX_DELAY);
         ISM330DHCX_ACC_GetAxes (&ISM330DHCX_Obj, &xAcceleroAxes);
         ISM330DHCX_GYRO_GetAxes(&ISM330DHCX_Obj, &xGyroAxes    );
         IIS2MDC_MAG_GetAxes    (&IIS2MDC_Obj   , &xMagnetoAxes );
         xSemaphoreGive(SENSORS_I2C_MutexHandle);
-#endif
 
         if( lBspError == BSP_ERROR_NONE )
+ #endif
         {
             int lbytesWritten = snprintf( pcPayloadBuf,
                                           MQTT_PUBLISH_MAX_LEN,

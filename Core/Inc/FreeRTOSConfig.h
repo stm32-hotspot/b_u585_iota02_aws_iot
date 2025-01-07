@@ -57,8 +57,10 @@ extern unsigned long getRunTimeCounterValue(void);
 /* USER CODE END 0 */
 #endif
 #ifndef CMSIS_device_header
-#define CMSIS_device_header "stm32u5xx.h"
+#define CMSIS_device_header "main.h"
 #endif /* CMSIS_device_header */
+
+#include CMSIS_device_header
 
 /*-------------------- STM32U5 specific defines -------------------*/
 #define configENABLE_TRUSTZONE                   0
@@ -180,7 +182,7 @@ header file. */
             LogAssert( "Assertion failed." ); \
             vDyingGasp();                     \
             while( 1 ) {                      \
-                __NOP();                      \
+                ;                             \
             }                                 \
         }                                     \
     } while( 0 )
@@ -192,6 +194,8 @@ header file. */
             LogAssert( "Non-fatal assertion failed." ); \
         }                                               \
     } while( 0 )
+
+void vPetWatchdog(void);
 /* USER CODE END 1 */
 
 #define SysTick_Handler xPortSysTickHandler
@@ -204,8 +208,6 @@ header file. */
 
 /* USER CODE BEGIN Defines */
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */
-#include "hw_defs.h"
-
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 #define configTASK_NOTIFICATION_ARRAY_ENTRIES   8
 /* USER CODE END Defines */

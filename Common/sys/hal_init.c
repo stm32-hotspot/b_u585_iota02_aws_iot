@@ -33,6 +33,9 @@
 #include <string.h>
 
 /* Global peripheral handles */
+#if defined (HAL_ICACHE_MODULE_ENABLED)
+extern DCACHE_HandleTypeDef hdcache1;
+#endif
 
 /* local function prototypes */
 

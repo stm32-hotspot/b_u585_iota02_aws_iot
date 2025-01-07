@@ -65,6 +65,9 @@ static TaskHandle_t xNetTaskHandle = NULL;
 static MxDataplaneCtx_t xDataPlaneCtx;
 static ControlPlaneCtx_t xControlPlaneCtx;
 
+extern SPI_HandleTypeDef MXCHIP_SPI;
+#define pxHndlSpi2 (&MXCHIP_SPI)
+
 #if LOG_LEVEL == LOG_DEBUG
 
 /*

@@ -22,7 +22,7 @@
  ******************************************************************************
  */
 /* USER CODE END Header */
-#if defined(NO_STSAFE)
+#if !defined(USE_STSAFE)
 #include MBEDTLS_CONFIG_FILE
 
 #ifdef MBEDTLS_ENTROPY_HARDWARE_ALT
