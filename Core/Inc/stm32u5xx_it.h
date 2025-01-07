@@ -60,6 +60,7 @@ void TIM6_IRQHandler(void);
 void SPI2_IRQHandler(void);
 void USART1_IRQHandler(void);
 void RNG_IRQHandler(void);
+void OCTOSPI2_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

@@ -170,7 +170,7 @@ See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 /* Normal assert() semantics without relying on the provision of an assert.h
 header file. */
 /* USER CODE BEGIN 1 */
-/* USER CODE BEGIN 1 */
+#include "main.h"
 #include "logging.h"
 
 #define configASSERT( x )                     \

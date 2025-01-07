@@ -89,6 +89,7 @@ __attribute__( ( optimize( "O0" ) ) ) void prvGetRegistersFromStack( uint32_t * 
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern OSPI_HandleTypeDef hospi2;
 extern RNG_HandleTypeDef hrng;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel5;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel4;
@@ -322,6 +323,20 @@ void RNG_IRQHandler(void)
   /* USER CODE BEGIN RNG_IRQn 1 */
 
   /* USER CODE END RNG_IRQn 1 */
+}
+
+/**
+  * @brief This function handles OCTOSPI2 global interrupt.
+  */
+void OCTOSPI2_IRQHandler(void)
+{
+  /* USER CODE BEGIN OCTOSPI2_IRQn 0 */
+
+  /* USER CODE END OCTOSPI2_IRQn 0 */
+  HAL_OSPI_IRQHandler(&hospi2);
+  /* USER CODE BEGIN OCTOSPI2_IRQn 1 */
+
+  /* USER CODE END OCTOSPI2_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

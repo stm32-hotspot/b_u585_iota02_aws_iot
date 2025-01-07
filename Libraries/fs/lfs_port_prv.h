@@ -34,8 +34,8 @@ struct LfsPortCtx
 {
     SemaphoreHandle_t xMutex;
     TickType_t xBlockTime;
-#if defined(HAL_OPAMP_MODULE_ENABLED)
-    OSPI_HandleTypeDef xOSPIHandle;
+#if defined(HAL_OSPI_MODULE_ENABLED)
+    OSPI_HandleTypeDef * xpOSPIHandle;
 #endif
 };
 

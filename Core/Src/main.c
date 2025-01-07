@@ -444,8 +444,8 @@ void MX_OCTOSPI2_Init(void)
   {
     Error_Handler();
   }
-  HAL_OSPI_DLYB_Cfg_Struct.Units = 0;
-  HAL_OSPI_DLYB_Cfg_Struct.PhaseSel = 0;
+  HAL_OSPI_DLYB_Cfg_Struct.Units = 56;
+  HAL_OSPI_DLYB_Cfg_Struct.PhaseSel = 2;
   if (HAL_OSPI_DLYB_SetConfig(&hospi2, &HAL_OSPI_DLYB_Cfg_Struct) != HAL_OK)
   {
     Error_Handler();

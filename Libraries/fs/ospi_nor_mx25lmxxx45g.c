@@ -35,7 +35,6 @@
 #include "ospi_nor_mx25lmxxx45g.h"
 
 static TaskHandle_t xTaskHandle = NULL;
-static OSPI_HandleTypeDef * s_pxOSPI = NULL;
 
 static inline void ospi_HandleCallback( OSPI_HandleTypeDef * pxOSPI,
                                         HAL_OSPI_CallbackIDTypeDef xCallbackId )
@@ -111,228 +110,30 @@ static BaseType_t ospi_WaitForCallback( HAL_OSPI_CallbackIDTypeDef xCallbackID,
     return( ulNotifyValue == xCallbackID );
 }
 
-void OCTOSPI2_IRQHandler( void )
-{
-    configASSERT( s_pxOSPI != NULL );
-    HAL_OSPI_IRQHandler( s_pxOSPI );
-}
-
-static void ospi_IRQHandler( void )
-{
-    configASSERT( s_pxOSPI != NULL );
-    HAL_OSPI_IRQHandler( s_pxOSPI );
-}
-
 /* Initialize static variables for the current operation */
 static inline void ospi_OpInit( OSPI_HandleTypeDef * pxOSPI )
 {
-    s_pxOSPI = pxOSPI;
     xTaskHandle = xTaskGetCurrentTaskHandle();
-}
-
-static void ospi_MspInitCallback( OSPI_HandleTypeDef * pxOSPI )
-{
-    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
-    RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
-    HAL_StatusTypeDef xHalStatus = HAL_OK;
-
-    ( void ) pxOSPI;
-
-    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_OSPI;
-    PeriphClkInit.OspiClockSelection = RCC_OSPICLKSOURCE_SYSCLK;
-    xHalStatus = HAL_RCCEx_PeriphCLKConfig( &PeriphClkInit );
-
-    if( xHalStatus != HAL_OK )
-    {
-        LogError( "Error while configuring peripheral clock for OSPI2." );
-    }
-
-    /* Peripheral clock enable */
-    __HAL_RCC_OSPI2_CLK_ENABLE();
-
-    __HAL_RCC_GPIOI_CLK_ENABLE();
-    __HAL_RCC_GPIOH_CLK_ENABLE();
-    __HAL_RCC_GPIOF_CLK_ENABLE();
-
-    /**OCTOSPI2 GPIO Configuration
-     * PI5     ------> OCTOSPIM_P2_NCS
-     * PH12     ------> OCTOSPIM_P2_IO7
-     * PH10     ------> OCTOSPIM_P2_IO5
-     * PH11     ------> OCTOSPIM_P2_IO6
-     * PF0     ------> OCTOSPIM_P2_IO0
-     * PH9     ------> OCTOSPIM_P2_IO4
-     * PF1     ------> OCTOSPIM_P2_IO1
-     * PF2     ------> OCTOSPIM_P2_IO2
-     * PF3     ------> OCTOSPIM_P2_IO3
-     * PF4     ------> OCTOSPIM_P2_CLK
-     * PF12     ------> OCTOSPIM_P2_DQS
-     */
-    GPIO_InitStruct.Pin = GPIO_PIN_5;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF5_OCTOSPI2;
-    HAL_GPIO_Init( GPIOI, &GPIO_InitStruct );
-
-    GPIO_InitStruct.Pin = GPIO_PIN_12 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_9;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF5_OCTOSPI2;
-    HAL_GPIO_Init( GPIOH, &GPIO_InitStruct );
-
-    GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
-                          | GPIO_PIN_4 | GPIO_PIN_12;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF5_OCTOSPI2;
-    HAL_GPIO_Init( GPIOF, &GPIO_InitStruct );
-
-    /* Set the vector, requires sram located vector table */
-    NVIC_SetVector( OCTOSPI2_IRQn, ( uint32_t ) ospi_IRQHandler );
-
-    /* OCTOSPI2 interrupt Init */
-    HAL_NVIC_SetPriority( OCTOSPI2_IRQn, 5, 0 );
-    HAL_NVIC_EnableIRQ( OCTOSPI2_IRQn );
-}
-
-static void ospi_MspDeInitCallback( OSPI_HandleTypeDef * pxOSPI )
-{
-    ( void ) pxOSPI;
-
-    __HAL_RCC_OSPI2_CLK_DISABLE();
-
-    /**OCTOSPI2 GPIO Configuration
-     * PI5     ------> OCTOSPIM_P2_NCS
-     * PH12     ------> OCTOSPIM_P2_IO7
-     * PH10     ------> OCTOSPIM_P2_IO5
-     * PH11     ------> OCTOSPIM_P2_IO6
-     * PF0     ------> OCTOSPIM_P2_IO0
-     * PH9     ------> OCTOSPIM_P2_IO4
-     * PF1     ------> OCTOSPIM_P2_IO1
-     * PF2     ------> OCTOSPIM_P2_IO2
-     * PF3     ------> OCTOSPIM_P2_IO3
-     * PF4     ------> OCTOSPIM_P2_CLK
-     * PF12     ------> OCTOSPIM_P2_DQS
-     */
-    HAL_GPIO_DeInit( GPIOI, GPIO_PIN_5 );
-
-    HAL_GPIO_DeInit( GPIOH, GPIO_PIN_12 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_9 );
-
-    HAL_GPIO_DeInit( GPIOF, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
-                     | GPIO_PIN_4 | GPIO_PIN_12 );
-
-    /* OCTOSPI2 interrupt DeInit */
-    HAL_NVIC_DisableIRQ( OCTOSPI2_IRQn );
 }
 
 static BaseType_t ospi_InitDriver( OSPI_HandleTypeDef * pxOSPI )
 {
     HAL_StatusTypeDef xHalStatus = HAL_OK;
 
-    /* Initialize handle struct */
-    pxOSPI->Instance = OCTOSPI2;
-    pxOSPI->Init.FifoThreshold = 4;
-    pxOSPI->Init.DualQuad = HAL_OSPI_DUALQUAD_DISABLE;
-    pxOSPI->Init.MemoryType = HAL_OSPI_MEMTYPE_MACRONIX;
-    pxOSPI->Init.DeviceSize = 26;
-    pxOSPI->Init.ChipSelectHighTime = 2;
-    pxOSPI->Init.FreeRunningClock = HAL_OSPI_FREERUNCLK_ENABLE;
-    pxOSPI->Init.ClockMode = HAL_OSPI_CLOCK_MODE_0;
-    pxOSPI->Init.WrapSize = HAL_OSPI_WRAP_NOT_SUPPORTED;
-    pxOSPI->Init.ClockPrescaler = 4;
-    pxOSPI->Init.SampleShifting = HAL_OSPI_SAMPLE_SHIFTING_NONE;
-    pxOSPI->Init.DelayHoldQuarterCycle = HAL_OSPI_DHQC_ENABLE;
-    pxOSPI->Init.ChipSelectBoundary = 0;
-    pxOSPI->Init.DelayBlockBypass = HAL_OSPI_DELAY_BLOCK_USED;
-    pxOSPI->Init.MaxTran = 0;
-    pxOSPI->Init.Refresh = 0;
-
-    /* Register MSP (pinmux) callbacks */
-    xHalStatus = HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_MSP_INIT_CB_ID, ospi_MspInitCallback );
-    xHalStatus &= HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_MSP_DEINIT_CB_ID, ospi_MspDeInitCallback );
-
-    if( xHalStatus != HAL_OK )
-    {
-        LogError( "Error while setting OSPI MspInit and MspDeInit callbacks" );
-        return pdFALSE;
-    }
-
-    xHalStatus = HAL_OSPI_Init( pxOSPI );
-
-    if( xHalStatus != HAL_OK )
-    {
-        LogError( "Error while Initializing OSPI driver." );
-        return pdFALSE;
-    }
-
     /* Register additional callbacks */
-    xHalStatus = HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_RX_CPLT_CB_ID, ospi_RxCpltCallback );
-    xHalStatus &= HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_TX_CPLT_CB_ID, ospi_TxCpltCallback );
-    xHalStatus &= HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_CMD_CPLT_CB_ID, ospi_CmdCpltCallback );
+    xHalStatus  = HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_RX_CPLT_CB_ID     , ospi_RxCpltCallback          );
+    xHalStatus &= HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_TX_CPLT_CB_ID     , ospi_TxCpltCallback          );
+    xHalStatus &= HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_CMD_CPLT_CB_ID    , ospi_CmdCpltCallback         );
     xHalStatus &= HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_STATUS_MATCH_CB_ID, ospi_StatusMatchCpltCallback );
-    xHalStatus &= HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_TIMEOUT_CB_ID, ospi_TimeoutCallback );
-    xHalStatus &= HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_ERROR_CB_ID, ospi_ErrorCallback );
-    xHalStatus &= HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_ABORT_CB_ID, ospi_AbortCallback );
+    xHalStatus &= HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_TIMEOUT_CB_ID     , ospi_TimeoutCallback         );
+    xHalStatus &= HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_ERROR_CB_ID       , ospi_ErrorCallback           );
+    xHalStatus &= HAL_OSPI_RegisterCallback( pxOSPI, HAL_OSPI_ABORT_CB_ID       , ospi_AbortCallback           );
 
     if( xHalStatus != HAL_OK )
     {
         LogError( "Error while register OSPI driver callbacks." );
         return pdFALSE;
     }
-
-    OSPIM_CfgTypeDef xOspiMCfg = { 0 };
-
-    xOspiMCfg.ClkPort = 2;
-    xOspiMCfg.DQSPort = 2;
-    xOspiMCfg.NCSPort = 2;
-    xOspiMCfg.IOLowPort = HAL_OSPIM_IOPORT_2_LOW;
-    xOspiMCfg.IOHighPort = HAL_OSPIM_IOPORT_2_HIGH;
-
-    xHalStatus = HAL_OSPIM_Config( pxOSPI, &xOspiMCfg, HAL_OSPI_TIMEOUT_DEFAULT_VALUE );
-
-    if( xHalStatus != HAL_OK )
-    {
-        LogError( "Error while Initializing OSPIM driver." );
-        return pdFALSE;
-    }
-
-    HAL_OSPI_DLYB_CfgTypeDef xOspiDlybCfg = { 0 };
-
-    xOspiDlybCfg.Units = 56;
-    xOspiDlybCfg.PhaseSel = 2;
-    xHalStatus = HAL_OSPI_DLYB_SetConfig( pxOSPI, &xOspiDlybCfg );
-
-    if( xHalStatus != HAL_OK )
-    {
-        LogError( "Error while Initializing OSPI DLYB driver." );
-        return pdFALSE;
-    }
-
-    __HAL_OSPI_DISABLE( pxOSPI );
-    vTaskDelay( 100 );
-
-    SET_BIT( pxOSPI->Instance->DCR1, OCTOSPI_DCR1_FRCK );
-    vTaskDelay( 100 );
-
-    __HAL_OSPI_ENABLE( pxOSPI );
-    vTaskDelay( 100 );
-
-    DLYB_OCTOSPI2_NS->CR = 0U;
-    DLYB_OCTOSPI2_NS->CR = 0x03;
-    DLYB_OCTOSPI2_NS->CFGR = 0x7A02;
-    DLYB_OCTOSPI2_NS->CR = 0x01;
-    vTaskDelay( 100 );
-
-    __HAL_OSPI_DISABLE( pxOSPI );
-    vTaskDelay( 100 );
-
-    CLEAR_BIT( pxOSPI->Instance->DCR1, OCTOSPI_DCR1_FRCK );
-    vTaskDelay( 100 );
-
-    __HAL_OSPI_ENABLE( pxOSPI );
-    vTaskDelay( 100 );
 
     return pdTRUE;
 }
@@ -465,7 +266,6 @@ static BaseType_t ospi_OPI_WaitForStatus( OSPI_HandleTypeDef * pxOSPI,
     return xSuccess;
 }
 
-
 static BaseType_t ospi_SPI_WaitForStatus( OSPI_HandleTypeDef * pxOSPI,
                                           uint32_t ulMask,
                                           uint32_t ulMatch,
@@ -537,7 +337,6 @@ static BaseType_t ospi_SPI_WaitForStatus( OSPI_HandleTypeDef * pxOSPI,
     return xSuccess;
 }
 
-
 /* send Write enable command (WREN) in SPI mode */
 static BaseType_t ospi_cmd_SPI_WREN( OSPI_HandleTypeDef * pxOSPI,
                                      TickType_t xTimeout )
@@ -578,7 +377,6 @@ static BaseType_t ospi_cmd_SPI_WREN( OSPI_HandleTypeDef * pxOSPI,
 
     return( xHalStatus == HAL_OK );
 }
-
 
 /*
  * Switch flash from 1 bit SPI mode to 8 bit STR mode (single bit per clock)
@@ -629,8 +427,6 @@ static BaseType_t ospi_cmd_SPI_8BitSTRMode( OSPI_HandleTypeDef * pxOSPI,
 
     return( xHalStatus == HAL_OK );
 }
-
-
 
 /*
  * @Brief Initialize octospi flash controller and related peripherals

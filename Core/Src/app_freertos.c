@@ -244,7 +244,7 @@ void StartDefaultTask(void *argument)
 #if DEMO_QUALIFICATION_TEST
   xResult = xTaskCreate( run_qualification_main, "QualTest", 4096, NULL, 10, NULL );
   configASSERT( xResult == pdTRUE );
-    #else
+#else
   xResult = xTaskCreate(vMQTTAgentTask, "MQTTAgent", 2048, NULL, 10, NULL);
   configASSERT(xResult == pdTRUE);
 
@@ -314,15 +314,12 @@ lfs_t* pxGetDefaultFsCtx(void)
 
 static int fs_init(void)
 {
-  static lfs_t xLfsCtx =
-  { 0 };
-
-  struct lfs_info xDirInfo =
-  { 0 };
+  static lfs_t xLfsCtx = { 0 };
+  struct lfs_info xDirInfo = { 0 };
 
   /* Block time of up to 1 s for filesystem to initialize */
-#if 0
-  const struct lfs_config *pxCfg = pxInitializeOSPIFlashFs(pdMS_TO_TICKS(30 * 1000));
+#if defined(HAL_OSPI_MODULE_ENABLED)
+  const struct lfs_config *pxCfg = pxInitializeOSPIFlashFs    (pdMS_TO_TICKS(30 * 1000));
 #else
   const struct lfs_config *pxCfg = pxInitializeInternalFlashFs(pdMS_TO_TICKS(30 * 1000));
 #endif

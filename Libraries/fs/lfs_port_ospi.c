@@ -37,6 +37,8 @@
 #include "lfs_port_prv.h"
 #include "ospi_nor_mx25lmxxx45g.h"
 
+extern OSPI_HandleTypeDef MX25LM_OSPI;
+
 /*
  * LittleFS port for the external NOR flash connected to the STM32U5 octo-spi interface
  */
@@ -74,6 +76,8 @@ static int lfs_port_sync( const struct lfs_config * c );
 static void vPopulateConfig( struct lfs_config * pxCfg,
                              struct LfsPortCtx * pxCtx )
 {
+    pxCtx->xpOSPIHandle = &MX25LM_OSPI;
+
     /* Read size is one word */
     pxCfg->read_size = 1;
     pxCfg->prog_size = 256;
@@ -156,13 +160,13 @@ static void vPopulateConfig( struct lfs_config * pxCfg,
 
         pxCtx->xBlockTime = xBlockTime;
         pxCtx->xMutex = xSemaphoreCreateMutex();
+        pxCtx->xpOSPIHandle = &MX25LM_OSPI;
 
         configASSERT( pxCtx->xMutex != NULL );
 
-
         vPopulateConfig( pxCfg, pxCtx );
 
-        BaseType_t xSuccess = ospi_Init( &( pxCtx->xOSPIHandle ) );
+        BaseType_t xSuccess = ospi_Init( pxCtx->xpOSPIHandle );
 
         configASSERT( xSuccess == pdTRUE );
 
@@ -198,7 +202,7 @@ static int lfs_port_read( const struct lfs_config * c,
 
     uint32_t ulReadAddr = OPI_START_ADDRESS + ( block * c->block_size ) + off;
 
-    if( ospi_ReadAddr( &( pxCtx->xOSPIHandle ),
+    if( ospi_ReadAddr( pxCtx->xpOSPIHandle,
                        ulReadAddr,
                        pvBuffer,
                        size,
@@ -243,7 +247,7 @@ static int lfs_port_prog( const struct lfs_config * pxCfg,
     {
         LogDebug( "Writing block at addr: 0x%010lX, len: %lu", ulWriteAddr, MX25LM_PROGRAM_FIFO_LEN );
 
-        if( ospi_WriteAddr( &( pxCtx->xOSPIHandle ),
+        if( ospi_WriteAddr( pxCtx->xpOSPIHandle,
                             ulWriteAddr,
                             &( ( ( uint8_t * ) pvBuffer )[ ulWriteAddr - ulStartAddr ] ),
                             MX25LM_PROGRAM_FIFO_LEN,
@@ -271,7 +275,7 @@ static int lfs_port_erase( const struct lfs_config * pxCfg,
 
     LogDebug( "Starting erase operation addr: 0x%010lX ", ulEraseAddr );
 
-    if( ospi_EraseSector( &( pxCtx->xOSPIHandle ),
+    if( ospi_EraseSector( pxCtx->xpOSPIHandle,
                           ulEraseAddr,
                           pdMS_TO_TICKS( MX25LM_ERASE_TIMEOUT_MS ) ) != pdTRUE )
     {
