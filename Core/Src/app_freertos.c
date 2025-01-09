@@ -22,8 +22,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "hw_defs.h"
-#include "freertos_hooks.h"
 #include "logging.h"
 
 #include "sys_evt.h"
@@ -32,6 +30,8 @@
 #include "kvstore.h"
 #include "semphr.h"
 
+#include "hw_defs.h"
+
 #include <string.h>
 
 #include "lfs.h"
@@ -39,9 +39,6 @@
 
 #include "mx_netconn.h"
 
-#include "lwip/sockets.h"
-
-//#include "echo.h"
 #include "mqtt_agent_task.h"
 /* USER CODE END Includes */
 
@@ -52,9 +49,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ECHO_PORT 7
-//#define REMOTE_IP_ADDRESS "192.168.1.25"
-#define REMOTE_IP_ADDRESS "192.168.137.173"
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -69,13 +64,6 @@ SemaphoreHandle_t SENSORS_I2C_MutexHandle = NULL;
 static lfs_t *pxLfsCtx = NULL;
 
 /* USER CODE END Variables */
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 1024 * 4
-};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -83,6 +71,7 @@ void vInitTask(void *pvArgs);
 static void vHeartbeatTask(void *pvParameters);
 static int fs_init(void);
 lfs_t* pxGetDefaultFsCtx(void);
+
 
 extern void vSubscribePublishTestTask(void*);
 extern void vDefenderAgentTask(void *pvParameters);
@@ -145,6 +134,8 @@ __weak unsigned long getRunTimeCounterValue(void)
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
+  BaseType_t xResult;
+
   hw_init();
 
   /* Initialize uart for logging before cli is up and running */
@@ -154,66 +145,32 @@ void MX_FREERTOS_Init(void) {
 
   LogInfo("HW Init Complete.");
 
-  xSystemEvents = xEventGroupCreate();
+  xResult = xTaskCreate(&vInitTask, "InitTask", 1024, NULL, 23, NULL);
+  configASSERT(xResult == pdTRUE);
 
   /* USER CODE END Init */
-
-  /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
-
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
-
-  /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
-
-  /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
-
-  /* USER CODE BEGIN RTOS_EVENTS */
-  /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
-
 }
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
- * @brief Function implementing the defaultTask thread.
- * @param argument: Not used
- * @retval None
- */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+
+/* Private application code --------------------------------------------------*/
+/* USER CODE BEGIN Application */
+void vInitTask(void *pvArgs)
 {
-  /* USER CODE BEGIN defaultTask */
+  /* USER CODE BEGIN vInitTask */
   BaseType_t xResult;
   int xMountStatus;
 
-  (void) argument;
+  (void) pvArgs;
+
+  xSystemEvents = xEventGroupCreate();
+  SENSORS_I2C_MutexHandle = xSemaphoreCreateMutex();
+
   xResult = xTaskCreate(Task_CLI, "cli", 2048, NULL, 10, NULL);
   configASSERT(xResult == pdTRUE);
-
-  SENSORS_I2C_MutexHandle = xSemaphoreCreateMutex();
 
   xMountStatus = fs_init();
 
   if (xMountStatus == LFS_ERR_OK)
   {
-    /*
-     * FIXME: Need to debug  the cause of internal flash status register error here.
-     * Clearing the flash status register as a workaround.
-     */
-    FLASH_WaitForLastOperation(1000);
-
     LogInfo("File System mounted.");
 
     otaPal_EarlyInit();
@@ -229,11 +186,10 @@ void StartDefaultTask(void *argument)
 
   (void) xEventGroupSetBits(xSystemEvents, EVT_MASK_FS_READY);
 
-  xResult = xTaskCreate(vHeartbeatTask, "Heartbeat", 128, NULL,
-  tskIDLE_PRIORITY, NULL);
+  xResult = xTaskCreate(vHeartbeatTask, "Heartbeat", 128, NULL, tskIDLE_PRIORITY, NULL);
   configASSERT(xResult == pdTRUE);
 
-  xResult = xTaskCreate(&net_main, "MxNet", 1024, NULL, 23, NULL);
+  xResult = xTaskCreate(net_main, "MxNet", 1024, NULL, 23, NULL);
   configASSERT(xResult == pdTRUE);
 
 #if 0
@@ -245,16 +201,21 @@ void StartDefaultTask(void *argument)
   xResult = xTaskCreate( run_qualification_main, "QualTest", 4096, NULL, 10, NULL );
   configASSERT( xResult == pdTRUE );
 #else
+
+#if 1
   xResult = xTaskCreate(vMQTTAgentTask, "MQTTAgent", 2048, NULL, 10, NULL);
   configASSERT(xResult == pdTRUE);
+#endif
 
 #if 0
   xResult = xTaskCreate(vSubscribePublishTestTask, "PubSub", 6144, NULL, 10, NULL);
   configASSERT(xResult == pdTRUE);
 #endif
 
+#if 1
   xResult = xTaskCreate(vOTAUpdateTask, "OTAUpdate", 4096, NULL, tskIDLE_PRIORITY + 1, NULL);
   configASSERT(xResult == pdTRUE);
+#endif
 
 #if 1
   xResult = xTaskCreate(vEnvironmentSensorPublishTask, "EnvSense", 1024, NULL, 6, NULL);
@@ -266,11 +227,15 @@ void StartDefaultTask(void *argument)
   configASSERT(xResult == pdTRUE);
 #endif
 
+#if 1
   xResult = xTaskCreate(vShadowDeviceTask, "ShadowDevice", 1024, NULL, 5, NULL);
   configASSERT(xResult == pdTRUE);
+#endif
 
+#if 1
   xResult = xTaskCreate(vDefenderAgentTask, "AWSDefender", 2048, NULL, 5, NULL);
   configASSERT(xResult == pdTRUE);
+#endif
 
 #endif /* DEMO_QUALIFICATION_TEST */
 
@@ -278,13 +243,11 @@ void StartDefaultTask(void *argument)
   for (;;)
   {
     vTaskSuspend( NULL);
-    osDelay(1);
+    vTaskDelay(1);
   }
-  /* USER CODE END defaultTask */
+  /* USER CODE END vInitTask */
 }
 
-/* Private application code --------------------------------------------------*/
-/* USER CODE BEGIN Application */
 static void vHeartbeatTask(void *pvParameters)
 {
   (void) pvParameters;
@@ -318,7 +281,7 @@ static int fs_init(void)
   struct lfs_info xDirInfo = { 0 };
 
   /* Block time of up to 1 s for filesystem to initialize */
-#if defined(HAL_OSPI_MODULE_ENABLED)
+#if 0//defined(HAL_OSPI_MODULE_ENABLED)
   const struct lfs_config *pxCfg = pxInitializeOSPIFlashFs    (pdMS_TO_TICKS(30 * 1000));
 #else
   const struct lfs_config *pxCfg = pxInitializeInternalFlashFs(pdMS_TO_TICKS(30 * 1000));

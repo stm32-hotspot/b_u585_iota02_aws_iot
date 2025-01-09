@@ -54,14 +54,11 @@ extern "C" {
 /* USER CODE BEGIN EM */
 
 /* USER CODE END EM */
-extern osThreadId_t defaultTaskHandle;
 
 /* Exported function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
 /* USER CODE END FunctionPrototypes */
-
-void StartDefaultTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 

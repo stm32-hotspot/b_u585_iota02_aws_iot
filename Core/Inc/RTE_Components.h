@@ -24,7 +24,7 @@
 /* Defines ------------------------------------------------------------------*/
 /* ARM.mbedTLS.3.1.1 */
 #define RTE_Security_mbedTLS /* Security mbed TLS */
-/* STMicroelectronics.X-CUBE-MEMS1.11.0.0 */
+/* STMicroelectronics.X-CUBE-MEMS1.11.1.0 */
 #define ISM330DHCX_ACCGYR_I2C
 #define IIS2MDC_MAG_I2C
 #define LPS22HH_PRESSTEMP_I2C
@@ -33,7 +33,7 @@
 #define SAFEA1
 #define STSAFEA110
 /* lwIP.lwIP.2.2.0 */
-//<!-- the following content goes into file 'RTE_Components.h' -->
+<!-- the following content goes into file 'RTE_Components.h' -->
 #define RTE_Network_Core /* Network Core */
 #define RTE_Network_IPv4 /* Network IPv4 Stack */
 #define RTE_Network_RTOS /* Network RTOS */

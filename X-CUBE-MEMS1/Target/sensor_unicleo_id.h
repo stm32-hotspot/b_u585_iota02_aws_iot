@@ -68,6 +68,8 @@ extern "C" {
 #define LIS2DUXS12_UNICLEO_ID       38
 #define LSM6DSV32X_UNICLEO_ID       39
 #define ISM330BX_UNICLEO_ID         40
+#define ST1VAFE3BX_UNICLEO_ID       41
+#define ST1VAFE6AX_UNICLEO_ID       42
 
 /* MAG */
 #define LIS3MDL_UNICLEO_ID          1
@@ -90,7 +92,7 @@ extern "C" {
 #define ILPS28QSW_UNICLEO_ID        11
 #define LPS28DFW_UNICLEO_ID         12
 
-/* TEMP GAS */
+/* HUM TEMP GAS TMOS */
 #define HTS221_UNICLEO_ID           1
 #define STTS751_UNICLEO_ID          2
 #define STTS22H_UNICLEO_ID          3
