@@ -51,6 +51,7 @@
 #if defined(__ICCARM__) || defined(__ARMCC_VERSION) || defined(__GNUC__)
 #include <stdint.h>
 extern uint32_t SystemCoreClock;
+void xPortSysTickHandler(void);
 /* USER CODE BEGIN 0 */
 extern void configureTimerForRunTimeStats(void);
 extern unsigned long getRunTimeCounterValue(void);

@@ -39,7 +39,6 @@
 #define RTE_Network_RTOS /* Network RTOS */
 #define RTE_Network_FreeRTOS /* Network FreeRTOS */
 #define RTE_Network_Interface_Ethernet /* Network Interface Ethernet */
-#define RTE_Network_Driver_Ethernet /* Network Driver Ethernet */
 #define RTE_Network_API /* Network API */
 
 #endif /* __RTE_COMPONENTS_H__ */

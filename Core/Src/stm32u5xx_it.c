@@ -20,8 +20,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32u5xx_it.h"
+#include "FreeRTOS.h"
+#include "task.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "FreeRTOS.h"
+#include "task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,8 +99,6 @@ extern DMA_HandleTypeDef handle_GPDMA1_Channel5;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel4;
 extern SPI_HandleTypeDef hspi2;
 extern UART_HandleTypeDef huart1;
-extern TIM_HandleTypeDef htim6;
-
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -270,20 +272,6 @@ void GPDMA1_Channel5_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM6 global interrupt.
-  */
-void TIM6_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM6_IRQn 0 */
-
-  /* USER CODE END TIM6_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim6);
-  /* USER CODE BEGIN TIM6_IRQn 1 */
-
-  /* USER CODE END TIM6_IRQn 1 */
-}
-
-/**
   * @brief This function handles SPI2 global interrupt.
   */
 void SPI2_IRQHandler(void)
@@ -340,5 +328,23 @@ void OCTOSPI2_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+// Use SysTick as OS Tick and HAL Tick. No need to have 2 x 1ms interrupts.
+#if defined(SysTick_Handler)
+#undef SysTick_Handler
+#endif
 
+void SysTick_Handler (void)
+{
+#if (configUSE_TICKLESS_IDLE == 0)
+  /* Clear overflow flag */
+  SysTick->CTRL;
+#endif
+
+  if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
+    /* Call tick handler */
+    xPortSysTickHandler();
+  }
+
+  HAL_IncTick();
+}
 /* USER CODE END 1 */
