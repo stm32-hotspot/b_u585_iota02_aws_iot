@@ -30,6 +30,8 @@
 
 #include "lfs.h"
 
+#include "main.h"
+
 struct LfsPortCtx
 {
     SemaphoreHandle_t xMutex;

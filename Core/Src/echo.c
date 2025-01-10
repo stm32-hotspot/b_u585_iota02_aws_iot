@@ -16,34 +16,13 @@
 
 #define ECHO_PORT 7
 #define REMOTE_IP_ADDRESS "192.168.1.31"
-//#define REMOTE_IP_ADDRESS "192.168.1.25"
-//#define REMOTE_IP_ADDRESS "192.168.137.173"
 
 static void lwip_socket_send(const char *message, const char *dest_ip, uint16_t dest_port);
+static void vEchoReceiverTask(void *pvParameters);
+static void vEchoSenderTask(void *pvParameters);
 
 char buffer1[1024];
 char buffer2[1024];
-
-void vEchoReceiverTask(void *pvParameters)
-{
-  int sock = *(int*) pvParameters;
-
-  int bytes_read;
-
-  (void) pvParameters;
-
-  while ((bytes_read = lwip_recv(sock, buffer2, sizeof(buffer2), 0)) > 0)
-  {
-    LogInfo("Data received size %d\n", bytes_read);
-    buffer2[bytes_read] = '\0';
-    LogInfo("Data received %s\n", buffer2);
-
-    lwip_send(sock, buffer2, bytes_read, 0);
-  }
-
-  lwip_close(sock);
-  vTaskDelete(NULL);
-}
 
 static void lwip_socket_send(const char *message, const char *dest_ip, uint16_t dest_port)
 {
@@ -97,7 +76,28 @@ static void lwip_socket_send(const char *message, const char *dest_ip, uint16_t 
   lwip_close(sock);
 }
 
-void vEchoSenderTask(void *pvParameters)
+static void vEchoReceiverTask(void *pvParameters)
+{
+  int sock = *(int*) pvParameters;
+
+  int bytes_read;
+
+  (void) pvParameters;
+
+  while ((bytes_read = lwip_recv(sock, buffer2, sizeof(buffer2), 0)) > 0)
+  {
+    LogInfo("Data received size %d\n", bytes_read);
+    buffer2[bytes_read] = '\0';
+    LogInfo("Data received %s\n", buffer2);
+
+    lwip_send(sock, buffer2, bytes_read, 0);
+  }
+
+  lwip_close(sock);
+  vTaskDelete(NULL);
+}
+
+static void vEchoSenderTask(void *pvParameters)
 {
   uint16_t message_id = 0;
 

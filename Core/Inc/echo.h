@@ -8,8 +8,6 @@
 #ifndef ECHO_H_
 #define ECHO_H_
 
-void vEchoReceiverTask(void *pvParameters);
-void vEchoSendiverTask(void *pvParameters);
 void vEchoServerTask(void *pvParameters);
 
 
