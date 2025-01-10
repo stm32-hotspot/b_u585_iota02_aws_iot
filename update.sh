@@ -2,8 +2,8 @@
 
 # Define source and destination directories
 HOME=~
-
-mbedTLS_source="$HOME/STM32Cube/Repository/Packs/ARM/mbedTLS/3.1.1/library/"
+mbedTLS_VERSON="3.1.1"
+mbedTLS_source="$HOME/STM32Cube/Repository/Packs/ARM/mbedTLS/$mbedTLS_VERSON/library/"
 mbedTLS_destination="./Middlewares/Third_Party/ARM_Security/"
 
 # Create the destination directory if it doesn't exist
