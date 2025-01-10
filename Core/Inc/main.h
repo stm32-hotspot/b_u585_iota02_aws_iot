@@ -64,7 +64,6 @@ void MX_OCTOSPI2_Init(void);
 #define xConsoleHandle huart1
 #define MXCHIP_SPI hspi2
 #define USE_SENSORS 1
-#define MAX_AP 20
 #define MXCHIP_FLOW_EXTI_IRQn EXTI15_IRQn
 #define MX25LM_OSPI hospi2
 #define MXCHIP_FLOW_Pin GPIO_PIN_15

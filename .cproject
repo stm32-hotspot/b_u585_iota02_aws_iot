@@ -143,13 +143,13 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
+						<entry excluding="Src/mbedTLS/hardware_rng.c|Src/crypto/core_pkcs11_pal_internal.c|Src/crypto/rng_alt_stm32u5.c|Src/echo - Copy.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry excluding="BSP/Components/veml6030|BSP/Components/aps6408|BSP/Components/mx25lm51245g" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="Src/mbedTLS/hardware_rng.c|Src/crypto/core_pkcs11_pal_internal.c|Src/crypto/rng_alt_stm32u5.c|Src/echo - Copy.c|Src/sysmem.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
+						<entry excluding="Third_Party/lwIP_Network_lwIP/lwip/apps/lwiperf|Third_Party/lwIP_Network_lwIP/lwip/apps/apps|Third_Party/lwIP_Network_lwIP/lwip/apps/netbiosns|Third_Party/lwIP_Network_lwIP/lwip/apps/smtp|Third_Party/lwIP_Network_lwIP/lwip/apps/snmp|Third_Party/lwIP_Network_lwIP/lwip/apps/sntp|Third_Party/lwIP_Network_lwIP/lwip/apps/tftp|Third_Party/lwIP_Network_lwIP/lwip/apps/mqtt|Third_Party/lwIP_Network_lwIP/lwip/apps/mdns|Third_Party/lwIP_Network_lwIP/lwip/apps/http|Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls|Third_Party/lwIP_Network_lwIP/ports/cmsis-rtos|Third_Party/lwIP_Network_lwIP/ports/cmsis-driver/netif" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="STSAFE"/>
 						<entry excluding="app/qualification_app_main.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
-						<entry excluding="fs/lfs_port_ospi.c|tinycbor/src/open_memstream.c|tinycbor/tools|tinycbor/tests|tinycbor/examples|corePKCS11/source/portable/os|corePKCS11/test|littlefs/lfs_util.c|littlefs/runners|microcoap/main-posix.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libraries"/>
+						<entry excluding="fs/lfs_port_ospi.c|tinycbor/src/open_memstream.c|tinycbor/tools|tinycbor/tests|tinycbor/examples|corePKCS11/source/portable/os|microcoap/main-posix.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libraries"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="X-CUBE-MEMS1"/>
-						<entry excluding="Third_Party/lwIP_Network_lwIP/lwip/apps/apps|Third_Party/lwIP_Network_lwIP/lwip/apps/netbiosns|Third_Party/lwIP_Network_lwIP/lwip/apps/smtp|Third_Party/lwIP_Network_lwIP/lwip/apps/snmp|Third_Party/lwIP_Network_lwIP/lwip/apps/sntp|Third_Party/lwIP_Network_lwIP/lwip/apps/tftp|Third_Party/lwIP_Network_lwIP/lwip/apps/mqtt|Third_Party/lwIP_Network_lwIP/lwip/apps/mdns|Third_Party/lwIP_Network_lwIP/lwip/apps/http|Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls|Third_Party/lwIP_Network_lwIP/ports/cmsis-rtos|Third_Party/lwIP_Network_lwIP/ports/cmsis-driver/netif" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
