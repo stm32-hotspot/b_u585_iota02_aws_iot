@@ -32,7 +32,7 @@
 /* STMicroelectronics.X-CUBE-SAFEA1.1.2.2 */
 #define SAFEA1
 #define STSAFEA110
-/* lwIP.lwIP.2.2.0 */
+/* lwIP.lwIP.2.3.0 */
 <!-- the following content goes into file 'RTE_Components.h' -->
 #define RTE_Network_Core /* Network Core */
 #define RTE_Network_IPv4 /* Network IPv4 Stack */
