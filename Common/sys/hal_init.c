@@ -24,6 +24,8 @@
  * https://github.com/FreeRTOS
  *
  */
+#include "logging_levels.h"
+#define LOG_LEVEL    LOG_INFO
 
 #include "FreeRTOS.h"
 #include "main.h"

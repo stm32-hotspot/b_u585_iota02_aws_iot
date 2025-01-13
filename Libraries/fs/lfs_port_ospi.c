@@ -37,6 +37,9 @@
 #include "lfs_port_prv.h"
 #include "ospi_nor_mx25lmxxx45g.h"
 
+#include "main.h"
+
+#if (defined(HAL_OSPI_MODULE_ENABLED) && !defined(LFS_USE_INTERNAL_NOR))
 extern OSPI_HandleTypeDef MX25LM_OSPI;
 
 /*
@@ -291,3 +294,4 @@ static int lfs_port_sync( const struct lfs_config * c )
 {
     return 0;
 }
+#endif /* HAL_OSPI_MODULE_ENABLED */

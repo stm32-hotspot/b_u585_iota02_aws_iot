@@ -3270,5 +3270,5 @@ void mbedtls_platform_free( void * ptr );
 /*#define MBEDTLS_ECDH_VARIANT_EVEREST_ENABLED */
 
 /* \} name SECTION: Customization configuration options */
-
+//#include "mbedtls/config_adjust_legacy_crypto.h"
 #include "mbedtls/check_config.h"

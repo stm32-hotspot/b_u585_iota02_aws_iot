@@ -11,5 +11,4 @@ void GPIO_EXTI_Register_Callback( uint16_t usGpioPinMask, GPIOInterruptCallback_
 
 void vDoSystemReset( void );
 
-
 #endif /* __HW_DEFS */

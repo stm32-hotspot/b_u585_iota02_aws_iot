@@ -40,6 +40,10 @@
 #include "mx_netconn.h"
 
 #include "mqtt_agent_task.h"
+
+#if defined(__SAFEA1_CONF_H__)
+#include "stsafe.h"
+#endif
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -144,6 +148,21 @@ void MX_FREERTOS_Init(void) {
   vInitLoggingEarly();
 
   vLoggingInit();
+
+#if defined(__SAFEA1_CONF_H__)
+  StSafeA_ResponseCode_t stsafe_status;
+
+  stsafe_status = SAFEA1_Init();
+
+   if(stsafe_status == STSAFEA_OK)
+   {
+     LogInfo("STSAFE-A1xx initialized successfully");
+   }
+   else
+   {
+     LogError("STSAFE-A1xx NOT initialized");
+   }
+#endif
 
   LogInfo("HW Init Complete.");
   /* USER CODE END Init */
@@ -312,7 +331,7 @@ static int fs_init(void)
   struct lfs_info xDirInfo = { 0 };
 
   /* Block time of up to 1 s for filesystem to initialize */
-#if 0//defined(HAL_OSPI_MODULE_ENABLED)
+#if (defined(HAL_OSPI_MODULE_ENABLED) && !defined(LFS_USE_INTERNAL_NOR))
   const struct lfs_config *pxCfg = pxInitializeOSPIFlashFs    (pdMS_TO_TICKS(30 * 1000));
 #else
   const struct lfs_config *pxCfg = pxInitializeInternalFlashFs(pdMS_TO_TICKS(30 * 1000));

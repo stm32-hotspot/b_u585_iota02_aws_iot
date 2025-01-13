@@ -521,7 +521,7 @@ int32_t SAFEA1_I2C_Send(uint16_t DevAddr, uint8_t *pData, uint16_t Length)
 {
   int32_t ret;
 
-  ret = BSP_I2C1_Send(DevAddr, pData, Length);
+  ret = BSP_I2C2_Send(DevAddr, pData, Length);
   if (ret == BSP_ERROR_BUS_ACKNOWLEDGE_FAILURE)
   {
     return STSAFEA_BUS_NACK;
@@ -548,7 +548,7 @@ int32_t SAFEA1_I2C_Recv(uint16_t DevAddr, uint8_t *pData, uint16_t Length)
 {
   int32_t ret;
 
-  ret = BSP_I2C1_Recv(DevAddr, pData, Length);
+  ret = BSP_I2C2_Recv(DevAddr, pData, Length);
   if (ret == BSP_ERROR_BUS_ACKNOWLEDGE_FAILURE)
   {
     return STSAFEA_BUS_NACK;

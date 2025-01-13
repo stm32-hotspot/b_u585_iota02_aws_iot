@@ -24,8 +24,8 @@ This peoject is generated using [STM32CubeMX](https://www.st.com/stm32cubemx). M
 * Publish and Subscribe
 
 ## Key Software Components
-### LWIP TCP/IP Stack
-See [ lwIP ](https://github.com/lwip-tcpip/lwip) for details.
+### LWIP  2.3.0 TCP/IP Stack
+See [ lwIP ](https://www.keil.arm.com/packs/lwip-lwip/versions/) for details.
 
 ### Mbedtls 3.1.1 TLS and Cryptography library
 See [ MbedTLS ](https://www.keil.arm.com/packs/mbedtls-arm/versions/) for details.
@@ -63,7 +63,7 @@ git submodule update --init --recursive
 
 If you need to regenerate the project with STM32CubeMX, then you need to dowload and install the following CMSIS packs.
 
-[lwIP 2.2.0](https://www.keil.com/pack/lwIP.lwIP.2.2.0.pack)
+[lwIP 2.3.0](https://www.keil.com/pack/lwIP.lwIP.2.3.0.pack)
 
 [mbedTLS 3.1.1](https://www.keil.com/pack/ARM.mbedTLS.3.1.1.pack)
 

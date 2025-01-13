@@ -35,7 +35,7 @@
 #include "lfs_port_prv.h"
 
 #include "main.h"
-
+#if ((!defined(HAL_OSPI_MODULE_ENABLED) || defined(LFS_USE_INTERNAL_NOR)) && defined(__STM32U5xx_HAL_CORTEX_H))
 /* Uses all pages of Bank 2
  *
  */
@@ -331,4 +331,5 @@ static void vPopulateConfig( struct lfs_config * pxCfg,
 
         return 0;
     }
+#endif /* (!defined(HAL_OSPI_MODULE_ENABLED) && defined(__STM32U5xx_HAL_CORTEX_H)) */
 #endif /* if 0 */

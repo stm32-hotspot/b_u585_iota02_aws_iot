@@ -736,6 +736,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(MXCHIP_NSS_GPIO_Port, MXCHIP_NSS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(STSAFE_EN_GPIO_Port, STSAFE_EN_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(MXCHIP_RESET_GPIO_Port, MXCHIP_RESET_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : MXCHIP_FLOW_Pin */
@@ -784,12 +787,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(MXCHIP_NSS_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : MXCHIP_RESET_Pin */
-  GPIO_InitStruct.Pin = MXCHIP_RESET_Pin;
+  /*Configure GPIO pins : STSAFE_EN_Pin MXCHIP_RESET_Pin */
+  GPIO_InitStruct.Pin = STSAFE_EN_Pin|MXCHIP_RESET_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(MXCHIP_RESET_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI14_IRQn, 5, 0);

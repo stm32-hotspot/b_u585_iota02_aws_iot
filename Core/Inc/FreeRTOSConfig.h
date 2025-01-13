@@ -195,6 +195,7 @@ header file. */
     } while( 0 )
 
 void vPetWatchdog(void);
+void vDoSystemReset(void);
 /* USER CODE END 1 */
 
 #define SysTick_Handler xPortSysTickHandler
