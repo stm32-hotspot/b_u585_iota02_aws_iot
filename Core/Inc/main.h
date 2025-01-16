@@ -102,7 +102,7 @@ void MX_OCTOSPI2_Init(void);
 #define MXCHIP_RESET_GPIO_Port GPIOF
 
 /* USER CODE BEGIN Private defines */
-
+#define STSAFEA1_I2C_MutexHandle SENSORS_I2C_MutexHandle
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -33,9 +33,6 @@
 
     #define MBEDTLS_ENTROPY_TIMEOUT_MS    100
 
-/*
- * include the correct headerfile depending on the STM32 family */
-
     #include "main.h"
     #include <string.h>
 
