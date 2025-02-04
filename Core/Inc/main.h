@@ -103,6 +103,12 @@ void MX_OCTOSPI2_Init(void);
 
 /* USER CODE BEGIN Private defines */
 #define fleetProvisioning_STACKSIZE            configMINIMAL_STACK_SIZE
+#define DEMO_PUB_SUB       1
+#define DEMO_OTA           1
+#define DEMO_ENV_SENSOR    1
+#define DEMO_MOTION_SENSOR 1
+#define DEMO_SHADOW        1
+#define DEMO_DEFENDER      1
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

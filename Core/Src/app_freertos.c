@@ -246,62 +246,71 @@ void StartDefaultTask(void *argument)
   xResult = xTaskCreate(net_main, "MxNet", 1024, NULL, 23, NULL);
   configASSERT(xResult == pdTRUE);
 
-#if 0
-    xResult = xTaskCreate(vEchoServerTask, "EchoServer", 1024, NULL, 22, NULL);
-    configASSERT(xResult == pdTRUE);
-  #endif
-
 #if DEMO_QUALIFICATION_TEST
     xResult = xTaskCreate( run_qualification_main, "QualTest", 4096, NULL, 10, NULL );
     configASSERT( xResult == pdTRUE );
-  #else
+#else
 
-#if 1
-  xResult = xTaskCreate(vMQTTAgentTask, "MQTTAgent", 2048, NULL, 10, NULL);
-  configASSERT(xResult == pdTRUE);
-#endif
-// @SJ
-#if !defined(__SAFEA1_CONF_H__)
+#if !defined(__SAFEA1_CONF_H__) && defined(FLEET_PROVISION_DEMO)
   BaseType_t xSuccess = pdTRUE;
   uint32_t provisioned;
-  provisioned = KVStore_getUInt32( CS_PROVISIONEDs, &( xSuccess ) );
-  if(provisioned == 0)
+  size_t xLength;
+
+  KVStore_getStringHeap(CS_CORE_THING_NAME, &xLength);
+
+  if ((xLength == 0) || (xLength == -1))
   {
-#if 1
-    xResult = xTaskCreate(prvFleetProvisioningTask, "FleetProv", fleetProvisioning_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL);
-    configASSERT(xResult == pdTRUE);
-#endif
+    /* Update the KV Store */
+    KVStore_setUInt32(CS_PROVISIONEDs, 0);
+    KVStore_setString(CS_CORE_THING_NAME, "STM32");
+    KVStore_xCommitChanges();
+
+    provisioned = 0;
   }
   else
-#endif
   {
+    provisioned = KVStore_getUInt32( CS_PROVISIONEDs, &( xSuccess ) );
+  }
+#endif /* !defined(__SAFEA1_CONF_H__) && defined(FLEET_PROVISION_DEMO) */
 
-#if 1
+  xResult = xTaskCreate(vMQTTAgentTask, "MQTTAgent", 2048, NULL, 10, NULL);
+  configASSERT(xResult == pdTRUE);
+
+#if !defined(__SAFEA1_CONF_H__) && defined(FLEET_PROVISION_DEMO)
+  if(provisioned == 0)
+  {
+    xResult = xTaskCreate(prvFleetProvisioningTask, "FleetProv", fleetProvisioning_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL);
+    configASSERT(xResult == pdTRUE);
+  }
+  else
+#endif /* !defined(__SAFEA1_CONF_H__) && defined(FLEET_PROVISION_DEMO) */
+  {
+#if DEMO_PUB_SUB
     xResult = xTaskCreate(vSubscribePublishTestTask, "PubSub", 6144, NULL, 10, NULL);
     configASSERT(xResult == pdTRUE);
 #endif
 
-#if 0
+#if DEMO_OTA
   xResult = xTaskCreate(vOTAUpdateTask, "OTAUpdate", 4096, NULL, tskIDLE_PRIORITY + 1, NULL);
   configASSERT(xResult == pdTRUE);
 #endif
 
-#if 0
+#if DEMO_ENV_SENSOR
   xResult = xTaskCreate(vEnvironmentSensorPublishTask, "EnvSense", 1024, NULL, 6, NULL);
   configASSERT(xResult == pdTRUE);
 #endif
 
-#if 0
+#if DEMO_MOTION_SENSOR
   xResult = xTaskCreate(vMotionSensorsPublish, "MotionS", 2048, NULL, 5, NULL);
   configASSERT(xResult == pdTRUE);
 #endif
 
-#if 0
+#if DEMO_SHADOW
   xResult = xTaskCreate(vShadowDeviceTask, "ShadowDevice", 1024, NULL, 5, NULL);
   configASSERT(xResult == pdTRUE);
 #endif
 
-#if 0
+#if DEMO_DEFENDER
   xResult = xTaskCreate(vDefenderAgentTask, "AWSDefender", 2048, NULL, 5, NULL);
   configASSERT(xResult == pdTRUE);
 #endif
