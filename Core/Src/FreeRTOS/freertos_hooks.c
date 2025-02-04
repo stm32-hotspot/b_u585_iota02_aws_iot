@@ -140,3 +140,37 @@ void vPetWatchdog(void)
   HAL_IWDG_Refresh( &hiwdg );
 #endif
 }
+
+/**
+  * @brief This function provides minimum delay (in milliseconds) based
+  *        on variable incremented.
+  * @note In the default implementation , SysTick timer is the source of time base.
+  *       It is used to generate interrupts at regular time intervals where uwTick
+  *       is incremented.
+  * @note This function is declared as __weak to be overwritten in case of other
+  *       implementations in user file.
+  * @param Delay  specifies the delay time length, in milliseconds.
+  * @retval None
+  */
+void HAL_Delay(uint32_t Delay)
+{
+  if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED)
+  {
+    uint32_t tickstart = HAL_GetTick();
+    uint32_t wait = Delay;
+
+    /* Add a freq to guarantee minimum wait */
+    if (wait < HAL_MAX_DELAY)
+    {
+      wait += (uint32_t) (uwTickFreq);
+    }
+
+    while ((HAL_GetTick() - tickstart) < wait)
+    {
+    }
+  }
+  else
+  {
+    vTaskDelay(pdMS_TO_TICKS(Delay));
+  }
+}

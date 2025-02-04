@@ -27,9 +27,6 @@
 #define _KVSTORE_CONFIG_H
 
 #include "kvstore_config_plat.h"
-//#include "test_param_config.h"
-//#include "test_execution_config.h"
-//#include "ota_config.h"
 
 typedef enum KvStoreEnum
 {
@@ -39,6 +36,10 @@ typedef enum KvStoreEnum
     CS_WIFI_SSID,
     CS_WIFI_CREDENTIAL,
     CS_TIME_HWM_S_1970,
+#if defined(FLEET_PROVISION_DEMO)
+    CS_PROVISIONEDs,
+    CS_THING_GROUP_NAME,
+#endif
     CS_NUM_KEYS
 } KVStoreKey_t;
 
@@ -96,9 +97,28 @@ typedef enum KvStoreEnum
 #if !defined( WIFI_SECURITY_DFLT )
     #define WIFI_SECURITY_DFLT    ""
 #endif /* !defined ( WIFI_SECURITY_DFLT ) */
+
+#if defined(FLEET_PROVISION_DEMO)
+#if !defined( THING_GROUP_NAME_DFLT )
+    #define THING_GROUP_NAME_DFLT    ""
+#endif /* !defined ( THING_GROUP_NAME_DFLT ) */
+#endif
 /* -------------------------------- Values for common attributes -------------------------------- */
 
 /* Array to map between strings and KVStoreKey_t IDs */
+#if defined(FLEET_PROVISION_DEMO)
+#define KV_STORE_STRINGS   \
+    {                      \
+        "thing_name",      \
+        "mqtt_endpoint",   \
+        "mqtt_port",       \
+        "wifi_ssid",       \
+        "wifi_credential", \
+        "time_hwm",        \
+        "provision_state", \
+		    "thing_group_name" \
+    }
+#else
 #define KV_STORE_STRINGS   \
     {                      \
         "thing_name",      \
@@ -108,15 +128,30 @@ typedef enum KvStoreEnum
         "wifi_credential", \
         "time_hwm"         \
     }
+#endif
 
+#if defined(FLEET_PROVISION_DEMO)
 #define KV_STORE_DEFAULTS                                                          \
     {                                                                              \
-        KV_DFLT( KV_TYPE_STRING, THING_NAME_DFLT ),    /* CS_CORE_THING_NAME */    \
-        KV_DFLT( KV_TYPE_STRING, MQTT_ENDPOINT_DFLT ), /* CS_CORE_MQTT_ENDPOINT */ \
-        KV_DFLT( KV_TYPE_UINT32, MQTT_PORT_DFLT ),     /* CS_CORE_MQTT_PORT */     \
-        KV_DFLT( KV_TYPE_STRING, WIFI_SSID_DFLT ),     /* CS_WIFI_SSID */          \
-        KV_DFLT( KV_TYPE_STRING, WIFI_PASSWORD_DFLT ), /* CS_WIFI_CREDENTIAL */    \
-        KV_DFLT( KV_TYPE_UINT32, 0 ),                  /* CS_TIME_HWM_S_1970 */    \
+        KV_DFLT( KV_TYPE_STRING, THING_NAME_DFLT ),                /* CS_CORE_THING_NAME             */ \
+        KV_DFLT( KV_TYPE_STRING, MQTT_ENDPOINT_DFLT ),             /* CS_CORE_MQTT_ENDPOINT          */ \
+        KV_DFLT( KV_TYPE_UINT32, MQTT_PORT_DFLT ),                 /* CS_CORE_MQTT_PORT              */ \
+        KV_DFLT( KV_TYPE_STRING, WIFI_SSID_DFLT ),                 /* CS_WIFI_SSID                   */ \
+        KV_DFLT( KV_TYPE_STRING, WIFI_PASSWORD_DFLT ),             /* CS_WIFI_CREDENTIAL             */ \
+        KV_DFLT( KV_TYPE_UINT32, 0 ),                              /* CS_TIME_HWM_S_1970             */ \
+		    KV_DFLT( KV_TYPE_UINT32, 0 ),                              /* CS_PROVISIONED                 */ \
+		    KV_DFLT( KV_TYPE_STRING, THING_GROUP_NAME_DFLT ),          /* CS_THING_GROUP_NAME            */ \
     }
+#else
+#define KV_STORE_DEFAULTS
+{                                                                              \
+    KV_DFLT( KV_TYPE_STRING, THING_NAME_DFLT ),    /* CS_CORE_THING_NAME    */ \
+    KV_DFLT( KV_TYPE_STRING, MQTT_ENDPOINT_DFLT ), /* CS_CORE_MQTT_ENDPOINT */ \
+    KV_DFLT( KV_TYPE_UINT32, MQTT_PORT_DFLT ),     /* CS_CORE_MQTT_PORT     */ \
+    KV_DFLT( KV_TYPE_STRING, WIFI_SSID_DFLT ),     /* CS_WIFI_SSID          */ \
+    KV_DFLT( KV_TYPE_STRING, WIFI_PASSWORD_DFLT ), /* CS_WIFI_CREDENTIAL    */ \
+    KV_DFLT( KV_TYPE_UINT32, 0 ),                  /* CS_TIME_HWM_S_1970    */ \
+}
+#endif
 
 #endif /* _KVSTORE_CONFIG_H */

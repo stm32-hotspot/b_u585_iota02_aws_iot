@@ -37,8 +37,8 @@ extern "C" {
   * @{
   */
 
-#include "stm32u5xx_hal.h"
-#include "custom_bus.h"
+#include "main.h"
+#include "custom_bus_os.h"
 #include "custom_errno.h"
 #include "stsafea_crc.h"
 
@@ -58,8 +58,8 @@ extern "C" {
 
 /* Defines ---------------------------------------------------------------*/
 
-#define SAFEA1_I2C_Init                BSP_I2C2_Init
-#define SAFEA1_I2C_DeInit              BSP_I2C2_DeInit
+#define SAFEA1_I2C_Init                BSP_I2C2_Init_OS
+#define SAFEA1_I2C_DeInit              BSP_I2C2_DeInit_OS
 #define SAFEA1_Delay                   HAL_Delay
 
 /* Set to 1 to optimize RAM usage. If set to 1 the StSafeA_Handle_t.InOutBuffer used through the BSP APIs is shared

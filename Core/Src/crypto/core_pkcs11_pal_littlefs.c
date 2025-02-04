@@ -29,6 +29,20 @@
  */
 /*-----------------------------------------------------------*/
 
+/**************************************************/
+/******* DO NOT CHANGE the following order ********/
+/**************************************************/
+
+/* Include logging header files and define logging macros in the following order:
+ * 1. Include the header file "logging_levels.h".
+ * 2. Define the LIBRARY_LOG_NAME and LIBRARY_LOG_LEVEL macros depending on
+ * the logging configuration for PKCS #11.
+ * 3. Include the header file "logging_stack.h", if logging is enabled for PKCS #11.
+ */
+
+#include "logging_levels.h"
+#define LOG_LEVEL    LOG_INFO
+#include "logging.h"
 #include "FreeRTOS.h"
 #include "atomic.h"
 
@@ -44,6 +58,7 @@
 #include "lfs.h"
 #include "lfs_port.h"
 
+#if PKCS11_PAL_LITTLEFS
 /*-----------------------------------------------------------*/
 
 static lfs_t * pLfsCtx = NULL;
@@ -195,6 +210,8 @@ static CK_RV prvReadData( const char * pcFileName,
 
 CK_RV PKCS11_PAL_Initialize( void )
 {
+    LogInfo("* Certs from lfs *");
+
     pLfsCtx = pxGetDefaultFsCtx();
     return CKR_OK;
 }
@@ -270,7 +287,6 @@ CK_OBJECT_HANDLE PKCS11_PAL_SaveObject( CK_ATTRIBUTE_PTR pxLabel,
 
 /*-----------------------------------------------------------*/
 
-
 CK_OBJECT_HANDLE PKCS11_PAL_FindObject( CK_BYTE_PTR pxLabel,
                                         CK_ULONG usLength )
 {
@@ -306,7 +322,6 @@ CK_RV PKCS11_PAL_GetObjectValue( CK_OBJECT_HANDLE xHandle,
 {
     CK_RV xReturn = CKR_OK;
     const char * pcFileName = NULL;
-
 
     if( ( ppucData == NULL ) || ( pulDataSize == NULL ) || ( pIsPrivate == NULL ) )
     {
@@ -367,4 +382,5 @@ CK_RV PKCS11_PAL_DestroyObject( CK_OBJECT_HANDLE xHandle )
     return xResult;
 }
 
+#endif
 /*-----------------------------------------------------------*/

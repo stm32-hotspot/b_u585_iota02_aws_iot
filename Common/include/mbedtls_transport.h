@@ -215,6 +215,11 @@ int32_t mbedtls_transport_send( NetworkContext_t * pxNetworkContext,
                                        char * pcPubKeyLabel,
                                        size_t uxPubKeyLabelLen );
 
+    int32_t lWriteEcPrivKeyToPKCS11( const mbedtls_pk_context * pxPubKeyContext,
+                                               CK_SESSION_HANDLE xP11SessionHandle,
+                                               char * pcPubKeyLabel,
+                                               size_t uxPubKeyLabelLen );
+
     CK_RV xPKCS11_initMbedtlsPkContext( mbedtls_pk_context * pxMbedtlsPkCtx,
                                         CK_SESSION_HANDLE xSessionHandle,
                                         CK_OBJECT_HANDLE xPkHandle );

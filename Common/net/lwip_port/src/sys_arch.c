@@ -711,10 +711,8 @@ void sys_assert( const char *pcMessage )
     }
 }
 
-
 #if defined(__SAFEA1_CONF_H__)
 extern uint8_t SAFEA1_GenerateRandom(uint8_t size, uint8_t *random);
-extern SemaphoreHandle_t STSAFEA1_I2C_MutexHandle;
 
 UBaseType_t uxRand(void)
 {
@@ -722,9 +720,7 @@ UBaseType_t uxRand(void)
   uint32_t uRNGValue = 0;
   uint8_t status;
 
-  xSemaphoreTake(STSAFEA1_I2C_MutexHandle, portMAX_DELAY);
   status = SAFEA1_GenerateRandom(4, (uint8_t *)&uRNGValue);
-  xSemaphoreGive(STSAFEA1_I2C_MutexHandle);
 
   configASSERT(status);
 

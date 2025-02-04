@@ -321,7 +321,7 @@ int8_t StSafeA_HW_Probe(STSAFEA_HW_t  *pCtx)
   HwCtx->BusRecv    = SAFEA1_I2C_Recv;
   HwCtx->CrcInit    = CRC16X25_Init;
   HwCtx->CrcCompute = CRC_Compute;
-  HwCtx->TimeDelay  = HAL_Delay;
+  HwCtx->TimeDelay  = SAFEA1_Delay;
   HwCtx->DevAddr    = STSAFEA_DEVICE_ADDRESS;
 
   return STSAFEA_BUS_OK;
@@ -521,7 +521,7 @@ int32_t SAFEA1_I2C_Send(uint16_t DevAddr, uint8_t *pData, uint16_t Length)
 {
   int32_t ret;
 
-  ret = BSP_I2C2_Send(DevAddr, pData, Length);
+  ret = BSP_I2C2_Send_OS(DevAddr, pData, Length);
   if (ret == BSP_ERROR_BUS_ACKNOWLEDGE_FAILURE)
   {
     return STSAFEA_BUS_NACK;
@@ -548,7 +548,7 @@ int32_t SAFEA1_I2C_Recv(uint16_t DevAddr, uint8_t *pData, uint16_t Length)
 {
   int32_t ret;
 
-  ret = BSP_I2C2_Recv(DevAddr, pData, Length);
+  ret = BSP_I2C2_Recv_OS(DevAddr, pData, Length);
   if (ret == BSP_ERROR_BUS_ACKNOWLEDGE_FAILURE)
   {
     return STSAFEA_BUS_NACK;

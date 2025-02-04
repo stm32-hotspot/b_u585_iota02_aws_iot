@@ -181,11 +181,10 @@ header file. */
             LogAssert( "Assertion failed." ); \
             vDyingGasp();                     \
             while( 1 ) {                      \
-                ;                             \
+              __BKPT(0);                      \
             }                                 \
         }                                     \
     } while( 0 )
-
 
 #define configASSERT_CONTINUE( x )                      \
     do {                                                \
@@ -210,6 +209,7 @@ void vDoSystemReset(void);
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 #define configTASK_NOTIFICATION_ARRAY_ENTRIES   8
+
 /* USER CODE END Defines */
 
 #endif /* FREERTOS_CONFIG_H */

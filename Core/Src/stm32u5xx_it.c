@@ -327,6 +327,7 @@ void OCTOSPI2_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+#if (USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION == 1)
 // Use SysTick as OS Tick and HAL Tick. No need to have 2 x 1ms interrupts.
 #if defined(SysTick_Handler)
 #undef SysTick_Handler
@@ -334,7 +335,7 @@ void OCTOSPI2_IRQHandler(void)
 
 void SysTick_Handler (void)
 {
-#if (configUSE_TICKLESS_IDLE == 0)
+#if (configUSE_TICKLESS_IDLE != 0 )
   /* Clear overflow flag */
   SysTick->CTRL;
 #endif
@@ -346,4 +347,5 @@ void SysTick_Handler (void)
 
   HAL_IncTick();
 }
+#endif
 /* USER CODE END 1 */

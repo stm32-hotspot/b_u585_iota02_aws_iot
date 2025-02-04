@@ -29,7 +29,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32u5xx_hal.h"
 
-#include "safea1_conf.h"
+//#include "safea1_conf.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -102,7 +102,7 @@ void MX_OCTOSPI2_Init(void);
 #define MXCHIP_RESET_GPIO_Port GPIOF
 
 /* USER CODE BEGIN Private defines */
-#define STSAFEA1_I2C_MutexHandle SENSORS_I2C_MutexHandle
+#define fleetProvisioning_STACKSIZE            configMINIMAL_STACK_SIZE
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

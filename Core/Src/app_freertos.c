@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * File Name          : app_freertos.c
-  * Description        : FreeRTOS applicative file
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * File Name          : app_freertos.c
+ * Description        : FreeRTOS applicative file
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -22,6 +22,14 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "logging_levels.h"
+/* define LOG_LEVEL here if you want to modify the logging level from the default */
+#if defined(LOG_LEVEL)
+#undef LOG_LEVEL
+#endif
+
+#define LOG_LEVEL    LOG_INFO
+
 #include "logging.h"
 
 #include "sys_evt.h"
@@ -44,6 +52,7 @@
 #if defined(__SAFEA1_CONF_H__)
 #include "stsafe.h"
 #endif
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -64,16 +73,13 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 EventGroupHandle_t xSystemEvents = NULL;
-SemaphoreHandle_t SENSORS_I2C_MutexHandle = NULL;
+
 static lfs_t *pxLfsCtx = NULL;
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 1024 * 4
-};
+const osThreadAttr_t defaultTask_attributes =
+{ .name = "defaultTask", .priority = (osPriority_t) osPriorityNormal, .stack_size = 1024 * 4 };
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -82,15 +88,15 @@ static void vHeartbeatTask(void *pvParameters);
 static int fs_init(void);
 lfs_t* pxGetDefaultFsCtx(void);
 
-
 extern void vSubscribePublishTestTask(void*);
 extern void vDefenderAgentTask(void *pvParameters);
 extern void vShadowDeviceTask(void *pvParameters);
 extern void vOTAUpdateTask(void *pvParam);
-extern void otaPal_EarlyInit( void );
+extern void otaPal_EarlyInit(void);
 extern void vEnvironmentSensorPublishTask(void *pvParameters);
 extern void vMotionSensorsPublish(void *pvParameters);
 extern void vEchoServerTask(void *pvParameters);
+extern void prvFleetProvisioningTask(void *pvParameters);
 /* USER CODE END FunctionPrototypes */
 
 /* USER CODE BEGIN 5 */
@@ -136,11 +142,12 @@ __weak unsigned long getRunTimeCounterValue(void)
 /* USER CODE END 1 */
 
 /**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
-  */
-void MX_FREERTOS_Init(void) {
+ * @brief  FreeRTOS initialization
+ * @param  None
+ * @retval None
+ */
+void MX_FREERTOS_Init(void)
+{
   /* USER CODE BEGIN Init */
   hw_init();
 
@@ -148,21 +155,6 @@ void MX_FREERTOS_Init(void) {
   vInitLoggingEarly();
 
   vLoggingInit();
-
-#if defined(__SAFEA1_CONF_H__)
-  StSafeA_ResponseCode_t stsafe_status;
-
-  stsafe_status = SAFEA1_Init();
-
-   if(stsafe_status == STSAFEA_OK)
-   {
-     LogInfo("STSAFE-A1xx initialized successfully");
-   }
-   else
-   {
-     LogError("STSAFE-A1xx NOT initialized");
-   }
-#endif
 
   LogInfo("HW Init Complete.");
   /* USER CODE END Init */
@@ -196,103 +188,132 @@ void MX_FREERTOS_Init(void) {
 }
 /* USER CODE BEGIN Header_StartDefaultTask */
 /**
-* @brief Function implementing the defaultTask thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Function implementing the defaultTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN defaultTask */
   BaseType_t xResult;
-    int xMountStatus;
+  int xMountStatus;
 
-    (void) argument;
+  (void) argument;
 
-    xSystemEvents = xEventGroupCreate();
-    SENSORS_I2C_MutexHandle = xSemaphoreCreateMutex();
+#if defined(__SAFEA1_CONF_H__)
+  bool stsafe_status;
 
-    xResult = xTaskCreate(Task_CLI, "cli", 2048, NULL, 10, NULL);
-    configASSERT(xResult == pdTRUE);
+  stsafe_status = SAFEA1_Init();
 
-    xMountStatus = fs_init();
+  if (stsafe_status)
+  {
+    LogInfo("STSAFE-A1xx initialized successfully");
+  }
+  else
+  {
+    LogError("STSAFE-A1xx NOT initialized");
+  }
+#endif
 
-    if (xMountStatus == LFS_ERR_OK)
-    {
-      LogInfo("File System mounted.");
+  xSystemEvents = xEventGroupCreate();
 
-      otaPal_EarlyInit();
+  xResult = xTaskCreate(Task_CLI, "cli", 2048, NULL, 10, NULL);
+  configASSERT(xResult == pdTRUE);
 
-      (void) xEventGroupSetBits(xSystemEvents, EVT_MASK_FS_READY);
+  xMountStatus = fs_init();
 
-      KVStore_init();
-    }
-    else
-    {
-      LogError("Failed to mount filesystem.");
-    }
+  if (xMountStatus == LFS_ERR_OK)
+  {
+    LogInfo("File System mounted.");
+
+    otaPal_EarlyInit();
 
     (void) xEventGroupSetBits(xSystemEvents, EVT_MASK_FS_READY);
 
-    xResult = xTaskCreate(vHeartbeatTask, "Heartbeat", 128, NULL, tskIDLE_PRIORITY, NULL);
-    configASSERT(xResult == pdTRUE);
+    KVStore_init();
+  }
+  else
+  {
+    LogError("Failed to mount filesystem.");
+  }
 
-    xResult = xTaskCreate(net_main, "MxNet", 1024, NULL, 23, NULL);
-    configASSERT(xResult == pdTRUE);
+  (void) xEventGroupSetBits(xSystemEvents, EVT_MASK_FS_READY);
 
-  #if 0
+  xResult = xTaskCreate(vHeartbeatTask, "Heartbeat", 128, NULL, tskIDLE_PRIORITY, NULL);
+  configASSERT(xResult == pdTRUE);
+
+  xResult = xTaskCreate(net_main, "MxNet", 1024, NULL, 23, NULL);
+  configASSERT(xResult == pdTRUE);
+
+#if 0
     xResult = xTaskCreate(vEchoServerTask, "EchoServer", 1024, NULL, 22, NULL);
     configASSERT(xResult == pdTRUE);
   #endif
 
-  #if DEMO_QUALIFICATION_TEST
+#if DEMO_QUALIFICATION_TEST
     xResult = xTaskCreate( run_qualification_main, "QualTest", 4096, NULL, 10, NULL );
     configASSERT( xResult == pdTRUE );
   #else
 
-  #if 1
-    xResult = xTaskCreate(vMQTTAgentTask, "MQTTAgent", 2048, NULL, 10, NULL);
+#if 1
+  xResult = xTaskCreate(vMQTTAgentTask, "MQTTAgent", 2048, NULL, 10, NULL);
+  configASSERT(xResult == pdTRUE);
+#endif
+// @SJ
+#if !defined(__SAFEA1_CONF_H__)
+  BaseType_t xSuccess = pdTRUE;
+  uint32_t provisioned;
+  provisioned = KVStore_getUInt32( CS_PROVISIONEDs, &( xSuccess ) );
+  if(provisioned == 0)
+  {
+#if 1
+    xResult = xTaskCreate(prvFleetProvisioningTask, "FleetProv", fleetProvisioning_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL);
     configASSERT(xResult == pdTRUE);
-  #endif
+#endif
+  }
+  else
+#endif
+  {
 
-  #if 0
+#if 1
     xResult = xTaskCreate(vSubscribePublishTestTask, "PubSub", 6144, NULL, 10, NULL);
     configASSERT(xResult == pdTRUE);
-  #endif
+#endif
 
-  #if 1
-    xResult = xTaskCreate(vOTAUpdateTask, "OTAUpdate", 4096, NULL, tskIDLE_PRIORITY + 1, NULL);
-    configASSERT(xResult == pdTRUE);
-  #endif
+#if 0
+  xResult = xTaskCreate(vOTAUpdateTask, "OTAUpdate", 4096, NULL, tskIDLE_PRIORITY + 1, NULL);
+  configASSERT(xResult == pdTRUE);
+#endif
 
-  #if 1
-    xResult = xTaskCreate(vEnvironmentSensorPublishTask, "EnvSense", 1024, NULL, 6, NULL);
-    configASSERT(xResult == pdTRUE);
-  #endif
+#if 0
+  xResult = xTaskCreate(vEnvironmentSensorPublishTask, "EnvSense", 1024, NULL, 6, NULL);
+  configASSERT(xResult == pdTRUE);
+#endif
 
-  #if 1
-    xResult = xTaskCreate(vMotionSensorsPublish, "MotionS", 2048, NULL, 5, NULL);
-    configASSERT(xResult == pdTRUE);
-  #endif
+#if 0
+  xResult = xTaskCreate(vMotionSensorsPublish, "MotionS", 2048, NULL, 5, NULL);
+  configASSERT(xResult == pdTRUE);
+#endif
 
-  #if 1
-    xResult = xTaskCreate(vShadowDeviceTask, "ShadowDevice", 1024, NULL, 5, NULL);
-    configASSERT(xResult == pdTRUE);
-  #endif
+#if 0
+  xResult = xTaskCreate(vShadowDeviceTask, "ShadowDevice", 1024, NULL, 5, NULL);
+  configASSERT(xResult == pdTRUE);
+#endif
 
-  #if 1
-    xResult = xTaskCreate(vDefenderAgentTask, "AWSDefender", 2048, NULL, 5, NULL);
-    configASSERT(xResult == pdTRUE);
-  #endif
+#if 0
+  xResult = xTaskCreate(vDefenderAgentTask, "AWSDefender", 2048, NULL, 5, NULL);
+  configASSERT(xResult == pdTRUE);
+#endif
+  }
+#endif /* DEMO_QUALIFICATION_TEST */
 
-  #endif /* DEMO_QUALIFICATION_TEST */
-
-    /* Infinite loop */
-    for (;;)
-    {
-      vTaskSuspend( NULL);
-      vTaskDelay(1);
-    }
+  /* Infinite loop */
+  for (;;)
+  {
+    vTaskSuspend( NULL);
+    vTaskDelay(1);
+  }
   /* USER CODE END defaultTask */
 }
 

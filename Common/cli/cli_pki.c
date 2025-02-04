@@ -563,7 +563,6 @@ static void vSubCommand_GenerateKey( ConsoleIO_t * pxCIO,
     }
 }
 
-
 static BaseType_t xReadPemFromCliAsDer( ConsoleIO_t * pxCIO,
                                         unsigned char ** ppucDerBuffer,
                                         size_t * puxDerLen )
@@ -700,6 +699,154 @@ static BaseType_t xReadPemFromCliAsDer( ConsoleIO_t * pxCIO,
         *ppucDerBuffer = pucDerBuffer;
         *puxDerLen = uxDerDataLen;
     }
+    else
+    {
+        xErrorFlag = pdTRUE;
+    }
+
+    return !xErrorFlag;
+}
+
+static BaseType_t xReadPemFromCli( ConsoleIO_t * pxCIO, unsigned char ** ppucDerBuffer, size_t * puxDerLen )
+{
+    size_t uxDerDataLen = 0;
+    BaseType_t xBeginFound = pdFALSE;
+    BaseType_t xEndFound = pdFALSE;
+    BaseType_t xErrorFlag = pdFALSE;
+    unsigned char * pucPemBuffer = NULL;
+
+    configASSERT( pxCIO );
+    configASSERT( ppucDerBuffer );
+    configASSERT( puxDerLen );
+
+    pucPemBuffer = mbedtls_calloc( 1, PEM_CERT_MAX_LEN );
+
+    if( pucPemBuffer == NULL )
+    {
+        pxCIO->print( "Error: Out of memory to store the given PEM file.\r\n" );
+        xErrorFlag = pdTRUE;
+    }
+    else
+    {
+        while( uxDerDataLen < PEM_CERT_MAX_LEN && xEndFound == pdFALSE )
+        {
+            char * pcInputBuffer = NULL;
+            int32_t lDataRead = pxCIO->readline( &pcInputBuffer );
+
+            if( lDataRead > 0 )
+            {
+                size_t uxDataRead = ( size_t ) lDataRead;
+
+                memcpy(&pucPemBuffer[uxDerDataLen], pcInputBuffer,uxDataRead);
+                uxDerDataLen += uxDataRead;
+                pucPemBuffer[uxDerDataLen] = '\r';
+                uxDerDataLen++;
+                pucPemBuffer[uxDerDataLen] = '\n';
+                uxDerDataLen++;
+
+                if( lDataRead > 64 )
+                {
+                    pxCIO->print( "Error: Current line exceeds maximum line length for a PEM file.\r\n" );
+                    xErrorFlag = pdTRUE;
+                }
+                /* Check if this line will overflow the buffer given for the pem file */
+                else if( ( xErrorFlag == pdFALSE ) && ( uxDataRead > 0 ) && ( ( uxDerDataLen + uxDataRead + PEM_LINE_ENDING_LEN ) >= PEM_CERT_MAX_LEN ) )
+                {
+                    pxCIO->print( "Error: Out of memory to store the given PEM file.\r\n" );
+                    xErrorFlag = pdTRUE;
+                }
+                /* Validate a header header line */
+                else if( xBeginFound == pdFALSE )
+                {
+                    if( strncmp( PEM_BEGIN, pcInputBuffer, strlen( PEM_BEGIN ) ) == 0 )
+                    {
+                        char * pcLabelEnd = strnstr( &( pcInputBuffer[ strlen( PEM_BEGIN ) ] ), PEM_META_SUFFIX, uxDataRead - strlen( PEM_BEGIN ) );
+
+                        if( pcLabelEnd == NULL )
+                        {
+                            pxCIO->print( "Error: PEM header does not contain the expected ending: '" PEM_META_SUFFIX "'.\r\n" );
+                            xErrorFlag = pdTRUE;
+                        }
+                        else
+                        {
+                            xBeginFound = pdTRUE;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        pxCIO->print( "Error: PEM header does not contain the expected text: '" PEM_BEGIN "'.\r\n" );
+                        xErrorFlag = pdTRUE;
+                    }
+                }
+                else if( xEndFound == pdFALSE )
+                {
+                    if( strncmp( PEM_END, pcInputBuffer, strlen( PEM_END ) ) == 0 )
+                    {
+                        char * pcLabelEnd = strnstr( &( pcInputBuffer[ strlen( PEM_END ) ] ), PEM_META_SUFFIX, uxDataRead - strlen( PEM_END ) );
+
+                        if( pcLabelEnd == NULL )
+                        {
+                            pxCIO->print( "Error: PEM footer does not contain the expected ending: '" PEM_META_SUFFIX "'.\r\n" );
+                            xErrorFlag = pdTRUE;
+                        }
+                        else
+                        {
+                            xEndFound = pdTRUE;
+                        }
+                    }
+                }
+                else
+                {
+                    /* Empty */
+                }
+// @SJ The key is sent in PEM format.
+#if 0
+                // Transform to DER
+                if( ( xBeginFound == pdTRUE ) &&
+                    ( xEndFound == pdFALSE ) )
+                {
+
+                    size_t uxBytesWritten = 0;
+                    int lRslt = mbedtls_base64_decode( &( pucDerBuffer[ uxDerDataLen ] ),
+                                                       PEM_CERT_MAX_LEN - uxDerDataLen,
+                                                       &uxBytesWritten,
+                                                       ( unsigned char * ) pcInputBuffer, uxDataRead );
+
+                    if( lRslt == 0 )
+                    {
+                        uxDerDataLen += uxBytesWritten;
+                        configASSERT( uxDerDataLen < PEM_CERT_MAX_LEN );
+                    }
+                    else
+                    {
+                        xErrorFlag = pdTRUE;
+                    }
+                }
+#endif
+            }
+            else
+            {
+                xErrorFlag = pdTRUE;
+            }
+
+            if( xErrorFlag == pdTRUE )
+            {
+                uxDerDataLen = 0;
+                vPortFree( pucPemBuffer );
+                pucPemBuffer = NULL;
+                break;
+            }
+        }
+    }
+
+  if (pucPemBuffer != NULL)
+  { //@SJ
+    pucPemBuffer[uxDerDataLen] = '\0';
+    uxDerDataLen++;
+    *ppucDerBuffer = pucPemBuffer;
+    *puxDerLen = uxDerDataLen;
+  }
     else
     {
         xErrorFlag = pdTRUE;
@@ -882,6 +1029,91 @@ static void vSubCommand_ImportPubKey( ConsoleIO_t * pxCIO,
     mbedtls_pk_free( &xPkContext );
 }
 
+static void vSubCommand_ImportPrivKey( ConsoleIO_t * pxCIO,
+                                      uint32_t ulArgc,
+                                      char * ppcArgv[],
+                                      int (*f_rng)(void *, unsigned char *, size_t), void *p_rng )
+{
+    BaseType_t xResult = pdTRUE;
+    PkiStatus_t xStatus = PKI_SUCCESS;
+
+    char pcPubKeyLabel[ configTLS_MAX_LABEL_LEN + 1 ] = { 0 };
+    size_t xPubKeyLabelLen = 0;
+    mbedtls_pk_context xPkContext;
+    unsigned char * pucDerBuffer = NULL;
+    size_t uxDerDataLen = 0;
+
+    configASSERT( pxCIO );
+
+    mbedtls_pk_init( &xPkContext );
+
+    if( ( ulArgc > LABEL_IDX ) &&
+        ( ppcArgv[ LABEL_IDX ] != NULL ) )
+    {
+        ( void ) strncpy( pcPubKeyLabel, ppcArgv[ LABEL_IDX ], configTLS_MAX_LABEL_LEN + 1 );
+    }
+    else
+    {
+        ( void ) strncpy( pcPubKeyLabel, OTA_SIGNING_KEY_LABEL, configTLS_MAX_LABEL_LEN + 1 );
+    }
+
+    xPubKeyLabelLen = strnlen( pcPubKeyLabel, configTLS_MAX_LABEL_LEN );
+
+    if( xPubKeyLabelLen > configTLS_MAX_LABEL_LEN )
+    {
+        pxCIO->print( "Error: Private Key label: '" );
+        pxCIO->print( pcPubKeyLabel );
+        pxCIO->print( "' is longer than the configured maximum length.\r\n" );
+        xResult = pdFALSE;
+    }
+
+    if( xResult == pdTRUE )
+    {
+        xResult = xReadPemFromCli( pxCIO, &pucDerBuffer, &uxDerDataLen );
+    }
+
+    if( xResult == pdTRUE )
+    {
+        int lRslt = 0;
+
+        lRslt = mbedtls_pk_parse_key( &xPkContext, pucDerBuffer, uxDerDataLen, NULL, 0, f_rng, p_rng );
+
+        if( lRslt != 0 )
+        {
+            pxCIO->print( "ERROR: Failed to parse private key." );
+            xResult = pdFALSE;
+        }
+    }
+
+    if( xResult == pdTRUE )
+    {
+      // TODO: Change to xPkiWritePrivKey
+        xStatus = xPkiWritePrivKey( pcPubKeyLabel, pucDerBuffer, uxDerDataLen, &xPkContext );
+
+
+        if( xStatus == PKI_SUCCESS )
+        {
+            pxCIO->print( "Success: Public Key loaded to label: '" );
+            pxCIO->print( pcPubKeyLabel );
+            pxCIO->print( "'.\r\n" );
+        }
+        else
+        {
+            pxCIO->print( "Error: failed to save public key to label: '" );
+            pxCIO->print( pcPubKeyLabel );
+            pxCIO->print( "'.\r\n" );
+        }
+    }
+
+    if( pucDerBuffer != NULL )
+    {
+        mbedtls_free( pucDerBuffer );
+        pucDerBuffer = NULL;
+    }
+
+    mbedtls_pk_free( &xPkContext );
+}
+
 static void vSubCommand_ExportCertificate( ConsoleIO_t * pxCIO,
                                            uint32_t ulArgc,
                                            char * ppcArgv[] )
@@ -903,6 +1135,18 @@ static void vSubCommand_ExportCertificate( ConsoleIO_t * pxCIO,
     xCert = xPkiObjectFromLabel( pcCertLabel );
 
     xStatus = xPkiReadCertificate( &xCertificateContext, &xCert );
+
+    if (xStatus == PKI_SUCCESS)
+    {
+      pxCIO->print("Cert: ");
+    }
+    else
+    {
+      pxCIO->print("ERROR: Failed to locate Cert key with label: '");
+    }
+
+    pxCIO->write( pcCertLabel, strnlen( pcCertLabel, configTLS_MAX_LABEL_LEN ) );
+    pxCIO->print( "\r\n" );
 
     if( xStatus == PKI_SUCCESS )
     {
@@ -934,36 +1178,41 @@ static void vSubCommand_ExportKey( ConsoleIO_t * pxCIO,
         pcPubKeyLabel = ppcArgv[ LABEL_PUB_IDX ];
     }
 
-    xPubKeyObj = xPkiObjectFromLabel( pcPubKeyLabel );
+    if(strcmp(pcPubKeyLabel, TLS_KEY_PUB_LABEL) == 0)
+    {
+    xPubKeyObj = xPkiObjectFromLabel(pcPubKeyLabel);
 
-    xStatus = xPkiReadPublicKeyDer( &pucPublicKeyDer, &uxPublicKeyDerLen, &xPubKeyObj );
+    xStatus = xPkiReadPublicKeyDer(&pucPublicKeyDer, &uxPublicKeyDerLen, &xPubKeyObj);
 
     /* If successful, print public key in PEM form to terminal. */
-    if( xStatus == PKI_SUCCESS )
+    if (xStatus == PKI_SUCCESS)
     {
-        pxCIO->print( "Public Key Label: " );
+      pxCIO->print("Public Key Label: ");
     }
     else
     {
-        pxCIO->print( "ERROR: Failed to locate public key with label: '" );
+      pxCIO->print("ERROR: Failed to locate public key with label: '");
     }
 
-    pxCIO->write( pcPubKeyLabel, strnlen( pcPubKeyLabel, configTLS_MAX_LABEL_LEN ) );
-    pxCIO->print( "\r\n" );
+    pxCIO->write(pcPubKeyLabel, strnlen(pcPubKeyLabel, configTLS_MAX_LABEL_LEN));
+    pxCIO->print("\r\n");
 
     /* Print PEM public key */
-    if( ( pucPublicKeyDer != NULL ) &&
-        ( uxPublicKeyDerLen > 0 ) )
+    if ((pucPublicKeyDer != NULL) && (uxPublicKeyDerLen > 0))
     {
-        vPrintDer( pxCIO,
-                   "-----BEGIN PUBLIC KEY-----\r\n",
-                   "-----END PUBLIC KEY-----\r\n",
-                   pucPublicKeyDer,
-                   uxPublicKeyDerLen );
+      vPrintDer(pxCIO, "-----BEGIN PUBLIC KEY-----\r\n", "-----END PUBLIC KEY-----\r\n", pucPublicKeyDer, uxPublicKeyDerLen);
 
-        /* Free heap allocated memory */
-        vPortFree( pucPublicKeyDer );
-        pucPublicKeyDer = NULL;
+      /* Free heap allocated memory */
+      vPortFree(pucPublicKeyDer);
+      pucPublicKeyDer = NULL;
+    }
+  }
+    else
+    {
+//      xPkiReadPrivateKey( mbedtls_pk_context * pxPkCtx,
+//          const PkiObject_t * pxPrivateKey,
+//          int ( * pxRngCallback )( void *, unsigned char *, size_t ),
+//          void * pvRngCtx )
     }
 }
 
@@ -1033,7 +1282,18 @@ static void vCommand_PKI( ConsoleIO_t * pxCIO,
 
                 if( 0 == strcmp( "key", pcObject ) )
                 {
-                    vSubCommand_ImportPubKey( pxCIO, ulArgc, ppcArgv );
+                    pcObject = ppcArgv[ LABEL_PUB_IDX ];
+
+                    if( 0 == strcmp( "fleetprov_claim_key", pcObject ) )
+                    {
+                      mbedtls_entropy_context xEntropyCtx;
+                      mbedtls_entropy_init( &xEntropyCtx );
+                      vSubCommand_ImportPrivKey( pxCIO, ulArgc, ppcArgv, mbedtls_entropy_func, &xEntropyCtx  );
+                    }
+                    else
+                    {
+                      vSubCommand_ImportPubKey( pxCIO, ulArgc, ppcArgv );
+                    }
                     xSuccess = pdTRUE;
                 }
                 else if( 0 == strcmp( "cert", pcObject ) )

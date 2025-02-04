@@ -22,7 +22,6 @@
  * http://aws.amazon.com/freertos
  */
 
-
 /**
  * @brief A test application which loops through subscribing to a topic and publishing message
  * to a topic. This test application can be used with AWS IoT device advisor test suite to
@@ -54,7 +53,7 @@
 #include "kvstore.h"
 
 # define MAXT_TOPIC_LENGTH 64
-static char topic     [MAXT_TOPIC_LENGTH];
+static char topic[MAXT_TOPIC_LENGTH];
 
 /**
  * @brief A test application which loops through subscribing to a topic and publishing message
@@ -92,7 +91,6 @@ static char topic     [MAXT_TOPIC_LENGTH];
  */
 #define configPUBLISH_TOPIC_BUFFER_LENGTH            ( sizeof( configPUBLISH_TOPIC_FORMAT ) - 1 )
 
-
 /**
  * @brief Format of topic used to subscribe to incoming messages.
  *
@@ -113,13 +111,13 @@ static char topic     [MAXT_TOPIC_LENGTH];
  */
 struct MQTTAgentCommandContext
 {
-    TaskHandle_t xTaskToNotify;
-    void * pArgs;
+  TaskHandle_t xTaskToNotify;
+  void *pArgs;
 };
 
 /*-----------------------------------------------------------*/
 
-MQTTAgentHandle_t xMQTTAgentHandle = NULL;
+static MQTTAgentHandle_t xMQTTAgentHandle = NULL;
 
 /*-----------------------------------------------------------*/
 
@@ -137,8 +135,7 @@ MQTTAgentHandle_t xMQTTAgentHandle = NULL;
  * @param[in] pxCommandContext Context of the initial command.
  * @param[in].xReturnStatus The result of the command.
  */
-static void prvPublishCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
-                                       MQTTAgentReturnInfo_t * pxReturnInfo );
+static void prvPublishCommandCallback(MQTTAgentCommandContext_t *pxCommandContext, MQTTAgentReturnInfo_t *pxReturnInfo);
 
 /**
  * @brief Passed into MQTTAgent_Subscribe() as the callback to execute when
@@ -151,8 +148,7 @@ static void prvPublishCommandCallback( MQTTAgentCommandContext_t * pxCommandCont
  * @param[in] pvIncomingPublishCallbackContext Context of the initial command.
  * @param[in] pxPublishInfo Deserialized publish.
  */
-static void prvIncomingPublishCallback( void * pvIncomingPublishCallbackContext,
-                                        MQTTPublishInfo_t * pxPublishInfo );
+static void prvIncomingPublishCallback(void *pvIncomingPublishCallbackContext, MQTTPublishInfo_t *pxPublishInfo);
 
 /**
  * @brief Subscribe to the topic the demo task will also publish to - that
@@ -163,10 +159,7 @@ static void prvIncomingPublishCallback( void * pvIncomingPublishCallbackContext,
  * for all MQTT brokers.  Can also be QoS2 if supported by the broker.  AWS IoT
  * does not support QoS2.
  */
-static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
-                                         char * pcTopicFilter );
-
-
+static MQTTStatus_t prvSubscribeToTopic(MQTTQoS_t xQoS, char *pcTopicFilter);
 
 /**
  * @brief Publishes the given payload using the given qos to the topic provided.
@@ -183,17 +176,14 @@ static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
  * @param[in] pucPayload The payload blob to be published.
  * @param[in] xPayloadLength Length of the payload blob to be published.
  */
-static MQTTStatus_t prvPublishToTopic( MQTTQoS_t xQoS,
-                                       char * pcTopic,
-                                       uint8_t * pucPayload,
-                                       size_t xPayloadLength );
+static MQTTStatus_t prvPublishToTopic(MQTTQoS_t xQoS, char *pcTopic, uint8_t *pucPayload, size_t xPayloadLength);
 
 /**
  * @brief The function that implements the task demonstrated by this file.
  *
  * @param pvParameters The parameters to the task.
  */
-void vSubscribePublishTestTask( void * pvParameters );
+void vSubscribePublishTestTask(void *pvParameters);
 
 /*-----------------------------------------------------------*/
 
@@ -205,243 +195,207 @@ extern MQTTAgentContext_t xGlobalMqttAgentContext;
 
 /*-----------------------------------------------------------*/
 
-static void prvPublishCommandCallback( MQTTAgentCommandContext_t * pxCommandContext,
-                                       MQTTAgentReturnInfo_t * pxReturnInfo )
+static void prvPublishCommandCallback(MQTTAgentCommandContext_t *pxCommandContext, MQTTAgentReturnInfo_t *pxReturnInfo)
 {
-    if( pxCommandContext->xTaskToNotify != NULL )
-    {
-        xTaskNotify( pxCommandContext->xTaskToNotify,
-                     pxReturnInfo->returnCode,
-                     eSetValueWithOverwrite );
-    }
+  if (pxCommandContext->xTaskToNotify != NULL)
+  {
+    xTaskNotify(pxCommandContext->xTaskToNotify, pxReturnInfo->returnCode, eSetValueWithOverwrite);
+  }
 }
 
 /*-----------------------------------------------------------*/
 
-static void prvIncomingPublishCallback( void * pvIncomingPublishCallbackContext,
-                                        MQTTPublishInfo_t * pxPublishInfo )
+static void prvIncomingPublishCallback(void *pvIncomingPublishCallbackContext, MQTTPublishInfo_t *pxPublishInfo)
 {
-    static char cTerminatedString[ configPAYLOAD_BUFFER_LENGTH ];
+  static char cTerminatedString[configPAYLOAD_BUFFER_LENGTH];
 
-    ( void ) pvIncomingPublishCallbackContext;
+  (void) pvIncomingPublishCallbackContext;
 
-    /* Create a message that contains the incoming MQTT payload to the logger,
-     * terminating the string first. */
-    if( pxPublishInfo->payloadLength < configPAYLOAD_BUFFER_LENGTH )
+  /* Create a message that contains the incoming MQTT payload to the logger,
+   * terminating the string first. */
+  if (pxPublishInfo->payloadLength < configPAYLOAD_BUFFER_LENGTH)
+  {
+    memcpy((void*) cTerminatedString, pxPublishInfo->pPayload, pxPublishInfo->payloadLength);
+    cTerminatedString[pxPublishInfo->payloadLength] = 0x00;
+  }
+  else
+  {
+    memcpy((void*) cTerminatedString, pxPublishInfo->pPayload, configPAYLOAD_BUFFER_LENGTH);
+    cTerminatedString[ configPAYLOAD_BUFFER_LENGTH - 1] = 0x00;
+  }
+
+  LogInfo(( "Received incoming publish message %s", cTerminatedString ));
+}
+
+/*-----------------------------------------------------------*/
+
+static MQTTStatus_t prvSubscribeToTopic(MQTTQoS_t xQoS, char *pcTopicFilter)
+{
+  MQTTStatus_t xMQTTStatus;
+
+  /* Loop in case the queue used to communicate with the MQTT agent is full and
+   * attempts to post to it time out.  The queue will not become full if the
+   * priority of the MQTT agent task is higher than the priority of the task
+   * calling this function. */
+  do
+  {
+    xMQTTStatus = MqttAgent_SubscribeSync(xMQTTAgentHandle, pcTopicFilter, xQoS, prvIncomingPublishCallback,
+    NULL);
+
+    if (xMQTTStatus != MQTTSuccess)
     {
-        memcpy( ( void * ) cTerminatedString, pxPublishInfo->pPayload, pxPublishInfo->payloadLength );
-        cTerminatedString[ pxPublishInfo->payloadLength ] = 0x00;
+      LogError(( "Failed to SUBSCRIBE to topic with error = %u.", xMQTTStatus ));
     }
     else
     {
-        memcpy( ( void * ) cTerminatedString, pxPublishInfo->pPayload, configPAYLOAD_BUFFER_LENGTH );
-        cTerminatedString[ configPAYLOAD_BUFFER_LENGTH - 1 ] = 0x00;
+      LogInfo(( "Subscribed to topic %.*s.\n\n", strlen( pcTopicFilter ), pcTopicFilter ));
     }
+  } while (xMQTTStatus != MQTTSuccess);
 
-    LogInfo( ( "Received incoming publish message %s", cTerminatedString ) );
+  return xMQTTStatus;
+}
+/*-----------------------------------------------------------*/
+
+static MQTTStatus_t prvPublishToTopic(MQTTQoS_t xQoS, char *pcTopic, uint8_t *pucPayload, size_t xPayloadLength)
+{
+  MQTTPublishInfo_t xPublishInfo =
+  { 0UL };
+  MQTTAgentCommandContext_t xCommandContext =
+  { 0 };
+  MQTTStatus_t xMQTTStatus;
+  BaseType_t xNotifyStatus;
+  MQTTAgentCommandInfo_t xCommandParams =
+  { 0UL };
+  uint32_t ulNotifiedValue = 0U;
+
+  /* Create a unique number of the subscribe that is about to be sent.  The number
+   * is used as the command context and is sent back to this task as a notification
+   * in the callback that executed upon receipt of the subscription acknowledgment.
+   * That way this task can match an acknowledgment to a subscription. */
+  xTaskNotifyStateClear(NULL);
+
+  /* Configure the publish operation. */
+  xPublishInfo.qos = xQoS;
+  xPublishInfo.pTopicName = pcTopic;
+  xPublishInfo.topicNameLength = (uint16_t) strlen(pcTopic);
+  xPublishInfo.pPayload = pucPayload;
+  xPublishInfo.payloadLength = xPayloadLength;
+
+  xCommandContext.xTaskToNotify = xTaskGetCurrentTaskHandle();
+
+  xCommandParams.blockTimeMs = configMAX_COMMAND_SEND_BLOCK_TIME_MS;
+  xCommandParams.cmdCompleteCallback = prvPublishCommandCallback;
+  xCommandParams.pCmdCompleteCallbackContext = &xCommandContext;
+
+  /* Loop in case the queue used to communicate with the MQTT agent is full and
+   * attempts to post to it time out.  The queue will not become full if the
+   * priority of the MQTT agent task is higher than the priority of the task
+   * calling this function. */
+  do
+  {
+    xMQTTStatus = MQTTAgent_Publish(xMQTTAgentHandle, &xPublishInfo, &xCommandParams);
+
+    if (xMQTTStatus == MQTTSuccess)
+    {
+      /* Wait for this task to get notified, passing out the value it gets  notified with. */
+      xNotifyStatus = xTaskNotifyWait(0, 0, &ulNotifiedValue, portMAX_DELAY);
+
+      if (xNotifyStatus == pdTRUE)
+      {
+        xMQTTStatus = (MQTTStatus_t) (ulNotifiedValue);
+      }
+      else
+      {
+        xMQTTStatus = MQTTRecvFailed;
+      }
+    }
+  } while (xMQTTStatus != MQTTSuccess);
+
+  return xMQTTStatus;
 }
 
 /*-----------------------------------------------------------*/
 
-static MQTTStatus_t prvSubscribeToTopic( MQTTQoS_t xQoS,
-                                         char * pcTopicFilter )
+void vSubscribePublishTestTask(void *pvParameters)
 {
-    MQTTStatus_t xMQTTStatus;
+  char cPayloadBuf[configPAYLOAD_BUFFER_LENGTH];
+  size_t xPayloadLength;
+  uint32_t ulPublishCount = 0U, ulSuccessCount = 0U, ulFailCount = 0U;
+  BaseType_t xStatus = pdPASS;
+  MQTTStatus_t xMQTTStatus;
+  MQTTQoS_t xQoS;
+  TickType_t xTicksToDelay;
+  char *pThingName = NULL;
+  size_t uxTempSize = 0;
 
-    /* Loop in case the queue used to communicate with the MQTT agent is full and
-     * attempts to post to it time out.  The queue will not become full if the
-     * priority of the MQTT agent task is higher than the priority of the task
-     * calling this function. */
-    do
+  (void) pvParameters;
+
+  vSleepUntilMQTTAgentReady();
+
+  xMQTTAgentHandle = xGetMqttAgentHandle();
+  configASSERT(xMQTTAgentHandle != NULL);
+
+  vSleepUntilMQTTAgentConnected();
+
+  LogInfo(( "MQTT Agent is connected. Starting the publish subscribe task. " ));
+
+  pThingName = KVStore_getStringHeap(CS_CORE_THING_NAME, &uxTempSize);
+
+  snprintf(topic, MAXT_TOPIC_LENGTH, "mqtt_test/%s", pThingName);
+
+  if (xStatus == pdPASS)
+  {
+    xMQTTStatus = prvSubscribeToTopic(MQTTQoS1,
+    configSUBSCRIBE_TOPIC_FORMAT);
+
+    if (xMQTTStatus != MQTTSuccess)
     {
-        xMQTTStatus = MqttAgent_SubscribeSync( xMQTTAgentHandle,
-                                               pcTopicFilter,
-                                               xQoS,
-                                               prvIncomingPublishCallback,
-                                               NULL );
-
-        if( xMQTTStatus != MQTTSuccess )
-        {
-            LogError( ( "Failed to SUBSCRIBE to topic with error = %u.",
-                        xMQTTStatus ) );
-        }
-        else
-        {
-            LogInfo( ( "Subscribed to topic %.*s.\n\n",
-                       strlen( pcTopicFilter ),
-                       pcTopicFilter ) );
-        }
-    } while( xMQTTStatus != MQTTSuccess );
-
-    return xMQTTStatus;
-}
-/*-----------------------------------------------------------*/
-
-
-static MQTTStatus_t prvPublishToTopic( MQTTQoS_t xQoS,
-                                       char * pcTopic,
-                                       uint8_t * pucPayload,
-                                       size_t xPayloadLength )
-{
-    MQTTPublishInfo_t xPublishInfo = { 0UL };
-    MQTTAgentCommandContext_t xCommandContext = { 0 };
-    MQTTStatus_t xMQTTStatus;
-    BaseType_t xNotifyStatus;
-    MQTTAgentCommandInfo_t xCommandParams = { 0UL };
-    uint32_t ulNotifiedValue = 0U;
-
-    /* Create a unique number of the subscribe that is about to be sent.  The number
-     * is used as the command context and is sent back to this task as a notification
-     * in the callback that executed upon receipt of the subscription acknowledgment.
-     * That way this task can match an acknowledgment to a subscription. */
-    xTaskNotifyStateClear( NULL );
-
-    /* Configure the publish operation. */
-    xPublishInfo.qos = xQoS;
-    xPublishInfo.pTopicName = pcTopic;
-    xPublishInfo.topicNameLength = ( uint16_t ) strlen( pcTopic );
-    xPublishInfo.pPayload = pucPayload;
-    xPublishInfo.payloadLength = xPayloadLength;
-
-    xCommandContext.xTaskToNotify = xTaskGetCurrentTaskHandle();
-
-    xCommandParams.blockTimeMs = configMAX_COMMAND_SEND_BLOCK_TIME_MS;
-    xCommandParams.cmdCompleteCallback = prvPublishCommandCallback;
-    xCommandParams.pCmdCompleteCallbackContext = &xCommandContext;
-
-    /* Loop in case the queue used to communicate with the MQTT agent is full and
-     * attempts to post to it time out.  The queue will not become full if the
-     * priority of the MQTT agent task is higher than the priority of the task
-     * calling this function. */
-    do
-    {
-        xMQTTStatus = MQTTAgent_Publish( xMQTTAgentHandle,
-                                         &xPublishInfo,
-                                         &xCommandParams );
-
-        if( xMQTTStatus == MQTTSuccess )
-        {
-            /* Wait for this task to get notified, passing out the value it gets  notified with. */
-            xNotifyStatus = xTaskNotifyWait( 0,
-                                             0,
-                                             &ulNotifiedValue,
-                                             portMAX_DELAY );
-
-            if( xNotifyStatus == pdTRUE )
-            {
-                xMQTTStatus = ( MQTTStatus_t ) ( ulNotifiedValue );
-            }
-            else
-            {
-                xMQTTStatus = MQTTRecvFailed;
-            }
-        }
-    } while( xMQTTStatus != MQTTSuccess );
-
-    return xMQTTStatus;
-}
-
-/*-----------------------------------------------------------*/
-
-
-void vSubscribePublishTestTask( void * pvParameters )
-{
-    char cPayloadBuf[ configPAYLOAD_BUFFER_LENGTH ];
-    size_t xPayloadLength;
-    uint32_t ulPublishCount = 0U, ulSuccessCount = 0U, ulFailCount = 0U;
-    BaseType_t xStatus = pdPASS;
-    MQTTStatus_t xMQTTStatus;
-    MQTTQoS_t xQoS;
-    TickType_t xTicksToDelay;
-    char * pThingName = NULL;
-    size_t uxTempSize = 0;
-
-    ( void ) pvParameters;
-
-    vSleepUntilMQTTAgentReady();
-
-    xMQTTAgentHandle = xGetMqttAgentHandle();
-    configASSERT( xMQTTAgentHandle != NULL );
-
-    vSleepUntilMQTTAgentConnected();
-
-    LogInfo( ( "MQTT Agent is connected. Starting the publish subscribe task. " ) );
-
-    pThingName = KVStore_getStringHeap( CS_CORE_THING_NAME, &uxTempSize );
-
-    snprintf(topic, MAXT_TOPIC_LENGTH, "mqtt_test/%s", pThingName);
-
-    if( xStatus == pdPASS )
-    {
-        xMQTTStatus = prvSubscribeToTopic( MQTTQoS1,
-                                           configSUBSCRIBE_TOPIC_FORMAT );
-
-        if( xMQTTStatus != MQTTSuccess )
-        {
-            LogError( ( "Failed to subscribe to topic: %s.", configSUBSCRIBE_TOPIC_FORMAT ) );
-            xStatus = pdFAIL;
-        }
+      LogError(( "Failed to subscribe to topic: %s.", configSUBSCRIBE_TOPIC_FORMAT ));
+      xStatus = pdFAIL;
     }
+  }
 
-    if( xStatus == pdPASS )
+  if (xStatus == pdPASS)
+  {
+    /* Loop through infinitely. */
+    for (;;)
     {
-        /* Loop through infinitely. */
-        for( ; ; )
-        {
-            /* Have different tasks use different QoS.  0 and 1.  2 can also be used
-             * if supported by the broker. */
-            xQoS = ( MQTTQoS_t ) ( ( ulPublishCount + 1 ) % 2UL );
+      /* Have different tasks use different QoS.  0 and 1.  2 can also be used
+       * if supported by the broker. */
+      xQoS = (MQTTQoS_t) ((ulPublishCount + 1) % 2UL);
 
+      /* Create a payload to send with the publish message.  This contains
+       * the task name and an incrementing number. */
+      xPayloadLength = snprintf(cPayloadBuf,
+      configPAYLOAD_BUFFER_LENGTH, "{\"message\": \"Test message %lu\"}", (ulPublishCount + 1));
 
-            /* Create a payload to send with the publish message.  This contains
-             * the task name and an incrementing number. */
-            xPayloadLength = snprintf( cPayloadBuf,
-                                       configPAYLOAD_BUFFER_LENGTH,
-                                       "{\"message\": \"Test message %lu\"}",
-                                       ( ulPublishCount + 1 ) );
+      /* Assert if the buffer length is large enough to hold the message. */
+      configASSERT(xPayloadLength <= configPAYLOAD_BUFFER_LENGTH);
 
-            /* Assert if the buffer length is large enough to hold the message. */
-            configASSERT( xPayloadLength <= configPAYLOAD_BUFFER_LENGTH );
+      LogInfo(( "Sending publish message to topic: %s with qos: %d, message : %*s", configPUBLISH_TOPIC_FORMAT, xQoS, xPayloadLength, ( char * ) cPayloadBuf ));
 
-            LogInfo( ( "Sending publish message to topic: %s with qos: %d, message : %*s",
-                       configPUBLISH_TOPIC_FORMAT,
-                       xQoS,
-                       xPayloadLength,
-                       ( char * ) cPayloadBuf ) );
+      xMQTTStatus = prvPublishToTopic(xQoS,
+      configPUBLISH_TOPIC_FORMAT, (uint8_t*) cPayloadBuf, xPayloadLength);
 
-            xMQTTStatus = prvPublishToTopic( xQoS,
-                                             configPUBLISH_TOPIC_FORMAT,
-                                             ( uint8_t * ) cPayloadBuf,
-                                             xPayloadLength );
+      if (xMQTTStatus == MQTTSuccess)
+      {
+        ulSuccessCount++;
+        LogInfo(( "Successfully sent QoS %u publish to topic: %s (PassCount:%d, FailCount:%d).", xQoS, configPUBLISH_TOPIC_FORMAT, ulSuccessCount, ulFailCount ));
+      }
+      else
+      {
+        ulFailCount++;
+        LogError(( "Timed out while sending QoS %u publish to topic: %s (PassCount:%d, FailCount: %d)", xQoS, configPUBLISH_TOPIC_FORMAT, ulSuccessCount, ulFailCount ));
+      }
 
-            if( xMQTTStatus == MQTTSuccess )
-            {
-                ulSuccessCount++;
-                LogInfo( ( "Successfully sent QoS %u publish to topic: %s (PassCount:%d, FailCount:%d).",
-                           xQoS,
-                           configPUBLISH_TOPIC_FORMAT,
-                           ulSuccessCount,
-                           ulFailCount ) );
-            }
-            else
-            {
-                ulFailCount++;
-                LogError( ( "Timed out while sending QoS %u publish to topic: %s (PassCount:%d, FailCount: %d)",
-                            xQoS,
-                            configPUBLISH_TOPIC_FORMAT,
-                            ulSuccessCount,
-                            ulFailCount ) );
-            }
+      /* Add a little randomness into the delay so the tasks don't remain
+       * in lockstep. */
+      xTicksToDelay = pdMS_TO_TICKS( configDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) + (xTaskGetTickCount() % 0xff);
+      vTaskDelay(xTicksToDelay);
 
-            /* Add a little randomness into the delay so the tasks don't remain
-             * in lockstep. */
-            xTicksToDelay = pdMS_TO_TICKS( configDELAY_BETWEEN_PUBLISH_OPERATIONS_MS ) +
-                            ( xTaskGetTickCount() % 0xff );
-            vTaskDelay( xTicksToDelay );
-
-            ulPublishCount++;
-        }
+      ulPublishCount++;
     }
+  }
 
-    vTaskDelete( NULL );
+  vTaskDelete( NULL);
 }

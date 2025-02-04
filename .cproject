@@ -37,7 +37,7 @@
 							</tool>
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1793206418" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler">
 								<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.debuglevel.849501256" name="Debug level" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.debuglevel" useByScannerDiscovery="false" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.debuglevel.value.g3" valueType="enumerated"/>
-								<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.optimization.level.794276299" name="Optimization level" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.optimization.level.value.og" valueType="enumerated"/>
+								<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.optimization.level.794276299" name="Optimization level" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.optimization.level.value.o0" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.definedsymbols.2054269823" name="Define symbols (-D)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.definedsymbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG"/>
 									<listOptionValue builtIn="false" value="USE_HAL_DRIVER"/>
@@ -46,6 +46,7 @@
 									<listOptionValue builtIn="false" value="MBEDTLS_CONFIG_FILE=&quot;mbedtls_config_ntz.h&quot;"/>
 									<listOptionValue builtIn="false" value="LFS_CONFIG=lfs_config.h"/>
 									<listOptionValue builtIn="false" value="LFS_USE_INTERNAL_NOR"/>
+									<listOptionValue builtIn="false" value="FLEET_PROVISION_DEMO"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.1974808480" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
@@ -98,6 +99,8 @@
 									<listOptionValue builtIn="false" value="../STSAFE/Target"/>
 									<listOptionValue builtIn="false" value="../X-CUBE-MEMS1/Target"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Core/Src/mbedTLS}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Middlewares/Third_Party/AWS_AWS IoT/fleet-provisioning/source/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Common/app/FleetProvisioning}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Core/Src/crypto}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Core/Src/ota_pal}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Core/Src/stsafe}&quot;"/>
@@ -141,15 +144,15 @@
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.1221976189" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.46586632.913642096" name="rng_alt_stm32.c" rcbsApplicability="disable" resourcePath="Core/Src/crypto/rng_alt_stm32.c" toolsToInvoke="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1793206418.1245136056">
-						<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1793206418.1245136056" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1793206418"/>
+					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.46586632.266178110" name="tinycbor_serializer.c" rcbsApplicability="disable" resourcePath="Common/app/FleetProvisioning/tinycbor_serializer.c" toolsToInvoke="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1793206418.728463705">
+						<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1793206418.728463705" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1793206418"/>
 					</fileInfo>
 					<sourceEntries>
-						<entry excluding="app/qualification_app_main.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
-						<entry excluding="Src/crypto/rng_alt_stm32.c|Src/mbedTLS/hardware_rng.c|Src/crypto/core_pkcs11_pal_internal.c|Src/crypto/rng_alt_stm32u5.c|Src/echo - Copy.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
+						<entry excluding="app/FleetProvisioning/json_serializer.c|app/FleetProvisioning/fleet_provisioning_task_json.c|app/qualification_app_main.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
+						<entry excluding="Src/stsafe/key_value_store_eeprom.c|Src/crypto/rng_alt_stm32.c|Src/mbedTLS/hardware_rng.c|Src/crypto/core_pkcs11_pal_internal.c|Src/crypto/rng_alt_stm32u5.c|Src/echo - Copy.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry excluding="BSP/Components/veml6030|BSP/Components/aps6408|BSP/Components/mx25lm51245g" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry excluding="tinycbor/src/open_memstream.c|tinycbor/tools|tinycbor/tests|tinycbor/examples|corePKCS11/source/portable/os|microcoap/main-posix.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libraries"/>
-						<entry excluding="Third_Party/lwIP_Network_lwIP/lwip/apps/lwiperf|Third_Party/lwIP_Network_lwIP/lwip/apps/apps|Third_Party/lwIP_Network_lwIP/lwip/apps/netbiosns|Third_Party/lwIP_Network_lwIP/lwip/apps/smtp|Third_Party/lwIP_Network_lwIP/lwip/apps/snmp|Third_Party/lwIP_Network_lwIP/lwip/apps/sntp|Third_Party/lwIP_Network_lwIP/lwip/apps/tftp|Third_Party/lwIP_Network_lwIP/lwip/apps/mqtt|Third_Party/lwIP_Network_lwIP/lwip/apps/mdns|Third_Party/lwIP_Network_lwIP/lwip/apps/http|Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls|Third_Party/lwIP_Network_lwIP/ports/cmsis-rtos|Third_Party/lwIP_Network_lwIP/ports/cmsis-driver/netif" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
+						<entry excluding="Third_Party/AWS_AWS IoT/fleet-provisioning/test|Third_Party/AWS_AWS IoT/fleet-provisioning/tools|Third_Party/lwIP_Network_lwIP/lwip/apps/lwiperf|Third_Party/lwIP_Network_lwIP/lwip/apps/apps|Third_Party/lwIP_Network_lwIP/lwip/apps/netbiosns|Third_Party/lwIP_Network_lwIP/lwip/apps/smtp|Third_Party/lwIP_Network_lwIP/lwip/apps/snmp|Third_Party/lwIP_Network_lwIP/lwip/apps/sntp|Third_Party/lwIP_Network_lwIP/lwip/apps/tftp|Third_Party/lwIP_Network_lwIP/lwip/apps/mqtt|Third_Party/lwIP_Network_lwIP/lwip/apps/mdns|Third_Party/lwIP_Network_lwIP/lwip/apps/http|Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls|Third_Party/lwIP_Network_lwIP/ports/cmsis-rtos|Third_Party/lwIP_Network_lwIP/ports/cmsis-driver/netif" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="STSAFE"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="X-CUBE-MEMS1"/>
 					</sourceEntries>
@@ -282,7 +285,6 @@
 			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/aware_demo"/>
@@ -290,5 +292,17 @@
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/aware_demo"/>
 		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+		<buildTargets>
+			<target name="Debug" path="Core/Inc" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments>-j12</buildArguments>
+				<buildTarget>Debug</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+		</buildTargets>
 	</storageModule>
 </cproject>

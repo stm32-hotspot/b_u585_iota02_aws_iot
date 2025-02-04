@@ -34,6 +34,8 @@
 
 #include "ota_config.h"
 
+#include "core_pkcs11_pal.h"
+#include "core_pkcs11_pal_utils.h"
 /*-----------------------------------------------------------*/
 
 PkiStatus_t xPrvMbedtlsErrToPkiStatus( int lError )
@@ -356,6 +358,93 @@ PkiStatus_t xPkiWriteCertificate( const char * pcCertLabel,
 }
 
 /*-----------------------------------------------------------*/
+PkiStatus_t xPkiWritePrivKey( const char * pcPrivKeyLabel,
+                             const unsigned char * pucPrivKeyDer,
+                             const size_t uxPrivKeyDerLen,
+                             mbedtls_pk_context * pxPkContext )
+{
+#if 0
+  PkiStatus_t xStatus = PKI_SUCCESS;
+  PkiObject_t xPrivKeyObject = { 0 };
+
+  configASSERT( pcPrivKeyLabel != NULL );
+  configASSERT( pxPkContext != NULL );
+
+  xPrivKeyObject = xPkiObjectFromLabel( pcPrivKeyLabel );
+
+  switch( xPrivKeyObject.xForm )
+  {
+      case OBJ_FORM_PEM:
+      case OBJ_FORM_DER:
+          xStatus = PKI_ERR_ARG_INVALID;
+          break;
+
+          #ifdef MBEDTLS_TRANSPORT_PKCS11
+              case OBJ_FORM_PKCS11_LABEL:
+                  xStatus = xPkcs11WritePrivKey( xPrivKeyObject.pcPkcs11Label, pxPkContext );
+                  break;
+          #endif /* ifdef MBEDTLS_TRANSPORT_PKCS11 */
+          #ifdef MBEDTLS_TRANSPORT_PSA
+              case OBJ_FORM_PSA_CRYPTO:
+                 {
+                     int lError = lWritePublicKeyToPSACrypto( xPubKeyObject.xPsaCryptoId, pxPkContext );
+
+                     MBEDTLS_LOG_IF_ERROR( lError, "Failed to write public key to PSA Crypto uid: 0x%08X,",
+                                           xPubKeyObject.xPsaCryptoId );
+
+                     xStatus = xPrvMbedtlsErrToPkiStatus( lError );
+                 }
+                 break;
+
+              case OBJ_FORM_PSA_ITS:
+                 {
+                     int lError = lWriteObjectToPsaIts( xPubKeyObject.xPsaStorageId, pucPubKeyDer, uxPubKeyDerLen );
+
+                     MBEDTLS_LOG_IF_ERROR( lError, "Failed to write public key to PSA ITS uid: 0x%PRIX64,",
+                                           xPubKeyObject.xPsaStorageId );
+
+                     xStatus = xPrvMbedtlsErrToPkiStatus( lError );
+                 }
+                 break;
+
+              case OBJ_FORM_PSA_PS:
+                 {
+                     int lError = lWriteObjectToPsaPs( xPubKeyObject.xPsaStorageId, pucPubKeyDer, uxPubKeyDerLen );
+
+                     MBEDTLS_LOG_IF_ERROR( lError, "Failed to write public key to PSA PS uid: 0x%PRIX64,",
+                                           xPubKeyObject.xPsaStorageId );
+
+                     xStatus = xPrvMbedtlsErrToPkiStatus( lError );
+                 }
+                 break;
+          #endif /* ifdef MBEDTLS_TRANSPORT_PSA */
+      case OBJ_FORM_NONE:
+      /* Intentional fall through */
+      default:
+          LogError( "Invalid public key form specified." );
+          xStatus = PKI_ERR_ARG_INVALID;
+          break;
+  }
+
+  return xStatus;
+#else
+  PkiStatus_t xStatus = PKI_ERR;
+  CK_ATTRIBUTE xLabel;
+  CK_OBJECT_HANDLE handle;
+  handle = PKCS11_PAL_FindObject( (CK_BYTE_PTR)pcPrivKeyLabel, 0 );
+
+  if(handle != eInvalidHandle)
+  {
+    xLabel.pValue = pcPrivKeyLabel;
+    if(PKCS11_PAL_SaveObject(&xLabel, (CK_BYTE_PTR)pucPrivKeyDer, (CK_ULONG)uxPrivKeyDerLen )!= eInvalidHandle)
+    {
+      xStatus  = PKI_SUCCESS;
+    }
+  }
+    return xStatus;
+#endif
+
+}
 
 PkiStatus_t xPkiWritePubKey( const char * pcPubKeyLabel,
                              const unsigned char * pucPubKeyDer,

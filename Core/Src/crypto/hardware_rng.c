@@ -27,6 +27,8 @@
 #include "string.h"
 #include "entropy_poll.h"
 
+#if defined( MBEDTLS_ENTROPY_HARDWARE_ALT )
+
 extern UBaseType_t uxRand(void);
 
 int mbedtls_hardware_poll( void *Data, unsigned char *Output, size_t Len, size_t *oLen )
@@ -44,3 +46,5 @@ int mbedtls_hardware_poll( void *Data, unsigned char *Output, size_t Len, size_t
 
   return 0;
 }
+
+#endif

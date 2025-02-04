@@ -749,4 +749,93 @@
         return xStatus;
     }
 
+    PkiStatus_t xPkcs11WritePrivKey( const char * pcLabel,
+                                        const mbedtls_pk_context * pxPrivKeyContext )
+        {
+            char pcLabelBuffer[ pkcs11configMAX_LABEL_LENGTH + 1 ];
+            CK_FUNCTION_LIST_PTR pxFunctionList = NULL;
+            PkiStatus_t xStatus = PKI_SUCCESS;
+            CK_SESSION_HANDLE xSession = 0;
+            size_t uxLabelLen = 0;
+            CK_RV xResult = CKR_OK;
+
+
+            if( !pcLabel )
+            {
+                xStatus = PKI_ERR_ARG_INVALID;
+                LogError( "pcLabel cannot be NULL." );
+            }
+            else if( !pxPrivKeyContext )
+            {
+                xStatus = PKI_ERR_ARG_INVALID;
+                LogError( "pxCertificateContext cannot be NULL." );
+            }
+            else
+            {
+                uxLabelLen = strnlen( pcLabel, pkcs11configMAX_LABEL_LENGTH );
+                ( void ) strncpy( pcLabelBuffer, pcLabel, pkcs11configMAX_LABEL_LENGTH + 1 );
+            }
+
+            if( uxLabelLen == 0 )
+            {
+                xStatus = PKI_ERR_ARG_INVALID;
+                LogError( "pcLabel must have a length > 0." );
+            }
+            else
+            {
+                xResult = C_GetFunctionList( &pxFunctionList );
+            }
+
+            if( xResult != CKR_OK )
+            {
+                LogError( "Failed to get PKCS11 function list pointer. CK_RV: %s",
+                          pcPKCS11StrError( xResult ) );
+
+                xStatus = xPrvCkRvToPkiStatus( xResult );
+            }
+
+            if( xStatus == PKI_SUCCESS )
+            {
+                xResult = xInitializePkcs11Session( &xSession );
+
+                if( xResult != CKR_OK )
+                {
+                    LogError( "Failed to initialize PKCS11 session. CK_RV: %s",
+                              pcPKCS11StrError( xResult ) );
+
+                    xStatus = xPrvCkRvToPkiStatus( xResult );
+                }
+            }
+
+            if( xStatus == PKI_SUCCESS )
+            {
+                xResult = xPrvDestoryObject( xSession, CKO_PUBLIC_KEY, pcLabelBuffer, uxLabelLen );
+
+                if( xResult != CKR_OK )
+                {
+                    LogError( "Failed to delete existing PKCS11 object. CK_RV: %s",
+                              pcPKCS11StrError( xResult ) );
+
+                    xStatus = xPrvCkRvToPkiStatus( xResult );
+                }
+            }
+
+            if( xStatus == PKI_SUCCESS )
+            {
+                int lRslt = lWriteEcPrivKeyToPKCS11( pxPrivKeyContext,
+                                                       xSession,
+                                                       pcLabelBuffer, uxLabelLen );
+
+                xStatus = xPrvMbedtlsErrToPkiStatus( lRslt );
+            }
+
+            if( xSession )
+            {
+                pxFunctionList->C_CloseSession( xSession );
+                xSession = 0;
+            }
+
+            return xStatus;
+        }
+
 #endif /* MBEDTLS_TRANSPORT_PKCS11 */

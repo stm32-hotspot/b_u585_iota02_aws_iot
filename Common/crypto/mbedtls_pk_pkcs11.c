@@ -22,6 +22,8 @@
 
 #include "tls_transport_config.h"
 
+#if !defined(__SAFEA1_CONF_H__)
+
 #ifdef MBEDTLS_TRANSPORT_PKCS11
 
 /**
@@ -551,7 +553,179 @@
 
         return( ( xResult == CKR_OK ) ? 0 : -1 );
     }
+//TODO: lWriteEcPrivKeyToPKCS11
+    int32_t lWriteEcPrivKeyToPKCS11( const mbedtls_pk_context * pxPubKeyContext,
+                                           CK_SESSION_HANDLE xP11SessionHandle,
+                                           char * pcPubKeyLabel,
+                                           size_t uxPubKeyLabelLen )
+        {
+            CK_RV xResult;
+            CK_OBJECT_HANDLE xCertHandle = 0;
+            CK_FUNCTION_LIST_PTR pxFunctionList;
+            size_t uxEcPointLength = 0;
+            CK_BYTE * pucEcPoint = NULL;
+            static CK_BYTE pucEcParams[] = pkcs11DER_ENCODED_OID_P256;
 
+            configASSERT( pxPubKeyContext );
+            configASSERT( pxPubKeyContext->pk_ctx );
+            configASSERT( pxPubKeyContext->pk_info );
+            configASSERT( xP11SessionHandle );
+            configASSERT( pcPubKeyLabel );
+            configASSERT( uxPubKeyLabelLen > 0 );
+
+            xResult = C_GetFunctionList( &pxFunctionList );
+
+            if( xResult == CKR_OK )
+            {
+                /* Look for an existing object that we may need to overwrite */
+                xResult = xFindObjectWithLabelAndClass( xP11SessionHandle,
+                                                        pcPubKeyLabel,
+                                                        uxPubKeyLabelLen,
+                                                        CKO_PRIVATE_KEY,
+                                                        &xCertHandle );
+            }
+
+            if( ( xResult == CKR_OK ) &&
+                ( xCertHandle != CK_INVALID_HANDLE ) )
+            {
+                xResult = pxFunctionList->C_DestroyObject( xP11SessionHandle,
+                                                           xCertHandle );
+            }
+
+            /* Export EC Point from mbedtls context to binary form */
+            if( xResult == CKR_OK )
+            {
+                if( pxPubKeyContext->pk_info->type == MBEDTLS_PK_ECKEY )
+                {
+                    int lRslt = 0;
+
+                    mbedtls_ecp_keypair * pxEcpKey = ( mbedtls_ecp_keypair * ) ( pxPubKeyContext->pk_ctx );
+
+                    /* Determine length */
+                    lRslt = mbedtls_ecp_point_write_binary( &( pxEcpKey->grp ),
+                                                            &( pxEcpKey->Q ),
+                                                            MBEDTLS_ECP_PF_UNCOMPRESSED,
+                                                            &uxEcPointLength,
+                                                            NULL,
+                                                            0 );
+
+                    if( ( lRslt == MBEDTLS_ERR_ECP_BUFFER_TOO_SMALL ) ||
+                        ( lRslt == 0 ) )
+                    {
+                        pucEcPoint = mbedtls_calloc( 1, uxEcPointLength + 2 );
+
+                        if( pucEcPoint == NULL )
+                        {
+                            xResult = CKR_HOST_MEMORY;
+                        }
+                    }
+                    else
+                    {
+                        xResult = CKR_FUNCTION_FAILED;
+                    }
+
+                    if( xResult == CKR_OK )
+                    {
+                        if( uxEcPointLength <= UINT8_MAX )
+                        {
+                            pucEcPoint[ 0 ] = MBEDTLS_ASN1_OCTET_STRING;
+                            pucEcPoint[ 1 ] = ( CK_BYTE ) uxEcPointLength;
+                        }
+                        else
+                        {
+                            xResult = CKR_FUNCTION_FAILED;
+                        }
+                    }
+
+                    if( xResult == CKR_OK )
+                    {
+                        /* Write public key */
+                        lRslt = mbedtls_ecp_point_write_binary( &( pxEcpKey->grp ),
+                                                                &( pxEcpKey->Q ),
+                                                                MBEDTLS_ECP_PF_UNCOMPRESSED,
+                                                                &uxEcPointLength,
+                                                                &( pucEcPoint[ 2 ] ),
+                                                                uxEcPointLength );
+
+                        if( lRslt != 0 )
+                        {
+                            xResult = CKR_FUNCTION_FAILED;
+                        }
+                        else
+                        {
+                            uxEcPointLength += 2;
+                        }
+                    }
+                }
+                else
+                {
+                    xResult = CKR_FUNCTION_NOT_SUPPORTED;
+                }
+            }
+
+            if( xResult == CKR_OK )
+            {
+                CK_OBJECT_CLASS xObjClass = CKO_PRIVATE_KEY;
+                CK_KEY_TYPE xKeyType = CKK_ECDSA;
+                CK_BBOOL xPersistKey = CK_TRUE;
+                CK_BBOOL xVerify = CK_TRUE;
+#define TEMPLATE_SIZE 5
+                CK_ATTRIBUTE pxTemplate[ TEMPLATE_SIZE ] =
+                {
+                    {
+                        .type = CKA_CLASS,
+                        .ulValueLen = sizeof( CK_OBJECT_CLASS ),
+                        .pValue = &xObjClass,
+                    },
+                    {
+                        .type = CKA_KEY_TYPE,
+                        .ulValueLen = sizeof( CK_KEY_TYPE ),
+                        .pValue = &xKeyType,
+                    },
+                    {
+                        .type = CKA_LABEL,
+                        .ulValueLen = uxPubKeyLabelLen,
+                        .pValue = pcPubKeyLabel,
+                    },
+                    {
+                        .type = CKA_TOKEN,
+                        .ulValueLen = sizeof( CK_BBOOL ),
+                        .pValue = &xPersistKey,
+                    },
+                    {
+                        .type = CKA_EC_PARAMS,
+                        .ulValueLen = sizeof( pucEcParams ),
+                        .pValue = pucEcParams,
+                    }
+#if 0
+                    ,{
+                        .type = CKA_VERIFY,
+                        .ulValueLen = sizeof( CK_BBOOL ),
+                        .pValue = &xVerify,
+                    },
+
+                    {
+                        .type = CKA_EC_POINT,
+                        .ulValueLen = uxEcPointLength,
+                        .pValue = pucEcPoint,
+                    }
+#endif
+                };
+
+                xResult = pxFunctionList->C_CreateObject( xP11SessionHandle,
+                                                          pxTemplate,
+                                                          TEMPLATE_SIZE,
+                                                          &xCertHandle );
+            }
+
+            if( pucEcPoint != NULL )
+            {
+                mbedtls_free( pucEcPoint );
+                pucEcPoint = NULL;
+            }
+
+            return( ( xResult == CKR_OK ) ? 0 : -1 );
+        }
 /*-----------------------------------------------------------*/
 
     const char * pcPKCS11StrError( CK_RV xError )
@@ -1479,8 +1653,6 @@
         return mbedtls_ecdsa_info.debug_func( &( pxEcDsaCtx->xMbedEcDsaCtx ), pxItems );
     }
 
-
-
     static size_t p11_rsa_get_bitlen( const void * pvCtx )
     {
         P11RsaCtx_t * pxRsaCtx = ( P11RsaCtx_t * ) pvCtx;
@@ -1535,7 +1707,6 @@
 
         return -1;
     }
-
 
     static int p11_rsa_check_pair( const void * pvPub,
                                    const void * pvPrv,
@@ -1619,5 +1790,5 @@
 
         return mbedtls_rsa_info.debug_func( &( pxP11RsaCtx->xMbedRsaCtx ), pxItems );
     }
-
+#endif /* __SAFEA1_CONF_H__ */
 #endif /* MBEDTLS_TRANSPORT_PKCS11 */

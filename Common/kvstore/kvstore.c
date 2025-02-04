@@ -32,11 +32,11 @@
 static SemaphoreHandle_t xKvMutex = NULL;
 
 #if KV_STORE_CACHE_ENABLE
-#define READ_ENTRY     xprvCopyValueFromCache
-#define WRITE_ENTRY    xprvWriteCacheEntry
+  #define READ_ENTRY     xprvCopyValueFromCache
+  #define WRITE_ENTRY    xprvWriteCacheEntry
 #else
-    #define READ_ENTRY     xprvReadValueFromImplStatic
-    #define WRITE_ENTRY    xprvWriteValueToImpl
+  #define READ_ENTRY     xprvReadValueFromImpl
+  #define WRITE_ENTRY    xprvWriteValueToImpl
 #endif
 
 const char *const kvStoreKeyMap[CS_NUM_KEYS] = KV_STORE_STRINGS;
@@ -213,9 +213,9 @@ size_t KVStore_getSize(KVStoreKey_t xKey)
 #if KV_STORE_CACHE_ENABLE
     xDataLen = prvGetCacheEntryLength(xKey);
 #else
-            /* otherwise read directly from NV */
-            xDataLen = xprvGetValueLengthFromImpl( xKey );
-        #endif
+    /* otherwise read directly from NV */
+    xDataLen = xprvGetValueLengthFromImpl( xKey );
+#endif
 
     if (xDataLen == 0)
     {

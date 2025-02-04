@@ -25,6 +25,7 @@
 
 
 #include "logging_levels.h"
+#define LOG_LEVEL    LOG_INFO
 #include "logging.h"
 #include "kvstore_prv.h"
 #include <string.h>
@@ -217,6 +218,7 @@
 
     void vprvNvImplInit( void )
     {
+      LogInfo("* Conf from PSA *");
 /*	tfm_its_init(); */
     }
 

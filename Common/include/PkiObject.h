@@ -134,6 +134,11 @@ PkiStatus_t xPkiReadPublicKeyDer( unsigned char ** ppucPubKeyDer,
 PkiStatus_t xPkiReadPublicKey( mbedtls_pk_context * pxPkCtx,
                                const PkiObject_t * pxPublicKey );
 
+PkiStatus_t xPkiWritePrivKey( const char * pcPrivKeyLabel,
+                             const unsigned char * pucPrivKeyDer,
+                             const size_t uxPrivKeyDerLen,
+                             mbedtls_pk_context * pxPkContext );
+
 PkiStatus_t xPkiWritePubKey( const char * pcPubKeyLabel,
                              const unsigned char * pucPubKeyDer,
                              const size_t uxPubKeyDerLen,
@@ -171,6 +176,8 @@ PkiStatus_t xPkiGenerateECKeypair( const char * pcPrvKeyLabel,
     PkiStatus_t xPkcs11WritePubKey( const char * pcLabel,
                                     const mbedtls_pk_context * pxPubKeyContext );
 
+    PkiStatus_t xPkcs11WritePrivKey( const char * pcLabel,
+                                            const mbedtls_pk_context * pxPubKeyContext );
 #endif /* MBEDTLS_TRANSPORT_PKCS11 */
 
 #ifdef MBEDTLS_TRANSPORT_PSA

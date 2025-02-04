@@ -56,7 +56,8 @@
 #include "lps22hh.h"
 
 #if USE_SENSORS
-#include "custom_bus.h"
+#include "custom_bus_os.h"
+#include "custom_errno.h"
 static HTS221_Object_t HTS221_Obj;
 static LPS22HH_Object_t LPS22HH_Obj;
 #endif
@@ -70,8 +71,6 @@ static LPS22HH_Object_t LPS22HH_Obj;
 
 #define MQTT_NOTIFY_IDX                      ( 1 )
 #define MQTT_PUBLISH_QOS                     ( MQTTQoS0 )
-
-extern SemaphoreHandle_t SENSORS_I2C_MutexHandle;
 
 /*-----------------------------------------------------------*/
 
@@ -175,8 +174,6 @@ static BaseType_t xIsMqttConnected(void)
 static BaseType_t xInitSensors(void)
 {
 #if USE_SENSORS
-  xSemaphoreTake(SENSORS_I2C_MutexHandle, portMAX_DELAY);
-
   uint8_t HTS221_Id;
   uint8_t Status;
   HTS221_IO_t HTS221_io_ctx =
@@ -189,10 +186,10 @@ static BaseType_t xInitSensors(void)
   /* Configure the driver */
   HTS221_io_ctx.BusType = HTS221_I2C_BUS; /* I2C */
   HTS221_io_ctx.Address = HTS221_I2C_ADDRESS;
-  HTS221_io_ctx.Init = BSP_I2C2_Init;
-  HTS221_io_ctx.DeInit = BSP_I2C2_DeInit;
-  HTS221_io_ctx.ReadReg = BSP_I2C2_ReadReg;
-  HTS221_io_ctx.WriteReg = BSP_I2C2_WriteReg;
+  HTS221_io_ctx.Init = BSP_I2C2_Init_OS;
+  HTS221_io_ctx.DeInit = BSP_I2C2_DeInit_OS;
+  HTS221_io_ctx.ReadReg = BSP_I2C2_ReadReg_OS;
+  HTS221_io_ctx.WriteReg = BSP_I2C2_WriteReg_OS;
 
   HTS221_RegisterBusIO(&HTS221_Obj, &HTS221_io_ctx);
   HTS221_Init(&HTS221_Obj);
@@ -221,10 +218,10 @@ static BaseType_t xInitSensors(void)
   /* Configure the driver */
   LPS22HH_io_ctx.BusType = LPS22HH_I2C_BUS; /* I2C */
   LPS22HH_io_ctx.Address = LPS22HH_I2C_ADDRESS;
-  LPS22HH_io_ctx.Init = BSP_I2C2_Init;
-  LPS22HH_io_ctx.DeInit = BSP_I2C2_DeInit;
-  LPS22HH_io_ctx.ReadReg = BSP_I2C2_ReadReg;
-  LPS22HH_io_ctx.WriteReg = BSP_I2C2_WriteReg;
+  LPS22HH_io_ctx.Init = BSP_I2C2_Init_OS;
+  LPS22HH_io_ctx.DeInit = BSP_I2C2_DeInit_OS;
+  LPS22HH_io_ctx.ReadReg = BSP_I2C2_ReadReg_OS;
+  LPS22HH_io_ctx.WriteReg = BSP_I2C2_WriteReg_OS;
 
   LPS22HH_RegisterBusIO(&LPS22HH_Obj, &LPS22HH_io_ctx);
   LPS22HH_Init(&LPS22HH_Obj);
@@ -250,7 +247,6 @@ static BaseType_t xInitSensors(void)
     LPS22HH_TEMP_Get_DRDY_Status(&LPS22HH_Obj, &Status);
   } while (Status != 1);
 
-  xSemaphoreGive(SENSORS_I2C_MutexHandle);
 #endif
   return pdTRUE;
 }
@@ -258,14 +254,11 @@ static BaseType_t xInitSensors(void)
 static BaseType_t xUpdateSensorData(EnvironmentalSensorData_t *pxData)
 {
 #if USE_SENSORS
-  xSemaphoreTake(SENSORS_I2C_MutexHandle, portMAX_DELAY);
   HTS221_HUM_GetHumidity    (&HTS221_Obj, &pxData->fHumidity);
   HTS221_TEMP_GetTemperature(&HTS221_Obj, &pxData->fTemperature0);
 
   LPS22HH_PRESS_GetPressure  (&LPS22HH_Obj, &pxData->fBarometricPressure);
   LPS22HH_TEMP_GetTemperature(&LPS22HH_Obj, &pxData->fTemperature1);
-
-  xSemaphoreGive(SENSORS_I2C_MutexHandle);
 #else
   pxData->fHumidity           += 5;
   pxData->fTemperature0       += 7;

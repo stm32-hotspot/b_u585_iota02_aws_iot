@@ -63,12 +63,11 @@
 #include "iis2mdc.h"
 
 #if USE_SENSORS
-#include "custom_bus.h"
+#include "custom_bus_os.h"
+#include "custom_errno.h"
 static ISM330DHCX_Object_t ISM330DHCX_Obj;
 static IIS2MDC_Object_t    IIS2MDC_Obj;
 #endif
-
-extern SemaphoreHandle_t SENSORS_I2C_MutexHandle;
 
 static ISM330DHCX_Axes_t xAcceleroAxes;
 static ISM330DHCX_Axes_t xGyroAxes;
@@ -208,7 +207,6 @@ static BaseType_t prvPublishAndWaitForAck( MQTTAgentHandle_t xAgentHandle,
 static BaseType_t xInitSensors(void)
 {
 #if USE_SENSORS
-  xSemaphoreTake(SENSORS_I2C_MutexHandle, portMAX_DELAY);
   uint8_t ISM330DHCX_Id;
   uint8_t Status;
   ISM330DHCX_IO_t ISM330DHCX_io_ctx = { 0 };
@@ -219,10 +217,10 @@ static BaseType_t xInitSensors(void)
   /* Configure the accelerometer driver */
   ISM330DHCX_io_ctx.BusType = ISM330DHCX_I2C_BUS; /* I2C */
   ISM330DHCX_io_ctx.Address = ISM330DHCX_I2C_ADD_H;
-  ISM330DHCX_io_ctx.Init = BSP_I2C2_Init;
-  ISM330DHCX_io_ctx.DeInit = BSP_I2C2_DeInit;
-  ISM330DHCX_io_ctx.ReadReg = BSP_I2C2_ReadReg;
-  ISM330DHCX_io_ctx.WriteReg = BSP_I2C2_WriteReg;
+  ISM330DHCX_io_ctx.Init = BSP_I2C2_Init_OS;
+  ISM330DHCX_io_ctx.DeInit = BSP_I2C2_DeInit_OS;
+  ISM330DHCX_io_ctx.ReadReg = BSP_I2C2_ReadReg_OS;
+  ISM330DHCX_io_ctx.WriteReg = BSP_I2C2_WriteReg_OS;
 
   ISM330DHCX_RegisterBusIO(&ISM330DHCX_Obj, &ISM330DHCX_io_ctx);
   ISM330DHCX_Init(&ISM330DHCX_Obj);
@@ -254,10 +252,10 @@ static BaseType_t xInitSensors(void)
   /* Configure the MAG driver */
   IIS2MDC_io_ctx.BusType = IIS2MDC_I2C_BUS; /* I2C */
   IIS2MDC_io_ctx.Address = IIS2MDC_I2C_ADD;
-  IIS2MDC_io_ctx.Init = BSP_I2C2_Init;
-  IIS2MDC_io_ctx.DeInit = BSP_I2C2_DeInit;
-  IIS2MDC_io_ctx.ReadReg = BSP_I2C2_ReadReg;
-  IIS2MDC_io_ctx.WriteReg = BSP_I2C2_WriteReg;
+  IIS2MDC_io_ctx.Init = BSP_I2C2_Init_OS;
+  IIS2MDC_io_ctx.DeInit = BSP_I2C2_DeInit_OS;
+  IIS2MDC_io_ctx.ReadReg = BSP_I2C2_ReadReg_OS;
+  IIS2MDC_io_ctx.WriteReg = BSP_I2C2_WriteReg_OS;
 
   IIS2MDC_RegisterBusIO(&IIS2MDC_Obj, &IIS2MDC_io_ctx);
   IIS2MDC_Init(&IIS2MDC_Obj);
@@ -276,8 +274,6 @@ static BaseType_t xInitSensors(void)
     IIS2MDC_MAG_Get_DRDY_Status(&IIS2MDC_Obj, &Status);
   }
   while (Status != 1);
-
-  xSemaphoreGive(SENSORS_I2C_MutexHandle);
 #endif
 
   return pdTRUE;
@@ -331,12 +327,9 @@ void vMotionSensorsPublish( void * pvParameters )
       /* Interpret sensor data */
         int32_t lBspError = BSP_ERROR_NONE;
 
-
-        xSemaphoreTake(SENSORS_I2C_MutexHandle, portMAX_DELAY);
         ISM330DHCX_ACC_GetAxes (&ISM330DHCX_Obj, &xAcceleroAxes);
         ISM330DHCX_GYRO_GetAxes(&ISM330DHCX_Obj, &xGyroAxes    );
         IIS2MDC_MAG_GetAxes    (&IIS2MDC_Obj   , &xMagnetoAxes );
-        xSemaphoreGive(SENSORS_I2C_MutexHandle);
 
         if( lBspError == BSP_ERROR_NONE )
  #endif

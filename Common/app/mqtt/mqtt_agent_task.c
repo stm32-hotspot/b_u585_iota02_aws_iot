@@ -967,9 +967,27 @@ void vMQTTAgentTask( void * pvParameters )
     NetworkContext_t * pxNetworkContext = NULL;
     uint16_t usNextRetryBackOff = 0U;
 
-    PkiObject_t xPrivateKey = xPkiObjectFromLabel( TLS_KEY_PRV_LABEL );
-    PkiObject_t xClientCertificate = xPkiObjectFromLabel( TLS_CERT_LABEL );
-    PkiObject_t pxRootCaChain[ 1 ] = { xPkiObjectFromLabel( TLS_ROOT_CA_CERT_LABEL ) };
+    PkiObject_t xPrivateKey;
+    PkiObject_t xClientCertificate;
+    PkiObject_t pxRootCaChain[ 1 ];
+
+#if !defined(__SAFEA1_CONF_H__)
+    BaseType_t xSuccess = pdTRUE;
+    uint32_t provisioned;
+    provisioned = KVStore_getUInt32( CS_PROVISIONEDs, &( xSuccess ) );
+    if(provisioned == 0)
+    {
+      xPrivateKey = xPkiObjectFromLabel( TLS_FLEET_KEY_PRIV_LABEL );
+      xClientCertificate = xPkiObjectFromLabel( TLS_FLEETCERT_LABEL );
+      pxRootCaChain[0] =  xPkiObjectFromLabel( TLS_ROOT_CA_CERT_LABEL ) ;
+    }
+    else
+#endif
+    {
+      xPrivateKey = xPkiObjectFromLabel( TLS_KEY_PRV_LABEL );
+      xClientCertificate = xPkiObjectFromLabel( TLS_CERT_LABEL );
+      pxRootCaChain[0] =  xPkiObjectFromLabel( TLS_ROOT_CA_CERT_LABEL ) ;
+    }
 
     ( void ) pvParameters;
 

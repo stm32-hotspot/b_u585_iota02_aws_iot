@@ -25,12 +25,13 @@
 
 
 #include "logging_levels.h"
+#define LOG_LEVEL    LOG_INFO
 #include "logging.h"
 #include "kvstore_prv.h"
 #include <string.h>
 #include "semphr.h"
 
-#ifdef KV_STORE_NVIMPL_LITTLEFS
+#if KV_STORE_NVIMPL_LITTLEFS
     #include "lfs.h"
     #include "lfs_port.h"
 
@@ -99,6 +100,11 @@
         return xLength;
     }
 
+    /*
+     * @brief Get the value stored in the KVStore implementation
+     * @param[in] xKey Key to lookup
+     * @return the value stored in the KVStore.
+     */
     BaseType_t xprvReadValueFromImpl( KVStoreKey_t xKey,
                                       KVStoreValueType_t * pxType,
                                       size_t * pxLength,
@@ -263,6 +269,7 @@
 
     void vprvNvImplInit( void )
     {
+      LogInfo("* Conf from lfs *");
         /*TODO: Wait for filesystem initialization */
     }
 #endif /* KV_STORE_NVIMPL_LITTLEFS */
