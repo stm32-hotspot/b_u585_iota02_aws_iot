@@ -114,7 +114,8 @@ static CK_RV prvDestroyProvidedObjects( CK_SESSION_HANDLE xSession,
                                                     strnlen( ( char * ) pxLabelPtr, pkcs11configMAX_LABEL_LENGTH ),
                                                     pxClass[ xIndex ], &xObjectHandle );
 
-            while( ( xResult == CKR_OK ) && ( xObjectHandle != CK_INVALID_HANDLE ) )
+            // FIXME: This causes an infinite loop.
+/*            while( ( xResult == CKR_OK ) && ( xObjectHandle != CK_INVALID_HANDLE ) )*/
             {
                 xResult = xFunctionList->C_DestroyObject( xSession, xObjectHandle );
 

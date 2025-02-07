@@ -206,6 +206,33 @@ static CK_RV prvReadData( const char * pcFileName,
     return xReturn;
 }
 
+static CK_RV prvFileCreate( const char * pcFileName )
+{
+    int lReturn = 0;
+    CK_RV xReturn = CKR_OK;
+    struct lfs_info xFileInfo = { 0 };
+
+    if( pcFileName == NULL )
+    {
+        lReturn = -1;
+    }
+    else
+    {
+        lReturn = lfs_stat( pLfsCtx, pcFileName, &xFileInfo );
+    }
+
+    if( ( lReturn < 0 ) || ( ( xFileInfo.type & LFS_TYPE_REG ) == 0 ) )
+    {
+      lfs_file_t xFile = { 0 };
+      uint32_t data = 0;
+      lReturn = lfs_file_open ( pLfsCtx, &xFile, pcFileName, LFS_O_WRONLY|LFS_O_CREAT|LFS_O_TRUNC);
+                lfs_file_write( pLfsCtx, &xFile, &data, sizeof( uint32_t ) );
+                lfs_file_close( pLfsCtx, &xFile );
+    }
+
+    return xReturn;
+}
+
 /*-----------------------------------------------------------*/
 
 CK_RV PKCS11_PAL_Initialize( void )
@@ -303,7 +330,12 @@ CK_OBJECT_HANDLE PKCS11_PAL_FindObject( CK_BYTE_PTR pxLabel,
 
         if( ( pcFileName == NULL ) || ( CKR_OK != prvFileExists( pcFileName ) ) )
         {
+          prvFileCreate(pcFileName);
+
+          if( ( pcFileName == NULL ) || ( CKR_OK != prvFileExists( pcFileName ) ) )
+          {
             xHandle = ( CK_OBJECT_HANDLE ) eInvalidHandle;
+          }
         }
     }
     else
@@ -364,12 +396,9 @@ CK_RV PKCS11_PAL_DestroyObject( CK_OBJECT_HANDLE xHandle )
     CK_RV xResult = CKR_OBJECT_HANDLE_INVALID;
     int ret = 0;
 
-    xResult = PAL_UTILS_HandleToFilename( xHandle,
-                                          &pcFileName,
-                                          &xIsPrivate );
+    xResult = PAL_UTILS_HandleToFilename( xHandle, &pcFileName, &xIsPrivate );
 
-    if( ( xResult == CKR_OK ) &&
-        ( prvFileExists( pcFileName ) == CKR_OK ) )
+    if( ( xResult == CKR_OK ) && ( prvFileExists( pcFileName ) == CKR_OK ) )
     {
         ret = lfs_remove( pLfsCtx, pcFileName );
 
