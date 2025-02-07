@@ -633,7 +633,7 @@ static TlsTransportStatus_t xConfigureCertificateAuth( TLSContext_t * pxTLSCtx,
     }
 
     configASSERT( pxTLSCtx->xSslConfig.f_rng );
-
+#if !defined(__SAFEA1_CONF_H__)
     xStatus = xPkiReadPrivateKey( pxPkCtx, pxPrivateKey,
                                   pxTLSCtx->xSslConfig.f_rng,
                                   pxTLSCtx->xSslConfig.p_rng );
@@ -643,6 +643,7 @@ static TlsTransportStatus_t xConfigureCertificateAuth( TLSContext_t * pxTLSCtx,
         LogError( "Failed to add private key to TLS context." );
     }
     else
+#endif
     {
         xStatus = xPkiReadCertificate( pxCertCtx, pxClientCert );
 
@@ -671,7 +672,8 @@ static TlsTransportStatus_t xConfigureCertificateAuth( TLSContext_t * pxTLSCtx,
             vLogCertInfo( pxCertCtx, "Client Certificate:" );
         }
     }
-
+    configASSERT( pxTLSCtx->xSslConfig.f_rng );
+#if !defined(__SAFEA1_CONF_H__)
     if( xStatus == TLS_TRANSPORT_SUCCESS )
     {
         configASSERT( pxCertPkCtx );
@@ -703,7 +705,7 @@ static TlsTransportStatus_t xConfigureCertificateAuth( TLSContext_t * pxTLSCtx,
 
         xStatus = ( lError == 0 ) ? TLS_TRANSPORT_SUCCESS : TLS_TRANSPORT_INVALID_CREDENTIALS;
     }
-
+#endif
     if( xStatus == TLS_TRANSPORT_SUCCESS )
     {
         int lError = mbedtls_ssl_conf_own_cert( &( pxTLSCtx->xSslConfig ),

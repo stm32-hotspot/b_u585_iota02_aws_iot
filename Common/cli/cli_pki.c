@@ -171,6 +171,7 @@ static void vPrintDer( ConsoleIO_t * pxCIO,
 
 #define CSR_BUFFER_LEN    2048
 
+#if !defined(__SAFEA1_CONF_H__)
 static void vSubCommand_GenerateCsr( ConsoleIO_t * pxCIO,
                                      uint32_t ulArgc,
                                      char * ppcArgv[] )
@@ -502,7 +503,6 @@ static void vSubCommand_GenerateCertificate( ConsoleIO_t * pxCIO,
     #endif /* MBEDTLS_TRANSPORT_PKCS11 */
 }
 
-
 static void vSubCommand_GenerateKey( ConsoleIO_t * pxCIO,
                                      uint32_t ulArgc,
                                      char * ppcArgv[] )
@@ -562,6 +562,7 @@ static void vSubCommand_GenerateKey( ConsoleIO_t * pxCIO,
         pucPublicKeyDer = NULL;
     }
 }
+#endif
 
 static BaseType_t xReadPemFromCliAsDer( ConsoleIO_t * pxCIO,
                                         unsigned char ** ppucDerBuffer,
@@ -1250,7 +1251,8 @@ static void vCommand_PKI( ConsoleIO_t * pxCIO,
                     vSubCommand_GenerateKey( pxCIO, ulArgc, ppcArgv );
                     xSuccess = pdTRUE;
                 }
-                else if( 0 == strcmp( "csr", pcObject ) )
+                else
+                  if( 0 == strcmp( "csr", pcObject ) )
                 {
                     vSubCommand_GenerateCsr( pxCIO, ulArgc, ppcArgv );
                     xSuccess = pdTRUE;
@@ -1269,6 +1271,7 @@ static void vCommand_PKI( ConsoleIO_t * pxCIO,
                 }
             }
             else
+
             {
                 pxCIO->print( "Error: Not enough arguments to 'pki generate' command.\r\n" );
                 xSuccess = pdFALSE;

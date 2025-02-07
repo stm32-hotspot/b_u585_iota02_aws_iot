@@ -27,7 +27,9 @@
 #include "core_pkcs11_config.h"
 
 #define configTLS_MAX_LABEL_LEN    pkcs11configMAX_LABEL_LENGTH
+#if !defined(__SAFEA1_CONF_H__)
 #define TLS_KEY_PRV_LABEL          pkcs11_TLS_KEY_PRV_LABEL
+#endif
 #define TLS_KEY_PUB_LABEL          pkcs11_TLS_KEY_PUB_LABEL
 #define TLS_CERT_LABEL             pkcs11_TLS_CERT_LABEL
 #define TLS_ROOT_CA_CERT_LABEL     pkcs11_ROOT_CA_CERT_LABEL
