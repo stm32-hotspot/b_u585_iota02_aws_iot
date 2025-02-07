@@ -37,8 +37,7 @@
  * 3. Include the header file "logging_stack.h".
  */
 
-#define democonfigPROVISIONING_TEMPLATE_NAME "ProvisionTemplate"
-#define democonfigDEVICE_PREFIX "stm32u5"
+#define democonfigPROVISIONING_TEMPLATE_NAME "DEFULT_FP_TemplateName"
 /**
  * @brief Size of the network buffer for MQTT packets. Must be large enough to
  * hold the GetCertificateFromCsr response, which, among other things, includes
