@@ -72,6 +72,8 @@
 
 /* Kernel includes. */
 #include "FreeRTOS.h"
+#if defined(FLEET_PROVISION_DEMO) && !defined(__SAFEA1_CONF_H__)
+
 #include "task.h"
 
 /* mbedTLS include for configuring threading functions */
@@ -116,10 +118,6 @@
 
 #ifndef democonfigPROVISIONING_TEMPLATE_NAME
     #error "Please define democonfigPROVISIONING_TEMPLATE_NAME to the template name registered with AWS IoT Core in demo_config.h."
-#endif
-
-#ifndef democonfigDEVICE_PREFIX
-    #error "Please define democonfigDEVICE_PREFIX in demo_config.h."
 #endif
 
 /**
@@ -268,7 +266,9 @@ static bool xUnsubscribeFromCsrResponseTopics(void);
 /**
  * @brief Subscribe to the RegisterThing accepted and rejected topics.
  */
+
 static bool xSubscribeToRegisterThingResponseTopics(void);
+
 
 /**
  * @brief Unsubscribe from the RegisterThing accepted and rejected topics.
@@ -479,7 +479,7 @@ static bool xPublishToTopic(MQTTQoS_t xQoS, char *pcTopic, uint8_t *pucPayload, 
 static bool xSubscribeToCsrResponseTopics(void)
 {
   bool status;
-
+//"$aws/certificates/create-from-csr/cbor/accepted"
   status = xSubscribeToTopic(MQTTQoS0, FP_CBOR_CREATE_CERT_ACCEPTED_TOPIC);
 
   if (status == false)
@@ -488,7 +488,7 @@ static bool xSubscribeToCsrResponseTopics(void)
   }
 
   if (status == true)
-  {
+  {//$aws/certificates/create-from-csr/cbor/rejected
     status = xSubscribeToTopic(MQTTQoS0, FP_CBOR_CREATE_CERT_REJECTED_TOPIC);
 
     if (status == false)
@@ -549,6 +549,7 @@ static bool xSubscribeToRegisterThingResponseTopics(void)
 
   return status;
 }
+
 /*-----------------------------------------------------------*/
 
 static bool xUnsubscribeFromRegisterThingResponseTopics(void)
@@ -601,7 +602,7 @@ int prvFleetProvisioningTask(void *pvParameters)
   size_t xOwnershipTokenLength;
 
   /* Buffer for holding the ThingName. */
-  char *democonfigFP_DEMO_ID = pvPortMalloc(MAX_THING_NAME_LENGTH);
+  char *democonfigFP_DEMO_ID;// = pvPortMalloc(MAX_THING_NAME_LENGTH);
   int fpdemoFP_DEMO_ID_LENGTH;
 
   /* Buffer for holding the CSR Subject. */
@@ -609,8 +610,8 @@ int prvFleetProvisioningTask(void *pvParameters)
 
   /* Buffer for holding the ThingGroup. */
   char * democonfigFP_GROUP_ID;//= pvPortMalloc(MAX_THING_NAME_LENGTH);//   "Slim_Thing_Group"
-
   int fpdemoFP_GROUP_ID_LENGTH;
+
 
   CK_SESSION_HANDLE xP11Session;
 
@@ -635,18 +636,14 @@ int prvFleetProvisioningTask(void *pvParameters)
 
   xQoS = 0;
 
-  uint32_t uid0 = HAL_GetUIDw0();
-  uint32_t uid1 = HAL_GetUIDw1();
-  uint32_t uid2 = HAL_GetUIDw2();
-
-  /* Generate the string in the format "stm32u5-<uid0><uid1><uid2>" */
-  fpdemoFP_DEMO_ID_LENGTH = snprintf(democonfigFP_DEMO_ID, MAX_THING_NAME_LENGTH, democonfigDEVICE_PREFIX"-%08X%08X%08X", (int)uid0, (int)uid1, (int)uid2);
-
   /* Generate the subject */
+  democonfigFP_DEMO_ID = KVStore_getStringHeap( CS_CORE_THING_NAME, (size_t *)&( fpdemoFP_DEMO_ID_LENGTH ) );
+
   snprintf(democonfigCSR_SUBJECT_NAME, MAX_THING_NAME_LENGTH, "CN=%s", democonfigFP_DEMO_ID);
 
   /* Get the ThingGroupName */
   democonfigFP_GROUP_ID = KVStore_getStringHeap(CS_THING_GROUP_NAME, (size_t *)&fpdemoFP_GROUP_ID_LENGTH);
+
 
   do
   {
@@ -752,6 +749,7 @@ int prvFleetProvisioningTask(void *pvParameters)
 
     if (xStatus == true)
     {
+
       /* Publish the RegisterThing request. */
       xStatus = xPublishToTopic(xQoS, FP_CBOR_REGISTER_PUBLISH_TOPIC(democonfigPROVISIONING_TEMPLATE_NAME), (uint8_t*) pucPayloadBuffer, xPayloadLength);
 
@@ -791,7 +789,7 @@ int prvFleetProvisioningTask(void *pvParameters)
   {
     /* Update the KV Store */
     KVStore_setUInt32(CS_PROVISIONEDs, 1);
-    KVStore_setString(CS_CORE_THING_NAME, pcThingName);
+//    KVStore_setString(CS_CORE_THING_NAME, pcThingName);
     KVStore_xCommitChanges();
 
     vDoSystemReset();
@@ -803,4 +801,5 @@ int prvFleetProvisioningTask(void *pvParameters)
 
   return (xStatus == true) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+#endif
 /*-----------------------------------------------------------*/
