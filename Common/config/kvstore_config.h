@@ -37,7 +37,7 @@ typedef enum KvStoreEnum
     CS_WIFI_CREDENTIAL,
     CS_TIME_HWM_S_1970,
 #if defined(FLEET_PROVISION_DEMO) && !defined(__SAFEA1_CONF_H__)
-    CS_PROVISIONEDs,
+    CS_PROVISIONED,
     CS_THING_GROUP_NAME,
 #endif
     CS_NUM_KEYS

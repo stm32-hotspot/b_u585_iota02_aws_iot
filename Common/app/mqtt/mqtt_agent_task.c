@@ -971,10 +971,10 @@ void vMQTTAgentTask( void * pvParameters )
     PkiObject_t xClientCertificate;
     PkiObject_t pxRootCaChain[ 1 ];
 
-#if !defined(__SAFEA1_CONF_H__)
+#if !defined(__SAFEA1_CONF_H__) && defined(FLEET_PROVISION_DEMO)
     BaseType_t xSuccess = pdTRUE;
     uint32_t provisioned;
-    provisioned = KVStore_getUInt32( CS_PROVISIONEDs, &( xSuccess ) );
+    provisioned = KVStore_getUInt32( CS_PROVISIONED, &( xSuccess ) );
     if(provisioned == 0)
     {
       xPrivateKey = xPkiObjectFromLabel( TLS_FLEET_KEY_PRIV_LABEL );

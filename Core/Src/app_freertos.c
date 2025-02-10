@@ -271,7 +271,7 @@ void StartDefaultTask(void *argument)
     snprintf(democonfigFP_DEMO_ID, MAX_THING_NAME_LENGTH, democonfigDEVICE_PREFIX"-%08X%08X%08X", (int)uid0, (int)uid1, (int)uid2);
 
     /* Update the KV Store */
-    KVStore_setUInt32(CS_PROVISIONEDs, 0);
+    KVStore_setUInt32(CS_PROVISIONED, 0);
     KVStore_setString(CS_CORE_THING_NAME, democonfigFP_DEMO_ID);
     KVStore_xCommitChanges();
 
@@ -281,7 +281,7 @@ void StartDefaultTask(void *argument)
   }
   else
   {
-    provisioned = KVStore_getUInt32( CS_PROVISIONEDs, &( xSuccess ) );
+    provisioned = KVStore_getUInt32( CS_PROVISIONED, &( xSuccess ) );
   }
 #endif /* !defined(__SAFEA1_CONF_H__) && defined(FLEET_PROVISION_DEMO) */
 

@@ -788,7 +788,7 @@ int prvFleetProvisioningTask(void *pvParameters)
   if (xStatus == true)
   {
     /* Update the KV Store */
-    KVStore_setUInt32(CS_PROVISIONEDs, 1);
+    KVStore_setUInt32(CS_PROVISIONED, 1);
 //    KVStore_setString(CS_CORE_THING_NAME, pcThingName);
     KVStore_xCommitChanges();
 

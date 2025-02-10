@@ -736,7 +736,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(MXCHIP_NSS_GPIO_Port, MXCHIP_NSS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(STSAFE_EN_GPIO_Port, STSAFE_EN_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(STSAFE_EN_GPIO_Port, STSAFE_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(MXCHIP_RESET_GPIO_Port, MXCHIP_RESET_Pin, GPIO_PIN_RESET);
