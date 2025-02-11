@@ -114,7 +114,7 @@ bool pfKvs_writeKeyValue(KVStoreKey_t xKey, const uint8_t *value, KVStoreTLVHead
     return false;
   }
 
-  if(xKey = CS_CORE_THING_NAME)
+  if(xKey == CS_CORE_THING_NAME)
   {
     return false;
   }
@@ -178,18 +178,22 @@ static bool pfKvs_setDefault(void)
 
   configASSERT(pxSTSAFE_KVStoreTLV!=NULL);
   result = SAFEA1_getDeviceCertificate(&pucData, &ulDataSize);
-  vPortFree(pucData);
 
-  result = SAFEA1_getDeviceCommonName (&pucData, &ulDataSize);
+  if (result == CKR_OK)
+  {
+    vPortFree(pucData);
+
+    result = SAFEA1_getDeviceCommonName(&pucData, &ulDataSize);
+  }
 
   if(result == CKR_OK)
   {
     pxSTSAFE_KVStoreTLV->KVStore[CS_CORE_THING_NAME].xTlvHeader.type = KV_TYPE_STRING;
     pxSTSAFE_KVStoreTLV->KVStore[CS_CORE_THING_NAME].xTlvHeader.length = ulDataSize;
     memcpy(pxSTSAFE_KVStoreTLV->KVStore[CS_CORE_THING_NAME].data, pucData, pxSTSAFE_KVStoreTLV->KVStore[CS_CORE_THING_NAME].xTlvHeader.length);
-  }
 
-  vPortFree(pucData);
+    vPortFree(pucData);
+  }
 
   pxSTSAFE_KVStoreTLV->KVStore[CS_CORE_MQTT_ENDPOINT].xTlvHeader.type = KV_TYPE_STRING;
   pxSTSAFE_KVStoreTLV->KVStore[CS_CORE_MQTT_ENDPOINT].xTlvHeader.length = strlen(DEFAULT_AWS_IOT_ENDPOINT) + 1;
