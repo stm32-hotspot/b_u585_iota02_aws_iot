@@ -207,14 +207,14 @@ extern "C" {
   {                                                                                  \
     if (mac == STSAFEA_MAC_NONE)                                                     \
     {                                                                                \
-      if ((index + size) > STSAFEA_BUFFER_DATA_CONTENT_SIZE)                        \
+      if ((size + index ) > STSAFEA_BUFFER_DATA_CONTENT_SIZE)                        \
       {                                                                              \
         return STSAFEA_BUFFER_LENGTH_EXCEEDED;                                       \
       }                                                                              \
     }                                                                                \
     else                                                                             \
     {                                                                                \
-      if ((index + size ) > (STSAFEA_BUFFER_DATA_CONTENT_SIZE - STSAFEA_MAC_LENGTH)) \
+      if ((size + index ) > (STSAFEA_BUFFER_DATA_CONTENT_SIZE - STSAFEA_MAC_LENGTH)) \
       {                                                                              \
         return STSAFEA_BUFFER_LENGTH_EXCEEDED;                                       \
       }                                                                              \

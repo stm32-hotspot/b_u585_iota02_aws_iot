@@ -12,6 +12,7 @@ This includes demonstration tasks for the following AWS services:
 * [AWS IoT Jobs](https://docs.aws.amazon.com/iot/latest/developerguide/iot-jobs.html)
 * [MQTT File Delivery](https://docs.aws.amazon.com/iot/latest/developerguide/mqtt-based-file-delivery.html)
 * [AWS IoT OTA Update](https://docs.aws.amazon.com/freertos/latest/userguide/freertos-ota-dev.html)
+* [Fleet Provisioning](https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html)
 
 The demo project connect to AWS IoT core via the included Wi-Fi module and use the [CoreMQTT-Agent](https://github.com/FreeRTOS/coreMQTT-Agent) library to share a single MQTT connection among multiple tasks. These tasks publish data from a PubSub task, and demonstrate use of the AWS IoT Device Shadow and Device Defender services.
 
@@ -21,7 +22,11 @@ This peoject is generated using [STM32CubeMX](https://www.st.com/stm32cubemx). M
 * MQTT Agent
 * IoT Defender
 * OTA Update
+* Fleet Provisionong
 * Publish and Subscribe
+* EnvironmentSensor
+* MotionSensors
+* ShadowDevice
 
 ## Key Software Components
 ### LWIP  2.3.0 TCP/IP Stack
@@ -80,6 +85,8 @@ If you need to regenerate the project with STM32CubeMX, then you need to dowload
 [coreMQTT 5.0.1](https://d1pm0k3vkcievw.cloudfront.net/AWS.coreMQTT.5.0.1.pack)
 
 [coreMQTT_Agent 5.0.1](https://d1pm0k3vkcievw.cloudfront.net/AWS.coreMQTT_Agent.5.0.1.pack)
+
+[AWS_IoT_Fleet_Provisioning 1.0.1](https://d1pm0k3vkcievw.cloudfront.net/AWS.AWS_IoT_Fleet_Provisioning.1.0.1.pack)
 
 The following packs are automatically downloaded by STM32CubeMX
 
