@@ -22,7 +22,7 @@
 
 #include "tls_transport_config.h"
 
-#if !defined(__SAFEA1_CONF_H__)
+#if !defined(__USE_STSAFE__)
 
 #ifdef MBEDTLS_TRANSPORT_PKCS11
 

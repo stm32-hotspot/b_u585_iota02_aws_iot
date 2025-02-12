@@ -171,7 +171,7 @@ static void vPrintDer( ConsoleIO_t * pxCIO,
 
 #define CSR_BUFFER_LEN    2048
 
-#if !defined(__SAFEA1_CONF_H__)
+#if !defined(__USE_STSAFE__)
 static void vSubCommand_GenerateCsr( ConsoleIO_t * pxCIO,
                                      uint32_t ulArgc,
                                      char * ppcArgv[] )
@@ -1240,7 +1240,7 @@ static void vCommand_PKI( ConsoleIO_t * pxCIO,
     {
         pcVerb = ppcArgv[ VERB_ARG_INDEX ];
 
-#if !defined(__SAFEA1_CONF_H__) && defined(FLEET_PROVISION_DEMO)
+#if !defined(__USE_STSAFE__) && defined(FLEET_PROVISION_DEMO)
         if( 0 == strcmp( "generate", pcVerb ) )
         {
             if( ulArgc > OBJECT_TYPE_INDEX )

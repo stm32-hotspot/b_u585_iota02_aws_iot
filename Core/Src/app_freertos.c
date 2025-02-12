@@ -49,7 +49,7 @@
 
 #include "mqtt_agent_task.h"
 
-#if defined(__SAFEA1_CONF_H__)
+#if defined(__USE_STSAFE__)
 #include "stsafe.h"
 #endif
 
@@ -201,7 +201,7 @@ void StartDefaultTask(void *argument)
 
   (void) argument;
 
-#if defined(__SAFEA1_CONF_H__)
+#if defined(__USE_STSAFE__)
   bool stsafe_status;
 
   stsafe_status = SAFEA1_Init();
@@ -251,7 +251,7 @@ void StartDefaultTask(void *argument)
     configASSERT( xResult == pdTRUE );
 #else
 
-#if !defined(__SAFEA1_CONF_H__) && defined(FLEET_PROVISION_DEMO)
+#if !defined(__USE_STSAFE__) && defined(FLEET_PROVISION_DEMO)
   BaseType_t xSuccess = pdTRUE;
   uint32_t provisioned;
   size_t xLength;
@@ -283,19 +283,19 @@ void StartDefaultTask(void *argument)
   {
     provisioned = KVStore_getUInt32( CS_PROVISIONED, &( xSuccess ) );
   }
-#endif /* !defined(__SAFEA1_CONF_H__) && defined(FLEET_PROVISION_DEMO) */
+#endif /* !defined(__USE_STSAFE__) && defined(FLEET_PROVISION_DEMO) */
 
   xResult = xTaskCreate(vMQTTAgentTask, "MQTTAgent", 2048, NULL, 10, NULL);
   configASSERT(xResult == pdTRUE);
 
-#if !defined(__SAFEA1_CONF_H__) && defined(FLEET_PROVISION_DEMO)
+#if !defined(__USE_STSAFE__) && defined(FLEET_PROVISION_DEMO)
   if(provisioned == 0)
   {
     xResult = xTaskCreate(prvFleetProvisioningTask, "FleetProv", fleetProvisioning_STACKSIZE, NULL, tskIDLE_PRIORITY, NULL);
     configASSERT(xResult == pdTRUE);
   }
   else
-#endif /* !defined(__SAFEA1_CONF_H__) && defined(FLEET_PROVISION_DEMO) */
+#endif /* !defined(__USE_STSAFE__) && defined(FLEET_PROVISION_DEMO) */
   {
 #if DEMO_PUB_SUB
     xResult = xTaskCreate(vSubscribePublishTestTask, "PubSub", 6144, NULL, 10, NULL);

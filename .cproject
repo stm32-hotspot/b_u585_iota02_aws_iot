@@ -207,7 +207,6 @@
 									<listOptionValue builtIn="false" value="MBEDTLS_CONFIG_FILE=&quot;mbedtls_config_ntz.h&quot;"/>
 									<listOptionValue builtIn="false" value="LFS_CONFIG=lfs_config.h"/>
 									<listOptionValue builtIn="false" value="LFS_USE_INTERNAL_NOR"/>
-									<listOptionValue builtIn="false" value="USE_STSAFE=0"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.1542987715" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
@@ -366,7 +365,7 @@
 									<listOptionValue builtIn="false" value="MBEDTLS_ALLOW_PRIVATE_ACCESS"/>
 									<listOptionValue builtIn="false" value="LFS_CONFIG=lfs_config.h"/>
 									<listOptionValue builtIn="false" value="LFS_USE_INTERNAL_NOR"/>
-									<listOptionValue builtIn="false" value="USE_STSAFE=1"/>
+									<listOptionValue builtIn="false" value="__USE_STSAFE__"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.18707085" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Core/Inc"/>

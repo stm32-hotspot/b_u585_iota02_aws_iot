@@ -34,7 +34,7 @@
 #define KV_STORE_NVIMPL_ENABLE      1
 
 /* Select where the KV_STORE is located */
-#if defined(__SAFEA1_CONF_H__)
+#if defined(__USE_STSAFE__)
 #define KV_STORE_NVIMPL_LITTLEFS    0
 #define KV_STORE_NVIMPL_STSAFE      1
 #define KV_STORE_NVIMPL_ARM_PSA     0
@@ -48,7 +48,7 @@
 #error "Exactly one KV_STORE_NVIMPL flag must be set to 1."
 #endif
 
-#if (KV_STORE_NVIMPL_STSAFE && !defined(__SAFEA1_CONF_H__))
+#if (KV_STORE_NVIMPL_STSAFE && !defined(__USE_STSAFE__))
 #error "STSAFE not present"
 #endif
 

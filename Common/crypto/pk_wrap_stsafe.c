@@ -18,7 +18,7 @@
  */
 #include "main.h"
 #include "stsafe.h"
-#if defined(__SAFEA1_CONF_H__)
+#if defined(__USE_STSAFE__)
 
 #include "common.h"
 
@@ -1215,5 +1215,5 @@ const mbedtls_pk_info_t mbedtls_pk_opaque_info = {
 };
 
 #endif /* MBEDTLS_USE_PSA_CRYPTO */
-#endif /* #if defined(__SAFEA1_CONF_H__) */
+#endif /* #if defined(__USE_STSAFE__) */
 #endif /* MBEDTLS_PK_C */

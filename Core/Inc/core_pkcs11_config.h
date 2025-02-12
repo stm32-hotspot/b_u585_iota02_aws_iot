@@ -30,7 +30,7 @@
 #include "main.h"
 #include "FreeRTOS.h"
 
-#if defined(__SAFEA1_CONF_H__)
+#if defined(__USE_STSAFE__)
 #define PKCS11_PAL_STSAFE      1
 #define PKCS11_PAL_LITTLEFS    0
 #else
@@ -43,7 +43,7 @@
 #error "Exactly one PKCS11_PAL flag must be set to 1."
 #endif
 
-#if (PKCS11_PAL_STSAFE && !defined(__SAFEA1_CONF_H__))
+#if (PKCS11_PAL_STSAFE && !defined(__USE_STSAFE__))
 #error "STSAFE not present"
 #endif
 /**
@@ -119,7 +119,7 @@
  * Private key for connection to AWS IoT endpoint.  The corresponding
  * public key should be registered with the AWS IoT endpoint.
  */
-#if !defined(__SAFEA1_CONF_H__)
+#if !defined(__USE_STSAFE__)
 #define pkcs11_TLS_KEY_PRV_LABEL                           "tls_key_priv"
 #define pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS       ( pkcs11_TLS_KEY_PRV_LABEL )
 #endif

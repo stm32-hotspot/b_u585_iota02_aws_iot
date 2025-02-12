@@ -971,7 +971,7 @@ void vMQTTAgentTask( void * pvParameters )
     PkiObject_t xClientCertificate;
     PkiObject_t pxRootCaChain[ 1 ];
 
-#if !defined(__SAFEA1_CONF_H__) && defined(FLEET_PROVISION_DEMO)
+#if !defined(__USE_STSAFE__) && defined(FLEET_PROVISION_DEMO)
     BaseType_t xSuccess = pdTRUE;
     uint32_t provisioned;
     provisioned = KVStore_getUInt32( CS_PROVISIONED, &( xSuccess ) );
@@ -984,7 +984,7 @@ void vMQTTAgentTask( void * pvParameters )
     else
 #endif
     {
-#if !defined(__SAFEA1_CONF_H__)
+#if !defined(__USE_STSAFE__)
       xPrivateKey = xPkiObjectFromLabel( TLS_KEY_PRV_LABEL );
 #endif
       xClientCertificate = xPkiObjectFromLabel( TLS_CERT_LABEL );

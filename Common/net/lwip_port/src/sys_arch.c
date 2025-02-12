@@ -711,7 +711,7 @@ void sys_assert( const char *pcMessage )
     }
 }
 
-#if defined(__SAFEA1_CONF_H__)
+#if defined(__USE_STSAFE__)
 extern uint8_t SAFEA1_GenerateRandom(uint8_t size, uint8_t *random);
 
 UBaseType_t uxRand(void)

@@ -2,7 +2,7 @@
 /* Includes --------------------------------------------------------------------*/
 
 #include "stsafea_mbedtls_interface.h"
-#if defined(__SAFEA1_CONF_H__)
+#if defined(__USE_STSAFE__)
 /* Functions -------------------------------------------------------------------*/
 
 /* Set for STSAFE Zone 0 */
@@ -74,4 +74,4 @@ int mbedtls_ecdsa_can_do( mbedtls_ecp_group_id gid )
   }
 }
 #endif
-#endif /* #if defined(__SAFEA1_CONF_H__) */
+#endif /* #if defined(__USE_STSAFE__) */

@@ -1,6 +1,6 @@
 #include "main.h"
 
-#if defined(__SAFEA1_CONF_H__)
+#if defined(__USE_STSAFE__)
 #include "logging_levels.h"
 /* define LOG_LEVEL here if you want to modify the logging level from the default */
 #define LOG_LEVEL    LOG_INFO

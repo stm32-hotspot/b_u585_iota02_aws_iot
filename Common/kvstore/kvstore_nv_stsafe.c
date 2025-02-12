@@ -30,7 +30,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#if (KV_STORE_NVIMPL_STSAFE) && (defined(__SAFEA1_CONF_H__))
+#if (KV_STORE_NVIMPL_STSAFE) && (defined(__USE_STSAFE__))
 #include <stsafe_key_value_store.h>
 
 /*

@@ -36,7 +36,7 @@ typedef enum KvStoreEnum
     CS_WIFI_SSID,
     CS_WIFI_CREDENTIAL,
     CS_TIME_HWM_S_1970,
-#if defined(FLEET_PROVISION_DEMO) && !defined(__SAFEA1_CONF_H__)
+#if defined(FLEET_PROVISION_DEMO) && !defined(__USE_STSAFE__)
     CS_PROVISIONED,
     CS_THING_GROUP_NAME,
 #endif
@@ -98,7 +98,7 @@ typedef enum KvStoreEnum
     #define WIFI_SECURITY_DFLT    ""
 #endif /* !defined ( WIFI_SECURITY_DFLT ) */
 
-#if defined(FLEET_PROVISION_DEMO)  && !defined(__SAFEA1_CONF_H__)
+#if defined(FLEET_PROVISION_DEMO)  && !defined(__USE_STSAFE__)
 #if !defined( THING_GROUP_NAME_DFLT )
     #define THING_GROUP_NAME_DFLT    ""
 #endif /* !defined ( THING_GROUP_NAME_DFLT ) */
@@ -106,7 +106,7 @@ typedef enum KvStoreEnum
 /* -------------------------------- Values for common attributes -------------------------------- */
 
 /* Array to map between strings and KVStoreKey_t IDs */
-#if defined(FLEET_PROVISION_DEMO)  && !defined(__SAFEA1_CONF_H__)
+#if defined(FLEET_PROVISION_DEMO)  && !defined(__USE_STSAFE__)
 #define KV_STORE_STRINGS   \
     {                      \
         "thing_name",      \
@@ -130,7 +130,7 @@ typedef enum KvStoreEnum
     }
 #endif
 
-#if defined(FLEET_PROVISION_DEMO)  && !defined(__SAFEA1_CONF_H__)
+#if defined(FLEET_PROVISION_DEMO)  && !defined(__USE_STSAFE__)
 #define KV_STORE_DEFAULTS                                                          \
     {                                                                              \
         KV_DFLT( KV_TYPE_STRING, THING_NAME_DFLT ),                /* CS_CORE_THING_NAME             */ \

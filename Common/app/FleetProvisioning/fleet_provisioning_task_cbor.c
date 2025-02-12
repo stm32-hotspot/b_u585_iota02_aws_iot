@@ -72,7 +72,7 @@
 
 /* Kernel includes. */
 #include "FreeRTOS.h"
-#if defined(FLEET_PROVISION_DEMO) && !defined(__SAFEA1_CONF_H__)
+#if defined(FLEET_PROVISION_DEMO) && !defined(__USE_STSAFE__)
 
 #include "task.h"
 

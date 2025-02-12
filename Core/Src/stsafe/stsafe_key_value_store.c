@@ -9,7 +9,7 @@
 #include "semphr.h"
 
 #include "kvstore.h"
-#if defined(__SAFEA1_CONF_H__)
+#if defined(__USE_STSAFE__)
 #include "stsafe.h"
 #include <stsafe_key_value_store.h>
 #include "stsafea_types.h"

@@ -633,7 +633,7 @@ static TlsTransportStatus_t xConfigureCertificateAuth( TLSContext_t * pxTLSCtx,
     }
 
     configASSERT( pxTLSCtx->xSslConfig.f_rng );
-#if !defined(__SAFEA1_CONF_H__)
+#if !defined(__USE_STSAFE__)
     xStatus = xPkiReadPrivateKey( pxPkCtx, pxPrivateKey,
                                   pxTLSCtx->xSslConfig.f_rng,
                                   pxTLSCtx->xSslConfig.p_rng );
@@ -673,7 +673,7 @@ static TlsTransportStatus_t xConfigureCertificateAuth( TLSContext_t * pxTLSCtx,
         }
     }
     configASSERT( pxTLSCtx->xSslConfig.f_rng );
-#if !defined(__SAFEA1_CONF_H__)
+#if !defined(__USE_STSAFE__)
     if( xStatus == TLS_TRANSPORT_SUCCESS )
     {
         configASSERT( pxCertPkCtx );
