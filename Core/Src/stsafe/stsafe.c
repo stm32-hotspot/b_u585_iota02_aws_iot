@@ -35,6 +35,32 @@ static uint8_t a_rx_tx_stsafea_data[STSAFEA_BUFFER_MAX_SIZE];
 static SemaphoreHandle_t xSTSAFEMutex = NULL;
 static mbedtls_x509_crt stsafea_certificate;
 
+int32_t STSAFE_Enable(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct;
+
+  /* Configure GPIO pin : RST/EN Pin */
+  GPIO_InitStruct.Pin = STSAFE_EN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(STSAFE_EN_GPIO_Port, &GPIO_InitStruct);
+
+  // Check Board revision.
+  // Rev-C: reading VREG pin will return 0 => enable = 1
+  // Rev-D: reading VREG pin will return 1 => enable = 0
+  GPIO_PinState enable = HAL_GPIO_ReadPin(STSAFE_EN_GPIO_Port, STSAFE_EN_Pin) == GPIO_PIN_RESET ? GPIO_PIN_SET : GPIO_PIN_RESET;
+
+  /* Configure GPIO pin : RST/EN Pin */
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  HAL_GPIO_Init(STSAFE_EN_GPIO_Port, &GPIO_InitStruct);
+
+  /* Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(STSAFE_EN_GPIO_Port, STSAFE_EN_Pin, enable);
+
+  vTaskDelay(pdMS_TO_TICKS(50));
+}
+
 bool SAFEA1_Init(void)
 {
   StSafeA_ResponseCode_t status = STSAFEA_COMMUNICATION_ERROR;
@@ -42,6 +68,10 @@ bool SAFEA1_Init(void)
   taskENTER_CRITICAL();
   if (xSTSAFEMutex == NULL)
   {
+    taskEXIT_CRITICAL();
+    STSAFE_Enable();
+    taskENTER_CRITICAL();
+
     xSTSAFEMutex = xSemaphoreCreateMutex();
     status = StSafeA_Init(&stsafea_handle, a_rx_tx_stsafea_data);
 
