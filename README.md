@@ -17,8 +17,6 @@ This includes demonstration tasks for the following AWS services:
 * [AWS IoT Jobs](https://docs.aws.amazon.com/iot/latest/developerguide/iot-jobs.html)
 * [MQTT File Delivery](https://docs.aws.amazon.com/iot/latest/developerguide/mqtt-based-file-delivery.html)
 
-
-
 The demo project connect to AWS IoT core via the included Wi-Fi module and use the [CoreMQTT-Agent](https://github.com/FreeRTOS/coreMQTT-Agent) library to share a single MQTT connection among multiple tasks. These tasks publish data from a PubSub task, and demonstrate use of the AWS IoT Device Shadow and Device Defender services.
 
 You can use [AWS Fleet Provisioning by Claim](https://aws.amazon.com/blogs/iot/how-to-automate-onboarding-of-iot-devices-to-aws-iot-core-at-scale-with-fleet-provisioning/) to automatically onboard IoT devices to AWS IoT Core
