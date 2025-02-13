@@ -39,7 +39,6 @@
 
 /* Project Includes */
 #include "logging.h"
-#include "hw_defs.h"
 
 /*-----------------------------------------------------------*/
 /* todo take into account maximum cli line length */

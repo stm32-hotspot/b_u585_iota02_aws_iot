@@ -22,7 +22,7 @@
 #include "task.h"
 #include "timers.h"
 #include "freertos_hooks.h"
-#include "hw_defs.h"
+
 #include <string.h>
 
 void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize)

@@ -27,7 +27,8 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
-#include "hw_defs.h"
+
+typedef void ( * GPIOInterruptCallback_t ) ( void * pvContext );
 
 static GPIOInterruptCallback_t volatile xGpioCallbacks[ 16 ] = { NULL };
 static void * volatile xGpioCallbackContext[ 16 ] = { NULL };

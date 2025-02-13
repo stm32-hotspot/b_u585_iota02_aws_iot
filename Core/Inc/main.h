@@ -109,6 +109,9 @@ void MX_OCTOSPI2_Init(void);
 #define DEMO_MOTION_SENSOR 1
 #define DEMO_SHADOW        1
 #define DEMO_DEFENDER      1
+
+#define democonfigMAX_THING_NAME_LENGTH 128
+#define democonfigDEVICE_PREFIX "stm32u5"
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

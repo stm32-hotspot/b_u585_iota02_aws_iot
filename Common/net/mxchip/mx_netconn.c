@@ -44,7 +44,6 @@
 #include "task.h"
 #include "event_groups.h"
 #include "kvstore.h"
-#include "hw_defs.h"
 
 /* lwip includes */
 #include "lwip/tcpip.h"

@@ -68,8 +68,6 @@
 #define LIBRARY_LOG_LEVEL    LOG_INFO
 #endif
 
-#define MAX_THING_NAME_LENGTH 128
-
 /* Kernel includes. */
 #include "FreeRTOS.h"
 #if defined(FLEET_PROVISION_DEMO) && !defined(__USE_STSAFE__)
@@ -479,7 +477,7 @@ static bool xPublishToTopic(MQTTQoS_t xQoS, char *pcTopic, uint8_t *pucPayload, 
 static bool xSubscribeToCsrResponseTopics(void)
 {
   bool status;
-//"$aws/certificates/create-from-csr/cbor/accepted"
+
   status = xSubscribeToTopic(MQTTQoS0, FP_CBOR_CREATE_CERT_ACCEPTED_TOPIC);
 
   if (status == false)
@@ -488,7 +486,7 @@ static bool xSubscribeToCsrResponseTopics(void)
   }
 
   if (status == true)
-  {//$aws/certificates/create-from-csr/cbor/rejected
+  {
     status = xSubscribeToTopic(MQTTQoS0, FP_CBOR_CREATE_CERT_REJECTED_TOPIC);
 
     if (status == false)
@@ -602,14 +600,14 @@ int prvFleetProvisioningTask(void *pvParameters)
   size_t xOwnershipTokenLength;
 
   /* Buffer for holding the ThingName. */
-  char *democonfigFP_DEMO_ID;// = pvPortMalloc(MAX_THING_NAME_LENGTH);
+  char *democonfigFP_DEMO_ID;
   int fpdemoFP_DEMO_ID_LENGTH;
 
   /* Buffer for holding the CSR Subject. */
-  char * democonfigCSR_SUBJECT_NAME  = pvPortMalloc(MAX_THING_NAME_LENGTH);
+  char * democonfigCSR_SUBJECT_NAME  = pvPortMalloc(democonfigMAX_THING_NAME_LENGTH);
 
   /* Buffer for holding the ThingGroup. */
-  char * democonfigFP_GROUP_ID;//= pvPortMalloc(MAX_THING_NAME_LENGTH);//   "Slim_Thing_Group"
+  char * democonfigFP_GROUP_ID;
   int fpdemoFP_GROUP_ID_LENGTH;
 
 
@@ -639,7 +637,7 @@ int prvFleetProvisioningTask(void *pvParameters)
   /* Generate the subject */
   democonfigFP_DEMO_ID = KVStore_getStringHeap( CS_CORE_THING_NAME, (size_t *)&( fpdemoFP_DEMO_ID_LENGTH ) );
 
-  snprintf(democonfigCSR_SUBJECT_NAME, MAX_THING_NAME_LENGTH, "CN=%s", democonfigFP_DEMO_ID);
+  snprintf(democonfigCSR_SUBJECT_NAME, democonfigMAX_THING_NAME_LENGTH, "CN=%s", democonfigFP_DEMO_ID);
 
   /* Get the ThingGroupName */
   democonfigFP_GROUP_ID = KVStore_getStringHeap(CS_THING_GROUP_NAME, (size_t *)&fpdemoFP_GROUP_ID_LENGTH);

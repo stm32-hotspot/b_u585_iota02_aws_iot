@@ -27,7 +27,6 @@
 #define LOG_LEVEL    LOG_INFO
 //#include "logging.h"
 
-#include "hw_defs.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "event_groups.h"

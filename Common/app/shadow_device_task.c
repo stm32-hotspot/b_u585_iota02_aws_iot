@@ -76,8 +76,6 @@
 
 #include "kvstore.h"
 
-#include "hw_defs.h"
-
 /**
  * @brief Format string representing a Shadow document with a "reported" state.
  *

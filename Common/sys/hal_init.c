@@ -29,7 +29,7 @@
 
 #include "FreeRTOS.h"
 #include "main.h"
-#include "hw_defs.h"
+
 #include "task.h"
 #include "logging.h"
 #include <string.h>
