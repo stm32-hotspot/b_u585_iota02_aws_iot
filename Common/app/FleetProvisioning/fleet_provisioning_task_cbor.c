@@ -201,21 +201,11 @@ typedef enum
 static ResponseStatus_t xResponseStatus;
 
 /**
- * @brief Buffer to hold the provisioned AWS IoT Thing name.
- */
-static char pcThingName[fpdemoMAX_THING_NAME_LENGTH];
-
-/**
- * @brief Length of the AWS IoT Thing name.
- */
-static size_t xThingNameLength;
-
-/**
  * @brief Buffer to hold responses received from the AWS IoT Fleet Provisioning
  * APIs. When the MQTT publish callback receives an expected Fleet Provisioning
  * accepted payload, it copies it into this buffer.
  */
-static uint8_t pucPayloadBuffer[democonfigNETWORK_BUFFER_SIZE * 2];
+static uint8_t *pucPayloadBuffer;//[democonfigNETWORK_BUFFER_SIZE * 2];
 
 /**
  * @brief Length of the payload stored in #pucPayloadBuffer. This is set by the
@@ -264,9 +254,7 @@ static bool xUnsubscribeFromCsrResponseTopics(void);
 /**
  * @brief Subscribe to the RegisterThing accepted and rejected topics.
  */
-
 static bool xSubscribeToRegisterThingResponseTopics(void);
-
 
 /**
  * @brief Unsubscribe from the RegisterThing accepted and rejected topics.
@@ -585,63 +573,82 @@ int prvFleetProvisioningTask(void *pvParameters)
 
   /* Buffer for holding the CSR. */
   char *pcCsr = pvPortMalloc(fpdemoCSR_BUFFER_LENGTH);
+  configASSERT(pcCsr != NULL);
+
   size_t xCsrLength = 0;
 
   /* Buffer for holding received certificate until it is saved. */
   char *pcCertificate = pvPortMalloc(fpdemoCERT_BUFFER_LENGTH);
+  configASSERT(pcCertificate != NULL);
+
   size_t xCertificateLength;
 
   /* Buffer for holding the certificate ID. */
   char *pcCertificateId = pvPortMalloc(fpdemoCERT_ID_BUFFER_LENGTH);
+  configASSERT(pcCertificateId != NULL);
+
   size_t xCertificateIdLength;
 
   /* Buffer for holding the certificate ownership token. */
   char *pcOwnershipToken = pvPortMalloc(fpdemoOWNERSHIP_TOKEN_BUFFER_LENGTH);
+  configASSERT(pcOwnershipToken != NULL);
+
   size_t xOwnershipTokenLength;
 
   /* Buffer for holding the ThingName. */
-  char *democonfigFP_DEMO_ID;
-  int fpdemoFP_DEMO_ID_LENGTH;
+  char *pcThingName = NULL; /* To be allocated by the KVStore_getStringHeap() function */
+
+  /* Length of the AWS IoT Thing name. */
+  size_t xThingNameLength;
 
   /* Buffer for holding the CSR Subject. */
-  char * democonfigCSR_SUBJECT_NAME  = pvPortMalloc(democonfigMAX_THING_NAME_LENGTH);
+  char * pcCSR_SUBJECT_NAME  = pvPortMalloc(democonfigMAX_THING_NAME_LENGTH);
+  configASSERT(pcCSR_SUBJECT_NAME != NULL);
 
   /* Buffer for holding the ThingGroup. */
-  char * democonfigFP_GROUP_ID;
-  int fpdemoFP_GROUP_ID_LENGTH;
+  char * pcThingGroupName =  NULL; /* To be allocated by the KVStore_getStringHeap() function */
 
+  /* Length of the AWS IoT Thing Group name. */
+  size_t xThingGroupNameLength;
 
+  /* PKCS11 Session handle */
   CK_SESSION_HANDLE xP11Session;
 
+  /* PKCS11 operations status */
   CK_RV xPkcs11Ret = CKR_OK;
 
-  MQTTQoS_t xQoS;
+  /* MQTT Quality Of Service */
+  MQTTQoS_t xQoS = 0;
 
   /* Silence compiler warnings about unused variables. */
   (void) pvParameters;
 
+  /* Buffer to hold the MQTT data */
+  pucPayloadBuffer = pvPortMalloc(democonfigNETWORK_BUFFER_SIZE * 2);
+  configASSERT(pucPayloadBuffer != NULL);
+
   memset(pcCsr, 0, fpdemoCSR_BUFFER_LENGTH);
 
-  /* TODO: Add comment */
+  /* Wait until the MQTT agent is ready */
   vSleepUntilMQTTAgentReady();
 
+  /* Get the MQTT Agent handle */
   xMQTTAgentHandle = xGetMqttAgentHandle();
   configASSERT(xMQTTAgentHandle != NULL);
 
+  /* Wait until we are connected to AWS */
   vSleepUntilMQTTAgentConnected();
 
   LogInfo(( "MQTT Agent is connected. Starting the fleet provisioning task. " ));
 
-  xQoS = 0;
+  /* Generate the Thing Name from KV Store */
+  pcThingName = KVStore_getStringHeap( CS_CORE_THING_NAME, (size_t *)&( xThingNameLength ) );
 
   /* Generate the subject */
-  democonfigFP_DEMO_ID = KVStore_getStringHeap( CS_CORE_THING_NAME, (size_t *)&( fpdemoFP_DEMO_ID_LENGTH ) );
-
-  snprintf(democonfigCSR_SUBJECT_NAME, democonfigMAX_THING_NAME_LENGTH, "CN=%s", democonfigFP_DEMO_ID);
+  snprintf(pcCSR_SUBJECT_NAME, democonfigMAX_THING_NAME_LENGTH, "CN=%s", pcThingName);
 
   /* Get the ThingGroupName */
-  democonfigFP_GROUP_ID = KVStore_getStringHeap(CS_THING_GROUP_NAME, (size_t *)&fpdemoFP_GROUP_ID_LENGTH);
-
+  pcThingGroupName = KVStore_getStringHeap(CS_THING_GROUP_NAME, (size_t *)&xThingGroupNameLength);
 
   do
   {
@@ -661,7 +668,7 @@ int prvFleetProvisioningTask(void *pvParameters)
     else
     {
       LogInfo("xGenerateKeyAndCsr");
-      xStatus = xGenerateKeyAndCsr(xP11Session, pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS, pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS, pcCsr, fpdemoCSR_BUFFER_LENGTH,democonfigCSR_SUBJECT_NAME, &xCsrLength);
+      xStatus = xGenerateKeyAndCsr(xP11Session, pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS, pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS, pcCsr, fpdemoCSR_BUFFER_LENGTH,pcCSR_SUBJECT_NAME, &xCsrLength);
 
       if (xStatus == false)
       {
@@ -696,7 +703,6 @@ int prvFleetProvisioningTask(void *pvParameters)
       /* Create the request payload containing the CSR to publish to the CreateCertificateFromCsr APIs. */
       xStatus = xGenerateCsrRequest(pucPayloadBuffer, democonfigNETWORK_BUFFER_SIZE, pcCsr, xCsrLength, &xPayloadLength);
     }
-
 
     if (xStatus == true)
     {
@@ -741,8 +747,8 @@ int prvFleetProvisioningTask(void *pvParameters)
       memset(pucPayloadBuffer, 0, democonfigNETWORK_BUFFER_SIZE * 2);
       /* Create the request payload to publish to the RegisterThing API. */
       xStatus = xGenerateRegisterThingRequest(pucPayloadBuffer, democonfigNETWORK_BUFFER_SIZE, pcOwnershipToken, xOwnershipTokenLength,
-            democonfigFP_DEMO_ID, fpdemoFP_DEMO_ID_LENGTH,
-            democonfigFP_GROUP_ID, fpdemoFP_GROUP_ID_LENGTH, &xPayloadLength);
+            pcThingName, xThingNameLength,
+            pcThingGroupName, xThingGroupNameLength, &xPayloadLength);
     }
 
     if (xStatus == true)
@@ -779,15 +785,15 @@ int prvFleetProvisioningTask(void *pvParameters)
   vPortFree(pcCertificate);
   vPortFree(pcCertificateId);
   vPortFree(pcOwnershipToken);
-  vPortFree(democonfigFP_DEMO_ID);
-  vPortFree(democonfigCSR_SUBJECT_NAME);
-  vPortFree(democonfigFP_GROUP_ID);
+  vPortFree(pcThingName);
+  vPortFree(pcCSR_SUBJECT_NAME);
+  vPortFree(pcThingGroupName);
+  vPortFree(pucPayloadBuffer);
 
   if (xStatus == true)
   {
     /* Update the KV Store */
     KVStore_setUInt32(CS_PROVISIONED, 1);
-//    KVStore_setString(CS_CORE_THING_NAME, pcThingName);
     KVStore_xCommitChanges();
 
     vDoSystemReset();
