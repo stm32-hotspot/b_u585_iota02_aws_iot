@@ -150,16 +150,11 @@ static bool pfKvs_read(void)
 
   if (status)
   {
-#if 0
     /* Check CRC and Magic number */
     __HAL_CRC_DR_RESET(&hcrc);
     uint32_t uwCRCValue = HAL_CRC_Calculate(&hcrc, (uint32_t*) pxSTSAFE_KVStoreTLV, sizeof(STSAFE_KVStoreTLV_t) / 4);
 
     status = ((pxSTSAFE_KVStoreTLV->magic_number == MAGIC_NUMBER) && (uwCRCValue == pxSTSAFE_KVStoreTLV->crc));
-#else
-    /* FIXME: For some reasons the CRC check is failing */
-    status = (pxSTSAFE_KVStoreTLV->magic_number == MAGIC_NUMBER);
-#endif
   }
 
   return status;

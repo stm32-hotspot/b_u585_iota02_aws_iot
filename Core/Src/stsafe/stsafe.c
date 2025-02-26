@@ -164,7 +164,7 @@ CK_RV SAFEA1_getDeviceCertificate(CK_BYTE_PTR *ppucData, CK_ULONG_PTR pulDataSiz
   uint16_t amount_read = 0;
   uint32_t amount_to_read = 0;
   uint16_t length = 0;
-  uint8_t header[4];
+  uint8_t header[STSAFE_ZONE_HEADER_SIZE];
 
   StSafeA_LVBuffer_t buf;
   uint8_t *buf_data;
@@ -174,7 +174,7 @@ CK_RV SAFEA1_getDeviceCertificate(CK_BYTE_PTR *ppucData, CK_ULONG_PTR pulDataSiz
 
   /* Extract the first four bytes of STSAFE-A1xx's x509 DER formatted certificate from Zone 0 to get its size */
   xSemaphoreTake(xSTSAFEMutex, portMAX_DELAY);
-  stsafe_status = StSafeA_Read(&stsafea_handle, STSAFEA_FLAG_FALSE, STSAFEA_FLAG_FALSE, STSAFEA_AC_ALWAYS, InZoneIndex, 0, 4, 4, &buf, STSAFEA_MAC_NONE);
+  stsafe_status = StSafeA_Read(&stsafea_handle, STSAFEA_FLAG_FALSE, STSAFEA_FLAG_FALSE, STSAFEA_AC_ALWAYS, InZoneIndex, 0, STSAFE_ZONE_HEADER_SIZE, STSAFE_ZONE_HEADER_SIZE, &buf, STSAFEA_MAC_NONE);
   xSemaphoreGive(xSTSAFEMutex);
 
   if (stsafe_status != STSAFEA_OK)
@@ -417,13 +417,18 @@ bool STSAFE1_Read(CK_BYTE_PTR *ppucData, CK_ULONG_PTR pulDataSize, uint8_t InZon
       amount_to_read = length;
     }
 
+    if((amount_to_read !=(amount_to_read + amount_read)%STSAFEA_BUFFER_DATA_CONTENT_SIZE) && ((amount_to_read + amount_read) > STSAFEA_BUFFER_DATA_CONTENT_SIZE))
+    {
+      amount_to_read -=(amount_to_read + amount_read)%STSAFEA_BUFFER_DATA_CONTENT_SIZE;
+    }
+
     xSemaphoreTake(xSTSAFEMutex, portMAX_DELAY);
     stsafe_status = StSafeA_Read(&stsafea_handle, STSAFEA_FLAG_FALSE, STSAFEA_FLAG_FALSE, STSAFEA_AC_ALWAYS, InZoneIndex, amount_read, amount_to_read, amount_to_read, &buf, STSAFEA_MAC_NONE);
     xSemaphoreGive(xSTSAFEMutex);
 
     amount_read += amount_to_read;
     length -= amount_to_read;
-    buf.Data = &buf_data[amount_read];
+    buf.Data = &buf_data[amount_read - STSAFE_ZONE_HEADER_SIZE];
   }
 
   if (stsafe_status == STSAFEA_OK)
@@ -456,7 +461,7 @@ bool STSAFE1_Write(CK_BYTE_PTR pucData, CK_ULONG ulDataSize, uint8_t InZoneIndex
   header[2] = ulDataSize >> 8;
   header[3] = ulDataSize;
 
-  if ((pucData != NULL) || (ulDataSize <= STSAFEA_BUFFER_DATA_PACKET_SIZE))
+  if ((pucData != NULL) && (ulDataSize <= (zone_size[InZoneIndex] - STSAFE_ZONE_HEADER_SIZE)))
   {
     xSemaphoreTake(xSTSAFEMutex, portMAX_DELAY);
 
@@ -480,7 +485,14 @@ bool STSAFE1_Write(CK_BYTE_PTR pucData, CK_ULONG ulDataSize, uint8_t InZoneIndex
         amount_to_write = length;
       }
 
+      if((amount_to_write !=(amount_to_write + amount_written)%STSAFEA_BUFFER_DATA_CONTENT_SIZE) && ((amount_to_write + amount_written) > STSAFEA_BUFFER_DATA_CONTENT_SIZE))
+      {
+        amount_to_write -=(amount_to_write + amount_written)%STSAFEA_BUFFER_DATA_CONTENT_SIZE;
+      }
+
       buf.Length = amount_to_write;
+
+      vTaskDelay(50);
 
       /* Write data to STSAFE */
       stsafe_status = StSafeA_Update(&stsafea_handle, STSAFEA_FLAG_TRUE, STSAFEA_FLAG_FALSE, STSAFEA_FLAG_FALSE, STSAFEA_AC_ALWAYS, InZoneIndex, amount_written, &buf, STSAFEA_MAC_NONE);
@@ -488,7 +500,7 @@ bool STSAFE1_Write(CK_BYTE_PTR pucData, CK_ULONG ulDataSize, uint8_t InZoneIndex
       /* Update the amount of data read */
       amount_written += amount_to_write;
       length -= amount_to_write;
-      buf.Data = &pucData[amount_written];
+      buf.Data = &pucData[amount_written - STSAFE_ZONE_HEADER_SIZE];
     }
 
     status = stsafe_status == STSAFEA_OK;
