@@ -3293,6 +3293,7 @@ CK_DECLARE_FUNCTION( CK_RV, C_GetAttributeValue )( CK_SESSION_HANDLE hSession,
                                                    mbedtls_ctr_drbg_random, &xP11Context.xMbedDrbgCtx );
         #endif /* MBEDTLS_VERSION_NUMBER < 0x03000000 */
 
+
 #if defined(__USE_STSAFE__)
             if( lMbedTLSResult != 0 )
             {
