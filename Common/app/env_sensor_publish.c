@@ -284,8 +284,8 @@ void vEnvironmentSensorPublishTask(void *pvParameters)
   BaseType_t xExitFlag = pdFALSE;
   char payloadBuf[MQTT_PUBLISH_MAX_LEN];
   MQTTAgentHandle_t xAgentHandle = NULL;
-  char pcTopicString[MQTT_PUBLICH_TOPIC_STR_LEN] =
-  { 0 };
+  char pcTopicString[MQTT_PUBLICH_TOPIC_STR_LEN] =  { 0 };
+  char * pcDeviceId = NULL;
   size_t uxTopicLen = 0;
 
   (void) pvParameters;
@@ -298,11 +298,15 @@ void vEnvironmentSensorPublishTask(void *pvParameters)
     vTaskDelete( NULL);
   }
 
-  uxTopicLen = KVStore_getString(CS_CORE_THING_NAME, pcTopicString, MQTT_PUBLICH_TOPIC_STR_LEN);
+  pcDeviceId = KVStore_getStringHeap( CS_CORE_THING_NAME, NULL );
 
-  if (uxTopicLen > 0)
+  if( pcDeviceId == NULL )
   {
-    uxTopicLen = strlcat(pcTopicString, "/" MQTT_PUBLISH_TOPIC, MQTT_PUBLICH_TOPIC_STR_LEN);
+      xExitFlag = pdTRUE;
+  }
+  else
+  {
+    uxTopicLen = snprintf( pcTopicString, ( size_t ) MQTT_PUBLICH_TOPIC_STR_LEN, "%s/env_sensor_data", pcDeviceId );
   }
 
   if ((uxTopicLen == 0) || (uxTopicLen >= MQTT_PUBLICH_TOPIC_STR_LEN))

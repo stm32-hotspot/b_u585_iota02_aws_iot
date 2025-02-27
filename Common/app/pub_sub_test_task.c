@@ -341,7 +341,7 @@ void vSubscribePublishTestTask(void *pvParameters)
 
   pThingName = KVStore_getStringHeap(CS_CORE_THING_NAME, &uxTempSize);
 
-  snprintf(topic, MAXT_TOPIC_LENGTH, "mqtt_test/%s", pThingName);
+  snprintf(topic, MAXT_TOPIC_LENGTH, "%s/mqtt_test", pThingName);
 
   if (xStatus == pdPASS)
   {
