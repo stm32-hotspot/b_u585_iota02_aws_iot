@@ -672,7 +672,7 @@ static TlsTransportStatus_t xConfigureCertificateAuth( TLSContext_t * pxTLSCtx,
         }
     }
     configASSERT( pxTLSCtx->xSslConfig.f_rng );
-#if !defined(__USE_STSAFE__)
+
     if( xStatus == TLS_TRANSPORT_SUCCESS )
     {
         configASSERT( pxCertPkCtx );
@@ -704,7 +704,7 @@ static TlsTransportStatus_t xConfigureCertificateAuth( TLSContext_t * pxTLSCtx,
 
         xStatus = ( lError == 0 ) ? TLS_TRANSPORT_SUCCESS : TLS_TRANSPORT_INVALID_CREDENTIALS;
     }
-#endif
+
     if( xStatus == TLS_TRANSPORT_SUCCESS )
     {
         int lError = mbedtls_ssl_conf_own_cert( &( pxTLSCtx->xSslConfig ),
