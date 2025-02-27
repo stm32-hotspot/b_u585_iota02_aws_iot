@@ -22,8 +22,7 @@ With these methods, you can streamline the process of registering and managing a
 This project is based on the [iot-reference-stm32u5](https://github.com/FreeRTOS/iot-reference-stm32u5) with three major differences:
 * Generated using STM32CubeMX and use CMSIS packs
 * Enables Fleet provisioning.
-* Enables Multi-Account Registration using STSAFE
-
+* Enables STSAFE and device registration with AWS using Multi-Account Registration, JITP and JITR
 ## 2. AWS IoT Core Demo Tasks
 * MQTT Agent
 * IoT Defender
@@ -122,13 +121,13 @@ This method requires manually provisioning devices using the AWS Command Line In
 #### [Fleet Provisioning](https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html#claim-based)
 This method is ideal for large-scale device deployments. Follow this [link](https://github.com/SlimJallouli/STM32_FleetProvisioning) for instructions
 
-#### [Multi-Account Registration](https://aws.amazon.com/about-aws/whats-new/2020/04/simplify-iot-device-registration-and-easily-move-devices-between-aws-accounts-with-aws-iot-core-multi-account-registration/)
+#### [Multi-Account Registration (MAR)](https://aws.amazon.com/about-aws/whats-new/2020/04/simplify-iot-device-registration-and-easily-move-devices-between-aws-accounts-with-aws-iot-core-multi-account-registration/)
 This method is ideal for large-scale device deployments with added security. Follow this [link]() for instructions
 
-#### [Multi-Account Registration](https://aws.amazon.com/about-aws/whats-new/2020/04/simplify-iot-device-registration-and-easily-move-devices-between-aws-accounts-with-aws-iot-core-multi-account-registration/)
-(Coming soon)
+#### [Just-in-Time Provisioning (JITP)](https://aws.amazon.com/blogs/iot/setting-up-just-in-time-provisioning-with-aws-iot-core/)
+(coming soon)
 
-#### [Just-in-Time Registration](https://aws.amazon.com/blogs/iot/just-in-time-registration-of-device-certificates-on-aws-iot/)
+#### [Just-in-Time Registration (JITR)](https://aws.amazon.com/blogs/iot/just-in-time-registration-of-device-certificates-on-aws-iot/)
 (coming soon)
 ## 6. CMSIS Packs
 
