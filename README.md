@@ -122,13 +122,16 @@ This method requires manually provisioning devices using the AWS Command Line In
 This method is ideal for large-scale device deployments. Follow this [link](https://github.com/SlimJallouli/STM32_FleetProvisioning) for instructions
 
 #### [Multi-Account Registration (MAR)](https://aws.amazon.com/about-aws/whats-new/2020/04/simplify-iot-device-registration-and-easily-move-devices-between-aws-accounts-with-aws-iot-core-multi-account-registration/)
-This method is ideal for large-scale device deployments with added security. Follow this [link]() for instructions
+This method is ideal for large-scale device deployments with added security. Follow this [link](https://github.com/SlimJallouli/stm32mcu_aws_mar) for instructions
 
 #### [Just-in-Time Provisioning (JITP)](https://aws.amazon.com/blogs/iot/setting-up-just-in-time-provisioning-with-aws-iot-core/)
-(coming soon)
+
+Follow this [link](https://aws.amazon.com/blogs/iot/setting-up-just-in-time-provisioning-with-aws-iot-core/) for instructions
 
 #### [Just-in-Time Registration (JITR)](https://aws.amazon.com/blogs/iot/just-in-time-registration-of-device-certificates-on-aws-iot/)
-(coming soon)
+
+Follow this [link](https://aws.amazon.com/blogs/iot/just-in-time-registration-of-device-certificates-on-aws-iot/) for instructions
+
 ## 6. CMSIS Packs
 
 If you need to regenerate the project with STM32CubeMX, then you need to dowload and install the following CMSIS packs.
