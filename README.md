@@ -46,8 +46,16 @@ There are multiple methods to provision your board with AWS
 [Fleet Provisioning](https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html#claim-based) is a feature of AWS IoT Core that automates the end-to-end device onboarding process. It securely delivers unique digital identities to devices, validates device attributes via Lambda functions, and sets up devices with all required permissions and registry metadata. This method is ideal for large-scale device deployments.
 
 ### 3.3 [Multi-Account Registration](https://aws.amazon.com/about-aws/whats-new/2020/04/simplify-iot-device-registration-and-easily-move-devices-between-aws-accounts-with-aws-iot-core-multi-account-registration/)
-[Multi-Account Registration](https://aws.amazon.com/about-aws/whats-new/2020/04/simplify-iot-device-registration-and-easily-move-devices-between-aws-accounts-with-aws-iot-core-multi-account-registration/) registration method uses a secure element [(STSAFE)](https://www.st.com/en/secure-mcus/stsafe-a110.html) for added security. The device certificate, private key, and configuration parameters are saved on [(STSAFE)](https://www.st.com/en/secure-mcus/stsafe-a110.html). This method simplifies device registration and allows for easy movement of devices between multiple AWS accounts. It eliminates the need for a Certificate Authority (CA) to be registered with AWS IoT. The secure element provides additional security by storing sensitive information securely on the device. This method is ideal for large-scale device deployments.
+[Multi-Account Registration (MAR)](https://aws.amazon.com/about-aws/whats-new/2020/04/simplify-iot-device-registration-and-easily-move-devices-between-aws-accounts-with-aws-iot-core-multi-account-registration/) registration method uses a secure element [(STSAFE)](https://www.st.com/en/secure-mcus/stsafe-a110.html) for added security. The device certificate, private key, and configuration parameters are saved on [(STSAFE)](https://www.st.com/en/secure-mcus/stsafe-a110.html). This method simplifies device registration and allows for easy movement of devices between multiple AWS accounts. It eliminates the need for a Certificate Authority (CA) to be registered with AWS IoT. The secure element provides additional security by storing sensitive information securely on the device. This method is ideal for large-scale device deployments.
 
+### 3.4 [Just-in-Time Provisioning](https://aws.amazon.com/blogs/iot/setting-up-just-in-time-provisioning-with-aws-iot-core/)
+
+[Just-in-Time Provisioning (JITP)](https://aws.amazon.com/blogs/iot/setting-up-just-in-time-provisioning-with-aws-iot-core/) is a method used to automatically provision IoT devices when they first attempt to connect to AWS IoT Core. The [(STSAFE)](https://www.st.com/en/secure-mcus/stsafe-a110.html) module stores the device certificate, private key, and configuration parameters securely, ensuring that the registration process is secure and reliable. This additional layer of security provided by the STSAFE module ensures that sensitive information is kept safe, making it a valuable asset for provisioning IoT devices with AWS IoT Core. This method is ideal for large-scale device deployments.
+
+### 4.5 [Just-in-Time Registration](https://aws.amazon.com/blogs/iot/just-in-time-registration-of-device-certificates-on-aws-iot/)
+
+[Just-in-Time Registration (JITR)](https://aws.amazon.com/blogs/iot/just-in-time-registration-of-device-certificates-on-aws-iot/) is a method used by AWS IoT Core to automatically register device certificates when a device first connects to AWS IoT.
+The [(STSAFE)](https://www.st.com/en/secure-mcus/stsafe-a110.html) module stores the device certificate, private key, and configuration parameters securely, ensuring that the registration process is secure and reliable. This additional layer of security provided by the STSAFE module ensures that sensitive information is kept safe, making it a valuable asset for provisioning IoT devices with AWS IoT Core. This method is ideal for large-scale device deployments.
 
 ## 4. Key Software Components
 ### LWIP  2.3.0 TCP/IP Stack
@@ -91,9 +99,13 @@ git submodule update --init --recursive
 * Build the project
 * Flash the board
 
+>NOTE: You might get a build error the first time you build the project. Just build a second time and the error will be resolved.
+
+>NOTE: The MAR option can be used with JITP and JITR provisioning options.
+
 ![alt text](<Screenshot 2025-02-26 175312-1.png>)
 ### 5.3 Provision your board
-There are three methods to provision your board with AWS
+There are multiple methods to provision your board with AWS. This also depends on the project configurarion you have selected.
 
 #### [Single Thing Provisioning](https://docs.aws.amazon.com/iot/latest/developerguide/single-thing-provisioning.html)
 
@@ -113,6 +125,11 @@ This method is ideal for large-scale device deployments. Follow this [link](http
 #### [Multi-Account Registration](https://aws.amazon.com/about-aws/whats-new/2020/04/simplify-iot-device-registration-and-easily-move-devices-between-aws-accounts-with-aws-iot-core-multi-account-registration/)
 This method is ideal for large-scale device deployments with added security. Follow this [link]() for instructions
 
+#### [Multi-Account Registration](https://aws.amazon.com/about-aws/whats-new/2020/04/simplify-iot-device-registration-and-easily-move-devices-between-aws-accounts-with-aws-iot-core-multi-account-registration/)
+(Coming soon)
+
+#### [Just-in-Time Registration](https://aws.amazon.com/blogs/iot/just-in-time-registration-of-device-certificates-on-aws-iot/)
+(coming soon)
 ## 6. CMSIS Packs
 
 If you need to regenerate the project with STM32CubeMX, then you need to dowload and install the following CMSIS packs.
