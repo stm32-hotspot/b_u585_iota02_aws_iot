@@ -842,7 +842,7 @@ static BaseType_t xReadPemFromCli( ConsoleIO_t * pxCIO, unsigned char ** ppucDer
     }
 
   if (pucPemBuffer != NULL)
-  { //@SJ
+  {
     pucPemBuffer[uxDerDataLen] = '\0';
     uxDerDataLen++;
     *ppucDerBuffer = pucPemBuffer;

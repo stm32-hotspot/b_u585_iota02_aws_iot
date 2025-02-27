@@ -15,7 +15,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define CERT_PEM 1
+#define CERT_PEM 0
 #define PUB_PEM  1
 
 const uint32_t zone_size[8] =
@@ -277,8 +277,8 @@ CK_RV SAFEA1_getDeviceCertificate(CK_BYTE_PTR *ppucData, CK_ULONG_PTR pulDataSiz
   *pulDataSize = pem_len;
 #else
   /* Copy out DER format */
-  *pulDataSize = stsafea_certificate.raw.len;
-  *ppucData    = stsafea_certificate.raw.p;
+  *pulDataSize = certificate_size;
+  *ppucData    = buf_data;
 #endif
 
   return ( CKR_OK);

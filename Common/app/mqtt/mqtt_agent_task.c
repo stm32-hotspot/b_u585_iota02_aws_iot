@@ -984,9 +984,8 @@ void vMQTTAgentTask( void * pvParameters )
     else
 #endif
     {
-#if !defined(__USE_STSAFE__)
+
       xPrivateKey = xPkiObjectFromLabel( TLS_KEY_PRV_LABEL );
-#endif
       xClientCertificate = xPkiObjectFromLabel( TLS_CERT_LABEL );
       pxRootCaChain[0] =  xPkiObjectFromLabel( TLS_ROOT_CA_CERT_LABEL ) ;
     }

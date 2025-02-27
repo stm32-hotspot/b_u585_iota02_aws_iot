@@ -206,7 +206,7 @@
 									<listOptionValue builtIn="false" value="USE_HAL_DRIVER"/>
 									<listOptionValue builtIn="false" value="STM32U585xx"/>
 									<listOptionValue builtIn="false" value="USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION=1"/>
-									<listOptionValue builtIn="false" value="MBEDTLS_CONFIG_FILE=&quot;mbedtls_config_ntz.h&quot;"/>
+									<listOptionValue builtIn="false" value="MBEDTLS_CONFIG_FILE=&quot;mbedtls_config_ntz_stsafe.h&quot;"/>
 									<listOptionValue builtIn="false" value="MBEDTLS_ALLOW_PRIVATE_ACCESS"/>
 									<listOptionValue builtIn="false" value="LFS_CONFIG=lfs_config.h"/>
 									<listOptionValue builtIn="false" value="LFS_USE_INTERNAL_NOR"/>

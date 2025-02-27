@@ -204,8 +204,8 @@ CK_RV PKCS11_PAL_GetObjectValue(CK_OBJECT_HANDLE xHandle, CK_BYTE_PTR *ppucData,
     switch (xHandle)
     {
     case eAwsDevicePrivateKey: /**< Private Key. */
+      xReturn = SAFEA1_getDevicePublicKey(ppucData, pulDataSize);
       *pIsPrivate = (CK_BBOOL) CK_TRUE;
-      xReturn = CKR_ACTION_PROHIBITED;
       break;
 
     case eAwsDevicePublicKey: /**< Public Key. */
