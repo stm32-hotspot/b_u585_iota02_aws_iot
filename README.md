@@ -119,7 +119,7 @@ This method involves using a Python script [(provision.py)](https://github.com/F
 This method requires manually provisioning devices using the AWS Command Line Interface (CLI). It involves creating device identities, registering them with AWS IoT Core, and attaching the necessary policies for device communication. Follow this  [link](https://github.com/FreeRTOS/iot-reference-stm32u5/blob/main/Getting_Started_Guide.md#option-8b-provision-manually-via-cli) for instructions.
 
 #### [Fleet Provisioning](https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html#claim-based)
-This method is ideal for large-scale device deployments. Follow this [link](https://github.com/SlimJallouli/STM32_FleetProvisioning) for instructions
+This method is ideal for large-scale device deployments. Follow this [link](https://github.com/SlimJallouli/stm32mcu_aws_fleetProvisioning) for instructions
 
 #### [Multi-Account Registration (MAR)](https://aws.amazon.com/about-aws/whats-new/2020/04/simplify-iot-device-registration-and-easily-move-devices-between-aws-accounts-with-aws-iot-core-multi-account-registration/)
 This method is ideal for large-scale device deployments with added security. Follow this [link](https://github.com/SlimJallouli/stm32mcu_aws_mar) for instructions
