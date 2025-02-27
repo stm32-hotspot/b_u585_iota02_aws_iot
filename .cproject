@@ -310,11 +310,39 @@
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.812346491" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec"/>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.46586632.459815429.2124130486" name="/" resourcePath="Libraries/corePKCS11/source/portable/mbedtls">
+						<toolChain id="com.st.stm32cube.ide.mcu.gnu.managedbuild.toolchain.exe.debug.906846352" name="MCU ARM GCC" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.toolchain.exe.debug" unusedChildren="">
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu.1519730686.381448867" name="MCU" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu.1519730686"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_cpuid.1437435182.1023915340" name="CPU" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_cpuid.1437435182"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_coreid.1215865158.202411406" name="Core" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_coreid.1215865158"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu.1727534504.1700395685" name="Floating-point unit" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu.1727534504"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi.1230243972.1425444968" name="Floating-point ABI" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi.1230243972"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board.1976948861.30156154" name="Board" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board.1976948861"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults.568776778.893385305" name="Defaults" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults.568776778"/>
+							<option id="com.st.stm32cube.ide.mcu.debug.option.cpuclock.748899718.146259731" name="Cpu clock frequence" superClass="com.st.stm32cube.ide.mcu.debug.option.cpuclock.748899718"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.nanoprintffloat.843542129.95132818" name="Use float with printf from newlib-nano (-u _printf_float)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.nanoprintffloat.843542129"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.convertbinary.543799836.1232594033" name="Convert to binary file (-O binary)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.convertbinary.543799836"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.converthex.1628612552.253280832" name="Convert to Intel Hex file (-O ihex)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.converthex.1628612552"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.834164253" name="MCU/MPU GCC Assembler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.1759902203"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1740514851" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.516761629"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.1729680839" name="MCU/MPU G++ Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.1618225833"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.589638586" name="MCU/MPU GCC Linker" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.1013028225"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker.1830544190" name="MCU/MPU G++ Linker" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker.1114703502"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.archiver.1560554022" name="MCU/MPU GCC Archiver" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.archiver.819712898"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.size.1759445742" name="MCU Size" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.size.2132553927"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objdump.listfile.796131350" name="MCU Output Converter list file" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objdump.listfile.867595444"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.hex.957002391" name="MCU Output Converter Hex" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.hex.991918774"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.binary.1885777744" name="MCU Output Converter Binary" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.binary.1857224637"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.verilog.857490298" name="MCU Output Converter Verilog" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.verilog.1982382389"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.srec.1971027387" name="MCU Output Converter Motorola S-rec" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.srec.610674230"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.2009263442" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.812346491"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
 						<entry excluding="app/FleetProvisioning/json_serializer.c|app/FleetProvisioning/fleet_provisioning_task_json.c|app/qualification_app_main.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry excluding="Src/stsafe/key_value_store_eeprom.c|Src/crypto/rng_alt_stm32.c|Src/mbedTLS/hardware_rng.c|Src/crypto/core_pkcs11_pal_internal.c|Src/crypto/rng_alt_stm32u5.c|Src/echo - Copy.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry excluding="BSP/Components/veml6030|BSP/Components/aps6408|BSP/Components/mx25lm51245g" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="corePKCS11/test|tinycbor/src/open_memstream.c|tinycbor/tools|tinycbor/tests|tinycbor/examples|corePKCS11/source/portable/os|microcoap/main-posix.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libraries"/>
+						<entry excluding="corePKCS11/source/portable/mbedtls|corePKCS11/test|tinycbor/src/open_memstream.c|tinycbor/tools|tinycbor/tests|tinycbor/examples|corePKCS11/source/portable/os|microcoap/main-posix.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libraries"/>
 						<entry excluding="Third_Party/ARM_Security/library/pk_wrap.c|Third_Party/AWS_AWS IoT/fleet-provisioning/test|Third_Party/AWS_AWS IoT/fleet-provisioning/tools|Third_Party/lwIP_Network_lwIP/lwip/apps/lwiperf|Third_Party/lwIP_Network_lwIP/lwip/apps/apps|Third_Party/lwIP_Network_lwIP/lwip/apps/netbiosns|Third_Party/lwIP_Network_lwIP/lwip/apps/smtp|Third_Party/lwIP_Network_lwIP/lwip/apps/snmp|Third_Party/lwIP_Network_lwIP/lwip/apps/sntp|Third_Party/lwIP_Network_lwIP/lwip/apps/tftp|Third_Party/lwIP_Network_lwIP/lwip/apps/mqtt|Third_Party/lwIP_Network_lwIP/lwip/apps/mdns|Third_Party/lwIP_Network_lwIP/lwip/apps/http|Third_Party/lwIP_Network_lwIP/lwip/apps/altcp_tls|Third_Party/lwIP_Network_lwIP/ports/cmsis-rtos|Third_Party/lwIP_Network_lwIP/ports/cmsis-driver/netif" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="STSAFE"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="X-CUBE-MEMS1"/>
@@ -503,6 +531,9 @@
 			<resource resourceType="PROJECT" workspacePath="/b_u585_iota02_aws_iot"/>
 		</configuration>
 		<configuration configurationName="FleetProvisioning"/>
+		<configuration configurationName="Single">
+			<resource resourceType="PROJECT" workspacePath="/b_u585_iota02_aws_iot"/>
+		</configuration>
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/b_u585_iota02_aws_iot"/>
 		</configuration>
