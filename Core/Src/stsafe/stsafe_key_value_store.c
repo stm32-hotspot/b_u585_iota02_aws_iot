@@ -18,18 +18,10 @@ extern CRC_HandleTypeDef hcrc;
 
 #define MAGIC_NUMBER 0x37a4ef09
 
-/* TODO: Remove test mode */
-#if 0 /* Test mode */
 #define DEFAULT_MQTT_PORT        0
 #define DEFAULT_WIFI_SSID        ""
 #define DEFAULT_WIFI_PASSWORD    ""
 #define DEFAULT_AWS_IOT_ENDPOINT ""
-#else
-#define DEFAULT_MQTT_PORT        8883
-#define DEFAULT_WIFI_SSID        "st_iot_demo"
-#define DEFAULT_WIFI_PASSWORD    "stm32u585"
-#define DEFAULT_AWS_IOT_ENDPOINT "a1qwhobjtvew8t-ats.iot.us-west-2.amazonaws.com"
-#endif
 
 #define STSAFE_MAX_KVSTORE_SIZE (STSAFE_ZONE_1_SIZE - STSAFE_ZONE_HEADER_SIZE)
 

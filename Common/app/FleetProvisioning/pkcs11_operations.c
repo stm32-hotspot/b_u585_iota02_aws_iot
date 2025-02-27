@@ -349,13 +349,8 @@ bool xLoadCertificate( CK_SESSION_HANDLE xP11Session,
         xCertificateTemplate.xSubject.pValue = pxSubject;
         xCertificateTemplate.xSubject.ulValueLen = strlen( ( const char * ) pxSubject );
         xCertificateTemplate.xValue.type = CKA_VALUE;
-#if 0
-        xCertificateTemplate.xValue.pValue = pcCertificate;
-        xCertificateTemplate.xValue.ulValueLen = xCertificateLength + 1;
-#else
         xCertificateTemplate.xValue.pValue = pucDerObject;
         xCertificateTemplate.xValue.ulValueLen = xDerLen;
-#endif
         xCertificateTemplate.xLabel.type = CKA_LABEL;
         xCertificateTemplate.xLabel.pValue = ( CK_VOID_PTR ) pcLabel;
         xCertificateTemplate.xLabel.ulValueLen = strnlen( pcLabel, pkcs11configMAX_LABEL_LENGTH );

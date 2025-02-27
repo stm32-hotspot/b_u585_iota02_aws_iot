@@ -67,7 +67,7 @@ const CLI_Command_Definition_t xCommandDef_conf =
         "        Commit staged config changes to nonvolatile memory.\r\n\n",
     .pxCommandInterpreter = vCommand_Configure
 };
-#if 1
+
 static void vSubCommand_CommitConfig( ConsoleIO_t * pxCIO )
 {
     BaseType_t xResult = KVStore_xCommitChanges();
@@ -357,8 +357,6 @@ static void vSubCommand_SetConfig( ConsoleIO_t * pxCIO,
         pxCIO->print( "An unknown error occurred." );
     }
 }
-#endif
-
 
 /*
  * CLI format:
